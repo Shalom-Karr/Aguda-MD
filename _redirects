@@ -1,6 +1,4 @@
-# Clean URLs for Cloudflare Pages / Netlify
-# This lets visitors use /posts?title=slug instead of /posts.html?title=slug
-
-/posts         /posts.html   200
-/admin         /admin.html   200
-/faq           /faq.html     200
+# Cloudflare Pages and Netlify automatically serve `/foo.html` at `/foo`.
+# No rewrite rules are needed for clean URLs — adding them causes redirect loops.
+#
+# This file is kept as a place to add redirects later (e.g. for renamed pages).
