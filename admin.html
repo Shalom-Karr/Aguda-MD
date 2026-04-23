@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin · Agudah MD Resources</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] },
+        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+      }}
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .editor-textarea {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.65;
+      resize: none;
+      tab-size: 2;
+    }
+    .editor-textarea:focus { outline: none; }
+    .preview-pane { font-size: 15px; }
+    .preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin-top: 1rem; margin-bottom: .5rem; }
+    .preview-pane h2 { font-size: 1.4rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: .5rem; color: #0f766e; }
+    .preview-pane h3 { font-size: 1.1rem; font-weight: 700; margin-top: 1rem; margin-bottom: .35rem; }
+    .preview-pane p  { margin-bottom: .85rem; line-height: 1.65; }
+    .preview-pane ul, .preview-pane ol { margin: 0 0 .85rem 1.25rem; }
+    .preview-pane ul { list-style: disc; }
+    .preview-pane ol { list-style: decimal; }
+    .preview-pane li { margin-bottom: .25rem; }
+    .preview-pane a { color: #0f766e; text-decoration: underline; }
+    .preview-pane blockquote { border-left: 4px solid #14b8a6; background: #f0fdfa; padding: .5rem 1rem; margin: .85rem 0; border-radius: 0 .5rem .5rem 0; }
+    .preview-pane code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .preview-pane pre { background: #0f172a; color: #f1f5f9; padding: 1rem; border-radius: .5rem; overflow-x: auto; }
+    .preview-pane pre code { background: transparent; padding: 0; color: inherit; }
+    .preview-pane hr { margin: 1.5rem 0; border-color: #e2e8f0; }
+    .preview-pane strong { font-weight: 700; }
+
+    /* Toolbar buttons */
+    .tb-btn { padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #475569; transition: all .15s; }
+    .tb-btn:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* Sync scroll */
+    .scroll-pane { overflow-y: auto; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
+
+  <!-- Demo banner -->
+  <div id="demo-banner" class="hidden bg-amber-100 border-b border-amber-300 text-amber-900 text-xs text-center py-1.5 px-4">
+    <strong>Demo mode</strong> — saves go to your browser's localStorage. No authentication is enforced.
+    Configure Supabase + auth before deploying to production. See <a href="docs/DEPLOYMENT.md" class="underline">docs/DEPLOYMENT.md</a>.
+  </div>
+
+  <!-- Top bar -->
+  <header class="bg-white border-b border-slate-200 px-5 h-14 flex items-center justify-between flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="flex items-center gap-2 font-bold text-brand-800 text-lg">
+        <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V20a1 1 0 01-1 1h-5v-7h-6v7H4a1 1 0 01-1-1V9.75z"/></svg>
+        Admin
+      </a>
+      <span class="text-xs text-slate-400">/</span>
+      <span id="editor-breadcrumb" class="text-sm text-slate-500">New program</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="save-status" class="text-xs text-slate-400"></span>
+      <button onclick="newPost()" class="text-sm font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100">+ New</button>
+      <button id="publish-toggle" onclick="togglePublish()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border">Draft</button>
+      <button onclick="savePost()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
+    </div>
+  </header>
+
+  <!-- Main layout: sidebar + editor -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Sidebar: post list -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
+      <div class="p-3 border-b border-slate-200">
+        <input id="list-search" type="text" placeholder="Filter..." class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+      </div>
+      <div id="post-list" class="flex-1 overflow-y-auto"></div>
+      <div class="p-3 border-t border-slate-200 text-[11px] text-slate-400">
+        <div>Mode: <span id="mode-label" class="font-mono font-semibold"></span></div>
+        <a href="docs/ADMIN_GUIDE.md" class="text-brand-700 hover:text-brand-900 font-semibold">Admin guide →</a>
+      </div>
+    </aside>
+
+    <!-- Editor area -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- Metadata fields -->
+      <div class="bg-white border-b border-slate-200 p-4 space-y-3">
+        <div>
+          <input id="post-title" type="text" placeholder="Program title (e.g. SNAP Food Benefits)"
+                 class="w-full text-2xl font-extrabold border-0 p-0 focus:ring-0 outline-none placeholder-slate-300">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Slug <span class="text-slate-400">(URL: /posts?title=<span id="slug-preview" class="text-brand-700"></span>)</span></label>
+            <input id="post-slug" type="text" placeholder="auto-generated-from-title"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 font-mono focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+            <select id="post-category" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Short summary</label>
+            <input id="post-summary" type="text" placeholder="One-line description for the program card"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- Markdown toolbar -->
+      <div class="bg-slate-100 border-b border-slate-200 px-2 py-1 flex items-center gap-1 text-xs flex-wrap">
+        <button class="tb-btn" onclick="md('# ', '')" title="Heading 1"><strong>H1</strong></button>
+        <button class="tb-btn" onclick="md('## ', '')" title="Heading 2"><strong>H2</strong></button>
+        <button class="tb-btn" onclick="md('### ', '')" title="Heading 3"><strong>H3</strong></button>
+        <span class="w-px h-5 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="md('**', '**')" title="Bold"><strong>B</strong></button>
+        <button class="tb-btn" onclick="md('*', '*')" title="Italic"><em>I</em></button>
+        <button class="tb-btn" onclick="md('`', '`')" title="Inline code"><code>&lt;/&gt;</code></button>
+        <span class="w-px h-5 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="md('- ', '')" title="Bullet list">• List</button>
+        <button class="tb-btn" onclick="md('1. ', '')" title="Numbered list">1. List</button>
+        <button class="tb-btn" onclick="md('> ', '')" title="Quote">❝ Quote</button>
+        <span class="w-px h-5 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="mdLink()" title="Link">🔗 Link</button>
+        <button class="tb-btn" onclick="md('---\n', '')" title="Horizontal rule">— HR</button>
+        <div class="ml-auto flex items-center gap-3 pr-2">
+          <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
+            <input id="sync-scroll" type="checkbox" checked class="w-3.5 h-3.5 accent-brand-600">
+            Sync scroll
+          </label>
+          <span class="text-[11px] text-slate-400 hidden md:inline">
+            <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono">⌘S</kbd> save
+          </span>
+        </div>
+      </div>
+
+      <!-- Side-by-side editor / preview -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Editor (left) -->
+        <div class="w-1/2 bg-white border-r border-slate-200 flex flex-col">
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Markdown</div>
+          <textarea id="post-content" class="editor-textarea scroll-pane flex-1 w-full p-5 text-slate-800 placeholder-slate-400"
+                    placeholder="# Program title&#10;&#10;Write the application guide here using Markdown...&#10;&#10;## Who qualifies?&#10;&#10;- Bullet one&#10;- Bullet two&#10;&#10;## How to apply&#10;&#10;1. Step one&#10;2. Step two"></textarea>
+        </div>
+        <!-- Preview (right) -->
+        <div class="w-1/2 bg-stone-50 flex flex-col">
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+            <span>Live preview</span>
+            <a id="preview-link" href="#" target="_blank" class="text-brand-700 hover:text-brand-900 font-semibold normal-case tracking-normal hidden">Open in new tab ↗</a>
+          </div>
+          <div id="preview" class="preview-pane scroll-pane flex-1 w-full p-5 text-slate-800"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/supabase-client.js"></script>
+  <script>
+    const C = window.SITE_CONFIG;
+    document.getElementById('mode-label').textContent = window.PROGRAMS_MODE;
+    if (window.PROGRAMS_MODE === 'demo') {
+      document.getElementById('demo-banner').classList.remove('hidden');
+    }
+
+    // Populate category dropdown
+    const catSel = document.getElementById('post-category');
+    (C.categories || ['General']).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      catSel.appendChild(opt);
+    });
+
+    // ------- STATE -------
+    let currentPost = blankPost();
+    let isDirty = false;
+
+    function blankPost() {
+      return { id: null, slug: '', title: '', summary: '', category: C.categories[0], content_md: '', is_published: false };
+    }
+
+    // ------- POST LIST SIDEBAR -------
+    async function loadPostList() {
+      const listEl = document.getElementById('post-list');
+      const filter = document.getElementById('list-search').value.toLowerCase().trim();
+      let posts;
+      try { posts = await window.ProgramsDB.listAll(); }
+      catch (e) { listEl.innerHTML = '<div class="p-4 text-xs text-red-600">Failed to load posts.</div>'; return; }
+      const filtered = filter
+        ? posts.filter(p => p.title.toLowerCase().includes(filter) || (p.slug || '').includes(filter))
+        : posts;
+      if (!filtered.length) {
+        listEl.innerHTML = '<div class="p-4 text-xs text-slate-400">No programs yet.</div>';
+        return;
+      }
+      listEl.innerHTML = filtered.map(p => `
+        <div class="post-list-item group border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50' : ''}">
+          <button onclick="loadPost('${p.id}')" class="w-full text-left px-3 py-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-sm text-slate-900 truncate">${p.title || '(untitled)'}</div>
+                <div class="text-[11px] text-slate-500 font-mono truncate">${p.slug || '—'}</div>
+              </div>
+              ${p.is_published
+                ? '<span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Live</span>'
+                : '<span class="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">
+              ${p.category || ''} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
+            </div>
+          </button>
+        </div>`).join('');
+    }
+
+    document.getElementById('list-search').addEventListener('input', loadPostList);
+
+    // ------- LOAD / NEW -------
+    async function loadPost(id) {
+      if (isDirty && !confirm('You have unsaved changes. Discard and load another post?')) return;
+      const all = await window.ProgramsDB.listAll();
+      const p = all.find(x => x.id === id);
+      if (!p) return;
+      currentPost = { ...p };
+      paintFromState();
+      isDirty = false;
+      setStatus('');
+      loadPostList();
+    }
+
+    function newPost() {
+      if (isDirty && !confirm('You have unsaved changes. Start a new post anyway?')) return;
+      currentPost = blankPost();
+      paintFromState();
+      isDirty = false;
+      setStatus('');
+      loadPostList();
+      document.getElementById('post-title').focus();
+    }
+
+    function paintFromState() {
+      document.getElementById('post-title').value   = currentPost.title || '';
+      document.getElementById('post-slug').value    = currentPost.slug || '';
+      document.getElementById('post-category').value = currentPost.category || C.categories[0];
+      document.getElementById('post-summary').value = currentPost.summary || '';
+      document.getElementById('post-content').value = currentPost.content_md || '';
+      updateBreadcrumb();
+      updatePublishButton();
+      updateSlugPreview();
+      renderPreview();
+    }
+
+    function updateBreadcrumb() {
+      document.getElementById('editor-breadcrumb').textContent =
+        currentPost.id ? (currentPost.title || '(untitled)') : 'New program';
+    }
+
+    // ------- PUBLISH TOGGLE -------
+    function togglePublish() {
+      currentPost.is_published = !currentPost.is_published;
+      markDirty();
+      updatePublishButton();
+    }
+
+    function updatePublishButton() {
+      const btn = document.getElementById('publish-toggle');
+      if (currentPost.is_published) {
+        btn.textContent = '● Published';
+        btn.className = 'text-sm font-semibold px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700';
+      } else {
+        btn.textContent = 'Draft';
+        btn.className = 'text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600';
+      }
+    }
+
+    // ------- INPUT BINDINGS -------
+    ['post-title','post-slug','post-category','post-summary','post-content'].forEach(id => {
+      document.getElementById(id).addEventListener('input', markDirty);
+    });
+
+    document.getElementById('post-title').addEventListener('input', (e) => {
+      currentPost.title = e.target.value;
+      // Auto-fill slug only if slug is empty or user hasn't manually set it yet (new post)
+      if (!currentPost.id && !document.getElementById('post-slug').dataset.manual) {
+        document.getElementById('post-slug').value = window.slugify(e.target.value);
+        currentPost.slug = document.getElementById('post-slug').value;
+        updateSlugPreview();
+      }
+      updateBreadcrumb();
+    });
+    document.getElementById('post-slug').addEventListener('input', (e) => {
+      currentPost.slug = e.target.value;
+      e.target.dataset.manual = '1';
+      updateSlugPreview();
+    });
+    document.getElementById('post-category').addEventListener('change', (e) => {
+      currentPost.category = e.target.value;
+    });
+    document.getElementById('post-summary').addEventListener('input', (e) => {
+      currentPost.summary = e.target.value;
+    });
+    document.getElementById('post-content').addEventListener('input', (e) => {
+      currentPost.content_md = e.target.value;
+      renderPreview();
+    });
+
+    function markDirty() {
+      isDirty = true;
+      setStatus('Unsaved changes');
+    }
+
+    function setStatus(msg, color = '#94a3b8') {
+      const el = document.getElementById('save-status');
+      el.textContent = msg;
+      el.style.color = color;
+    }
+
+    function updateSlugPreview() {
+      document.getElementById('slug-preview').textContent = currentPost.slug || '(slug)';
+      const link = document.getElementById('preview-link');
+      if (currentPost.slug && currentPost.is_published) {
+        link.href = `posts.html?title=${encodeURIComponent(currentPost.slug)}`;
+        link.classList.remove('hidden');
+      } else {
+        link.classList.add('hidden');
+      }
+    }
+
+    // ------- MARKDOWN PREVIEW -------
+    function renderPreview() {
+      const md = document.getElementById('post-content').value;
+      const rendered = marked.parse(md || '');
+      document.getElementById('preview').innerHTML = DOMPurify.sanitize(rendered);
+    }
+
+    // ------- TOOLBAR HELPERS -------
+    function md(before, after) {
+      const ta = document.getElementById('post-content');
+      const { selectionStart: s, selectionEnd: e, value: v } = ta;
+      const selected = v.slice(s, e);
+      const replacement = before + selected + after;
+      ta.value = v.slice(0, s) + replacement + v.slice(e);
+      ta.focus();
+      const cursorPos = s + before.length + selected.length;
+      ta.selectionStart = ta.selectionEnd = cursorPos;
+      currentPost.content_md = ta.value;
+      renderPreview();
+      markDirty();
+    }
+
+    function mdLink() {
+      const ta = document.getElementById('post-content');
+      const { selectionStart: s, selectionEnd: e, value: v } = ta;
+      const selected = v.slice(s, e) || 'link text';
+      const url = prompt('URL:', 'https://');
+      if (!url) return;
+      const replacement = `[${selected}](${url})`;
+      ta.value = v.slice(0, s) + replacement + v.slice(e);
+      currentPost.content_md = ta.value;
+      renderPreview();
+      markDirty();
+      ta.focus();
+    }
+
+    // ------- SYNC SCROLL -------
+    const editorEl  = document.getElementById('post-content');
+    const previewEl = document.getElementById('preview');
+    let syncing = false;
+    function pairScroll(src, dst) {
+      src.addEventListener('scroll', () => {
+        if (syncing) return;
+        if (!document.getElementById('sync-scroll').checked) return;
+        syncing = true;
+        const pct = src.scrollTop / (src.scrollHeight - src.clientHeight || 1);
+        dst.scrollTop = pct * (dst.scrollHeight - dst.clientHeight);
+        requestAnimationFrame(() => { syncing = false; });
+      });
+    }
+    pairScroll(editorEl, previewEl);
+    pairScroll(previewEl, editorEl);
+
+    // ------- SAVE -------
+    async function savePost() {
+      if (!currentPost.title.trim()) { alert('Please enter a title.'); return; }
+      if (!currentPost.slug.trim())  { currentPost.slug = window.slugify(currentPost.title); document.getElementById('post-slug').value = currentPost.slug; }
+      setStatus('Saving...', '#64748b');
+      try {
+        const saved = await window.ProgramsDB.save(currentPost);
+        currentPost = { ...saved };
+        isDirty = false;
+        setStatus('Saved ✓', '#059669');
+        setTimeout(() => setStatus(''), 2000);
+        updateSlugPreview();
+        loadPostList();
+      } catch (e) {
+        console.error(e);
+        setStatus('Error saving', '#dc2626');
+        alert('Save failed: ' + (e.message || e));
+      }
+    }
+
+    // Keyboard shortcut: Cmd/Ctrl+S
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); savePost(); }
+    });
+
+    // Warn before leaving with unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // ------- INIT -------
+    paintFromState();
+    renderPreview();
+    loadPostList();
+  </script>
+</body>
+</html>

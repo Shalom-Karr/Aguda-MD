@@ -1,0 +1,6 @@
+# Clean URLs for Cloudflare Pages / Netlify
+# This lets visitors use /posts?title=slug instead of /posts.html?title=slug
+
+/posts         /posts.html   200
+/admin         /admin.html   200
+/faq           /faq.html     200

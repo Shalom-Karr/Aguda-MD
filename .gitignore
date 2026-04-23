@@ -1,0 +1,28 @@
+# Local env / secrets
+.env
+.env.local
+*.local
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node (in case tooling is added later)
+node_modules/
+dist/
+build/
+
+# Misc
+.cache/
