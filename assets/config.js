@@ -11,9 +11,9 @@
 
 window.SITE_CONFIG = {
   /* Public-facing name and tagline */
-  name:      'Agudah MD Resources',
-  shortName: 'Agudah MD',
-  tagline:   'Free, step-by-step help applying for government programs in Maryland.',
+  name:      'Agudath Israel of Maryland',
+  shortName: 'Agudath Israel of Maryland',
+  tagline:   'Protecting • Advocating • Serving — free help applying for government programs in Maryland.',
 
   /* Contact / booking */
   calendlyUrl:  'https://calendly.com/your-organization',
@@ -38,7 +38,7 @@ window.SITE_CONFIG = {
 
   /* Footer copy */
   footer: {
-    copyright: '© 2026 Agudah MD Resources. All guides are for informational purposes only.',
+    copyright: '© 2026 Agudath Israel of Maryland. All guides are for informational purposes only.',
   },
 
   /* Supabase connection.
