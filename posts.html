@@ -97,9 +97,11 @@
 
     <div id="loading" class="py-20 text-center text-slate-400">Loading guide...</div>
 
-    <div id="article-layout" class="hidden lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12">
-      <!-- Desktop TOC sidebar (sticky) -->
-      <aside id="toc-sidebar" class="hidden lg:block">
+    <div id="article-layout" class="hidden xl:grid xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-12">
+      <!-- TOC sidebar — only shown on screens wide enough to comfortably fit
+           it alongside the article (xl breakpoint, 1280px+). Below that the
+           mobile "Jump to section" dropdown is used instead. -->
+      <aside id="toc-sidebar" class="hidden xl:block">
         <div class="sticky top-24">
           <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">On this page</p>
           <nav id="toc-nav" class="border-l border-slate-200"></nav>
@@ -123,8 +125,8 @@
             </div>
           </div>
 
-          <!-- Mobile TOC (collapsible, hidden on lg+) -->
-          <details id="toc-mobile" class="lg:hidden hidden mb-8 bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <!-- "Jump to section" dropdown — used on every screen narrower than xl -->
+          <details id="toc-mobile" class="xl:hidden hidden mb-8 bg-white border border-slate-200 rounded-xl overflow-hidden">
             <summary class="px-4 py-3 cursor-pointer font-semibold text-sm text-slate-700 list-none flex items-center justify-between">
               <span>Jump to section</span>
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
