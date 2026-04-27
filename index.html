@@ -27,6 +27,20 @@
       }}
     }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+  <script>
+    /* External links (http/https) open in a new tab. Internal/relative
+     * links stay in the same tab. */
+    DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+      if (node.tagName === 'A' && node.hasAttribute('href')) {
+        const href = node.getAttribute('href');
+        if (/^https?:\/\//i.test(href)) {
+          node.setAttribute('target', '_blank');
+          node.setAttribute('rel', 'noopener noreferrer');
+        }
+      }
+    });
+  </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .program-card { transition: all .2s ease; }
@@ -296,7 +310,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
           </summary>
-          <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-100 pt-3">${f.answer || ''}</div>
+          <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-100 pt-3">${DOMPurify.sanitize(f.answer || '')}</div>
         </details>`).join('');
       document.getElementById('faq-preview').classList.remove('hidden');
     }
