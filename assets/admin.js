@@ -964,6 +964,12 @@
     const ok = await requireAdmin();
     if (!ok) return;
 
+    // Reveal the admin chrome only after auth succeeds. Until this point
+    // the header and main layout are display:none, so removing the auth
+    // modal in dev tools leaves an empty page rather than exposing the UI.
+    $('#admin-header').classList.remove('hidden');
+    $('#admin-shell').classList.remove('hidden');
+
     paintFromState();
     renderPreview();
     loadPostList();
