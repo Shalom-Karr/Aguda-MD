@@ -331,8 +331,11 @@ create policy "agudah_md_ga_images_admin_delete"
 -- using the SAME email and a strong password.
 -- =============================================================================
 insert into public.agudah_md_ga_admins (email, full_name) values
-  ('chani@agudathisrael-md.org', 'Chani Vilner'),
-  ('shalomkarrsphone@gmail.com', 'Shalom Karr')
+  ('chani@agudathisrael-md.org',   'Chani Vilner'),
+  ('shalomkarrsphone@gmail.com',   'Shalom Karr'),
+  ('asadwin@agudathisrael-md.org', 'A. Sadwin'),
+  ('merlbaum@ahavasyisrael.org',   'Merlbaum (Ahavas Yisrael)'),
+  ('crothstein@ahavasyisrael.org', 'C. Rothstein (Ahavas Yisrael)')
 on conflict (email) do nothing;
 
 

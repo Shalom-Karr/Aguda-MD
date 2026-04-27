@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>Program Guide · Agudath Israel of Maryland</title>
+  <title>Program Guide · Baltimore Community Resource Network</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
     tailwind.config = {
       theme: { extend: {
         fontFamily: { sans: ['Inter', 'sans-serif'] },
-        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+        colors: { brand: { 50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' } }
       }}
     }
   </script>
@@ -25,12 +25,15 @@
   <style>
     body { font-family: 'Inter', sans-serif; }
     .prose h2 { scroll-margin-top: 5rem; }
-    .prose a { color: #0f766e; }
-    .prose a:hover { color: #115e59; }
-    .prose blockquote { border-left-color: #14b8a6; background: #f0fdfa; padding: 0.5rem 1rem; border-radius: 0 0.5rem 0.5rem 0; }
-    .prose ol li::marker { color: #0d9488; font-weight: 700; }
+    .prose a { color: #1d4ed8; }
+    .prose a:hover { color: #1e3a8a; }
+    .prose blockquote { border-left-color: #3b82f6; background: #eff6ff; padding: 0.5rem 1rem; border-radius: 0 0.5rem 0.5rem 0; }
+    .prose ol li::marker { color: #2563eb; font-weight: 700; }
     .prose img { border-radius: .75rem; box-shadow: 0 6px 24px -8px rgba(0,0,0,.15); margin: 1.5rem 0; }
-    #progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg,#14b8a6,#0d9488); width: 0%; z-index: 60; transition: width .1s; }
+    #progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg,#3b82f6,#1d4ed8); width: 0%; z-index: 60; transition: width .1s; }
+    .view-toggle { display: inline-flex; background: #f1f5f9; border-radius: 0.625rem; padding: 4px; gap: 4px; }
+    .view-toggle button { padding: 6px 16px; font-size: 13px; font-weight: 700; border-radius: 0.5rem; color: #475569; transition: all .15s; }
+    .view-toggle button.active { background: white; color: #1d4ed8; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   </style>
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
@@ -39,12 +42,12 @@
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
     <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2">
-        <img src="assets/logo.png" alt="Agudath Israel of Maryland" class="h-11 w-auto">
+        <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="hover:text-brand-700">Programs</a>
         <a href="faq.html" class="hover:text-brand-700">FAQ</a>
-        <a href="index.html#book" class="hover:text-brand-700">Book a Call</a>
+        <a href="book.html" class="hover:text-brand-700">Book a Call</a>
       </nav>
     </div>
   </header>
@@ -63,13 +66,22 @@
         <time id="updated" class="text-xs text-slate-500"></time>
       </div>
       <h1 id="title" class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight mb-4"></h1>
-      <p id="summary" class="text-xl text-slate-600 leading-relaxed mb-10 pb-10 border-b border-slate-200"></p>
+      <p id="summary" class="text-xl text-slate-600 leading-relaxed mb-8"></p>
+
+      <!-- Guide / FAQ toggle -->
+      <div id="view-toggle" class="hidden mb-10 pb-8 border-b border-slate-200">
+        <div class="view-toggle">
+          <button id="view-guide" data-view="guide">Step-by-step guide</button>
+          <button id="view-faq"   data-view="faq">FAQ</button>
+        </div>
+      </div>
+
       <div id="content" class="prose prose-slate prose-lg max-w-none"></div>
 
       <aside class="mt-16 p-8 bg-gradient-to-br from-brand-700 to-brand-800 text-white rounded-2xl">
         <h3 class="text-2xl font-bold mb-2">Need help with this application?</h3>
-        <p class="text-brand-50/90 mb-5">Book a free 20-minute call and we'll walk through it together.</p>
-        <a id="cta-calendly" href="#" class="inline-block bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl transition-colors">Schedule on Calendly</a>
+        <p class="text-blue-50/90 mb-5">Book a free 20-minute call and we'll walk through it together.</p>
+        <a id="cta-calendly" href="#" class="inline-block bg-white hover:bg-blue-50 text-brand-800 font-bold px-6 py-3 rounded-xl transition-colors">Book a free call</a>
       </aside>
     </article>
 
@@ -80,16 +92,12 @@
     </div>
   </main>
 
-  <footer class="bg-slate-900 text-slate-400 text-sm mt-20">
-    <div class="max-w-5xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-      <p id="footer-copyright"></p>
-      <a href="index.html#book" class="hover:text-white">Book a Call</a>
-    </div>
-  </footer>
+  <footer id="site-footer"></footer>
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
   <script src="assets/apply-config.js"></script>
+  <script src="assets/footer.js"></script>
   <script>
     const CATEGORY_COLORS = {
       Food:'bg-emerald-100 text-emerald-800',
@@ -98,16 +106,21 @@
       Energy:'bg-amber-100 text-amber-800',
       Family:'bg-purple-100 text-purple-800',
       Income:'bg-teal-100 text-teal-800',
+      Transportation:'bg-orange-100 text-orange-800',
+      Utilities:'bg-cyan-100 text-cyan-800',
     };
+
+    let currentPost  = null;
+    let currentView  = 'guide';   // 'guide' | 'faq'
 
     function applyConfig() {
       const C = window.SITE_CONFIG;
-      document.getElementById('footer-copyright').textContent = C.footer.copyright;
-      const cta = document.getElementById('cta-calendly');
       const isInline = C.bookingMode === 'inline';
+      const cta = document.getElementById('cta-calendly');
       cta.href = isInline ? 'book.html' : C.calendlyUrl;
       if (isInline) { cta.removeAttribute('target'); cta.removeAttribute('rel'); }
       else          { cta.target = '_blank'; cta.rel = 'noopener'; }
+      window.mountFooter();
     }
 
     function showNotFound() {
@@ -115,38 +128,68 @@
       document.getElementById('notfound').classList.remove('hidden');
     }
 
+    function renderContent() {
+      if (!currentPost) return;
+      const md = (currentView === 'faq')
+        ? (currentPost.faq_md || '_No FAQs yet for this program._')
+        : (currentPost.content_md || '');
+      document.getElementById('content').innerHTML =
+        DOMPurify.sanitize(marked.parse(md));
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.querySelectorAll('#view-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === view);
+      });
+      const url = new URL(window.location);
+      if (view === 'faq') url.searchParams.set('view', 'faq');
+      else                url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.toString());
+      renderContent();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     async function loadPost() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('title');
       if (!slug) return showNotFound();
 
-      let post;
-      try { post = await window.ProgramsDB.getBySlug(slug); }
+      try { currentPost = await window.ProgramsDB.getBySlug(slug); }
       catch (e) { console.error(e); return showNotFound(); }
-      if (!post) return showNotFound();
+      if (!currentPost) return showNotFound();
 
       const C = window.SITE_CONFIG;
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('article').classList.remove('hidden');
-      document.title = `${post.title} · ${C.name}`;
-      document.getElementById('title').textContent   = post.title;
-      document.getElementById('summary').textContent = post.summary || '';
+      document.title = `${currentPost.title} · ${C.name}`;
+      document.getElementById('title').textContent   = currentPost.title;
+      document.getElementById('summary').textContent = currentPost.summary || '';
 
       const cat = document.getElementById('category-badge');
-      if (post.category) {
-        cat.textContent = post.category;
-        cat.classList.add(...(CATEGORY_COLORS[post.category] || 'bg-slate-100 text-slate-700').split(' '));
+      if (currentPost.category) {
+        cat.textContent = currentPost.category;
+        cat.classList.add(...(CATEGORY_COLORS[currentPost.category] || 'bg-slate-100 text-slate-700').split(' '));
         cat.classList.remove('hidden');
       }
 
-      const updated = post.updated_at || post.created_at;
+      const updated = currentPost.updated_at || currentPost.created_at;
       if (updated) {
         document.getElementById('updated').textContent =
           'Last updated ' + new Date(updated).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
       }
 
-      document.getElementById('content').innerHTML =
-        DOMPurify.sanitize(marked.parse(post.content_md || ''));
+      // If the program has a separate FAQ block, show the toggle
+      if (currentPost.faq_md && currentPost.faq_md.trim()) {
+        document.getElementById('view-toggle').classList.remove('hidden');
+        document.querySelectorAll('#view-toggle button').forEach(b => {
+          b.addEventListener('click', () => setView(b.dataset.view));
+        });
+      }
+
+      // Pick initial view from URL
+      currentView = params.get('view') === 'faq' ? 'faq' : 'guide';
+      setView(currentView);
     }
 
     /* Reading progress bar */

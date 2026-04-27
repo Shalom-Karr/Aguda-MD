@@ -14,7 +14,7 @@
     tailwind.config = {
       theme: { extend: {
         fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] },
-        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+        colors: { brand: { 50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' } }
       }}
     }
   </script>
@@ -285,9 +285,13 @@
               <input data-setting="contactEmail" type="email" class="settings-input">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-600 mb-1">Phone (optional)</label>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Phone</label>
               <input data-setting="phone" type="tel" class="settings-input">
             </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Mailing address (footer)</label>
+            <input data-setting="address" type="text" class="settings-input" placeholder="115 Sudbrook Lane Suite E, Baltimore, MD 21208">
           </div>
         </section>
 
@@ -346,6 +350,37 @@
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Copyright text</label>
             <input data-setting="footer.copyright" type="text" class="settings-input">
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">"A project of" label</label>
+              <input data-setting="footer.aboutLabel" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Contact column heading</label>
+              <input data-setting="footer.contactLabel" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Site links heading</label>
+              <input data-setting="footer.linksLabel" type="text" class="settings-input">
+            </div>
+          </div>
+          <div class="border-t border-slate-100 pt-4">
+            <p class="text-xs font-bold text-slate-600 mb-3">Partner organizations (logos in footer)</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2 p-3 bg-slate-50 rounded-lg">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Partner 1</label>
+                <input data-setting="footer.partner1Name" type="text" class="settings-input" placeholder="Display name (alt text)">
+                <input data-setting="footer.partner1Url"  type="url"  class="settings-input" placeholder="https://...">
+                <p class="text-[11px] text-slate-400">Logo file: <code class="bg-white px-1 rounded">assets/logo-ay.png</code></p>
+              </div>
+              <div class="space-y-2 p-3 bg-slate-50 rounded-lg">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Partner 2</label>
+                <input data-setting="footer.partner2Name" type="text" class="settings-input" placeholder="Display name (alt text)">
+                <input data-setting="footer.partner2Url"  type="url"  class="settings-input" placeholder="https://...">
+                <p class="text-[11px] text-slate-400">Logo file: <code class="bg-white px-1 rounded">assets/logo-aimd.png</code></p>
+              </div>
+            </div>
           </div>
         </section>
 

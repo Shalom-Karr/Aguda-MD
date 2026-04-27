@@ -1,8 +1,9 @@
 /* ============================================================================
  * SITE CONFIG
  * ----------------------------------------------------------------------------
- * Edit this file to rebrand the site. No other files should need changes
- * for basic customization (name, colors, Calendly link, contact info).
+ * Edit this file to rebrand the site. Live values can also be overridden
+ * from the admin "Site Settings" tab — those are merged on top of these
+ * defaults at page load.
  *
  * For Supabase connection: fill in `supabase.url` and `supabase.anonKey`.
  * If both are empty, the site runs in DEMO MODE using localStorage + seed
@@ -11,54 +12,58 @@
 
 window.SITE_CONFIG = {
   /* Public-facing name and tagline */
-  name:      'Agudath Israel of Maryland',
-  shortName: 'Agudath Israel of Maryland',
-  tagline:   'Protecting • Advocating • Serving — free help applying for government programs in Maryland.',
+  name:      'Baltimore Community Resource Network',
+  shortName: 'BCRN',
+  tagline:   'Connecting You to Resources That Matter.',
 
   /* Contact / booking */
-  calendlyUrl:  'https://calendly.com/your-organization',
-  contactEmail: 'hello@example.com',
-  phone:        '',
+  calendlyUrl:  'https://calendly.com/merlbaum-ahavasyisrael/30min',
+  contactEmail: 'info@baltcrn.org',
+  phone:        '410-775-8525',
+  address:      '115 Sudbrook Lane Suite E, Baltimore, MD 21208',
 
   /* How the "Book a Call" button on the homepage behaves.
    *   'external' — clicking the button opens Calendly in a new tab.
-   *   'inline'   — Calendly is embedded directly on the homepage.
-   * The header "Book a Call" link adapts: scrolls to the embed when inline,
-   * or jumps straight to Calendly when external. */
-  bookingMode: 'external',
+   *   'inline'   — Calendly is embedded directly on the /book page. */
+  bookingMode: 'inline',
 
   /* Hero copy (homepage) */
   hero: {
-    eyebrow:  'Free assistance',
-    heading:  "Applying for government programs shouldn't be this hard.",
-    subhead:  'Clear, plain-language guides for food, healthcare, housing, and energy programs — plus a real person you can call if you get stuck.',
-    ctaPrimary:   { label: 'Browse programs',    href: '#programs' },
-    ctaSecondary: { label: 'Book a free call',   href: '#book' },
+    eyebrow:  'A project of Ahavas Yisrael & Agudath Israel of Maryland',
+    heading:  'Connecting You to Resources That Matter',
+    subhead:  'A nonprofit organization dedicated to helping community members access government assistance programs. We evaluate your situation, research eligible programs, and guide you through every step of the application process — free of charge.',
+    ctaPrimary:   { label: 'Browse programs', href: '#programs' },
+    ctaSecondary: { label: 'Book a free call', href: '#book' },
   },
 
-  /* Book-a-call section copy */
+  /* Book-a-call section copy (shown after the programs grid) */
   book: {
-    heading: 'Still have questions?',
-    subhead: "Book a free 20-minute call and we'll walk you through your application, step by step.",
-    buttonLabel: 'Schedule on Calendly',
+    heading: 'Need a hand with your application?',
+    subhead: "Book a free 20-minute call and we'll walk you through your options, step by step.",
+    buttonLabel: 'Schedule a free call',
   },
 
-  /* Footer copy */
+  /* Footer copy — every value here is editable from the admin Site Settings tab.
+   * Logo image files (assets/logo-ay.png and assets/logo-aimd.png) are
+   * referenced fixed paths; replace those files to change the actual
+   * partner logo images. */
   footer: {
-    copyright: '© 2026 Agudath Israel of Maryland. All guides are for informational purposes only.',
+    copyright:    '© 2026 Baltimore Community Resource Network. All guides are for informational purposes only.',
+    aboutLabel:   'A project of',
+    contactLabel: 'Contact',
+    linksLabel:   'Site',
+    partner1Name: 'Ahavas Yisrael Charity Fund',
+    partner1Url:  'https://ahavasyisrael.org',
+    partner2Name: 'Agudath Israel of Maryland',
+    partner2Url:  'https://agudathisrael-md.org',
   },
 
-  /* Supabase connection.
-   * Leave BOTH blank for demo mode (localStorage + seed data).
-   * Fill both in for production. The anon key is safe to expose — row-level
-   * security on the Supabase side is what protects writes. See docs/DEPLOYMENT.md. */
+  /* Supabase connection. */
   supabase: {
     url:     'https://qvoxpfigbukidlmshiei.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b3hwZmlnYnVraWRsbXNoaWVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyOTM2OTEsImV4cCI6MjA2NTg2OTY5MX0.CEbyeIw6QiMxbLBhU7x7Re7SL_unWJMyaJQPS9y-k60',
   },
 
-  /* Categories shown in the admin dropdown and used for card colors.
-   * To add a new category, add it here and in the CATEGORY_COLORS maps
-   * in index.html / posts.html (or extract those into this config later). */
-  categories: ['Food', 'Health', 'Housing', 'Energy', 'Family', 'Income'],
+  /* Categories shown in the admin dropdown and used for card colors. */
+  categories: ['Food', 'Health', 'Housing', 'Energy', 'Family', 'Income', 'Transportation', 'Utilities'],
 };

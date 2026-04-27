@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>Book a Call · Agudath Israel of Maryland</title>
+  <title>Book a Call · Baltimore Community Resource Network</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Book a free 20-minute call to get help applying for a government program.">
 
@@ -14,26 +14,21 @@
   <script>
     tailwind.config = { theme: { extend: {
       fontFamily: { sans: ['Inter', 'sans-serif'] },
-      colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+      colors: { brand: { 50:'#eff6ff',100:'#dbeafe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' } }
     }}}
   </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
-    /* Tall enough that Calendly's calendar view fits without an internal
-     * scrollbar; the page document scrolls naturally if it overflows. */
     .calendly-fill { height: 1100px; }
-    @media (max-width: 640px) {
-      .calendly-fill { height: 1300px; }
-    }
+    @media (max-width: 640px) { .calendly-fill { height: 1300px; } }
   </style>
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
 
-  <!-- Combined header: nav row + page heading row, both white -->
   <header class="bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2">
-        <img src="assets/logo.png" alt="Agudath Israel of Maryland" class="h-11 w-auto">
+        <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="hover:text-brand-700">Programs</a>
@@ -48,32 +43,23 @@
   </header>
 
   <main>
-    <!-- Full-width Calendly embed — tall enough that the widget renders
-         without its own scrollbar; page scrolls naturally if needed. -->
     <div id="calendly-inline" class="calendly-fill w-full"></div>
   </main>
 
-  <footer class="bg-slate-900 text-slate-400 text-sm">
-    <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-      <p id="footer-copyright"></p>
-      <div class="flex gap-5">
-        <a href="index.html" class="hover:text-white">Programs</a>
-        <a href="faq.html"   class="hover:text-white">FAQ</a>
-      </div>
-    </div>
-  </footer>
+  <footer id="site-footer"></footer>
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
   <script src="assets/apply-config.js"></script>
+  <script src="assets/footer.js"></script>
   <script>
     function applyConfig() {
       const C = window.SITE_CONFIG;
       document.title = `Book a Call · ${C.name}`;
       document.getElementById('page-heading').textContent  = C.book.heading || 'Book a free call';
       document.getElementById('page-subhead').textContent  = C.book.subhead  || 'Pick a time below.';
-      document.getElementById('footer-copyright').textContent = C.footer.copyright;
       mountCalendly(C.calendlyUrl);
+      window.mountFooter();
     }
 
     function mountCalendly(url) {

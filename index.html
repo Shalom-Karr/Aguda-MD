@@ -2,9 +2,9 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>Agudath Israel of Maryland · Government Program Help</title>
+  <title>Baltimore Community Resource Network · Connecting You to Resources That Matter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Free, step-by-step guides to help you apply for government assistance programs in Maryland.">
+  <meta name="description" content="Free, step-by-step guides to help Baltimore residents apply for government assistance programs. A project of Ahavas Yisrael and Agudath Israel of Maryland.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,15 +15,20 @@
     tailwind.config = {
       theme: { extend: {
         fontFamily: { sans: ['Inter', 'sans-serif'] },
-        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+        colors: {
+          brand: {
+            50:'#eff6ff', 100:'#dbeafe', 500:'#3b82f6',
+            600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a',
+          }
+        }
       }}
     }
   </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .program-card { transition: all .2s ease; }
-    .program-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -10px rgba(15,118,110,.22); border-color: #0d9488; }
-    ::selection { background: #ccfbf1; }
+    .program-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -10px rgba(30,64,175,.22); border-color: #2563eb; }
+    ::selection { background: #dbeafe; }
     details[open] summary .arrow { transform: rotate(180deg); }
     summary::-webkit-details-marker { display: none; }
     summary { list-style: none; }
@@ -39,30 +44,24 @@
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2">
-        <img src="assets/logo.png" alt="Agudath Israel of Maryland" class="h-11 w-auto">
+        <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="text-brand-700">Programs</a>
         <a href="faq.html" class="hover:text-brand-700">FAQ</a>
-        <a id="header-book-link" href="#book" class="hover:text-brand-700">Book a Call</a>
+        <a id="header-book-link" href="book.html" class="hover:text-brand-700">Book a Call</a>
         <a href="admin.html" class="text-xs text-slate-400 hover:text-slate-600">Admin</a>
       </nav>
-      <a id="header-book-mobile" href="#book" class="md:hidden text-xs font-bold bg-amber-500 text-white px-3 py-1.5 rounded-lg">Book Call</a>
+      <a id="header-book-mobile" href="book.html" class="md:hidden text-xs font-bold bg-brand-700 text-white px-3 py-1.5 rounded-lg">Book Call</a>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="bg-gradient-to-br from-brand-700 to-brand-900 text-white">
-    <div class="max-w-6xl mx-auto px-6 py-16 md:py-24">
-      <div class="max-w-3xl">
-        <span id="hero-eyebrow" class="inline-block bg-white/15 text-brand-100 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-5"></span>
-        <h1 id="hero-heading" class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5"></h1>
-        <p id="hero-subhead" class="text-lg md:text-xl text-brand-50/90 mb-8 leading-relaxed"></p>
-        <div class="flex flex-wrap gap-3">
-          <a id="hero-cta-1" href="#programs" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl transition-colors shadow-lg"></a>
-          <a id="hero-cta-2" href="#book" class="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-xl backdrop-blur transition-colors border border-white/20"></a>
-        </div>
-      </div>
+  <!-- Intro / hero -->
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-16 md:py-20 text-center">
+      <span id="hero-eyebrow" class="inline-block bg-white/15 text-blue-100 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-5"></span>
+      <h1 id="hero-heading" class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5"></h1>
+      <p id="hero-subhead" class="text-lg md:text-xl text-blue-50/90 leading-relaxed max-w-3xl mx-auto"></p>
     </div>
   </section>
 
@@ -70,8 +69,8 @@
   <main id="programs" class="max-w-6xl mx-auto px-6 py-16">
     <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
       <div>
-        <h2 class="text-3xl font-extrabold text-slate-900">Available programs</h2>
-        <p class="text-slate-600 mt-2">Pick a program for a plain-language application guide.</p>
+        <h2 class="text-3xl font-extrabold text-slate-900">Programs we help with</h2>
+        <p class="text-slate-600 mt-2">Choose a program for a plain-language application guide.</p>
       </div>
       <input id="search" type="text" placeholder="Search programs..."
              class="w-full md:w-72 border border-slate-300 rounded-xl px-4 py-2.5 bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none text-sm">
@@ -101,7 +100,7 @@
     </div>
   </section>
 
-  <!-- Book a call (CTA only — embed lives on /book) -->
+  <!-- Book a call (after programs, lower-emphasis) -->
   <section id="book" class="bg-stone-50 border-t border-slate-200">
     <div class="max-w-4xl mx-auto px-6 py-16 text-center">
       <h2 id="book-heading" class="text-3xl font-extrabold text-slate-900 mb-3"></h2>
@@ -110,31 +109,27 @@
     </div>
   </section>
 
-  <footer class="bg-slate-900 text-slate-400 text-sm">
-    <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-      <p id="footer-copyright"></p>
-      <div class="flex gap-5">
-        <a href="faq.html" class="hover:text-white">FAQ</a>
-        <a href="#book" class="hover:text-white">Book a Call</a>
-      </div>
-    </div>
-  </footer>
+  <footer id="site-footer"></footer>
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
   <script src="assets/apply-config.js"></script>
+  <script src="assets/footer.js"></script>
   <script>
     /* ----- Card styling ----- */
     const CATEGORY_COLORS = {
-      Food:    'bg-emerald-50 text-emerald-700 border-emerald-200',
-      Health:  'bg-rose-50 text-rose-700 border-rose-200',
-      Housing: 'bg-blue-50 text-blue-700 border-blue-200',
-      Energy:  'bg-amber-50 text-amber-700 border-amber-200',
-      Family:  'bg-purple-50 text-purple-700 border-purple-200',
-      Income:  'bg-teal-50 text-teal-700 border-teal-200',
+      Food:           'bg-emerald-50 text-emerald-700 border-emerald-200',
+      Health:         'bg-rose-50 text-rose-700 border-rose-200',
+      Housing:        'bg-blue-50 text-blue-700 border-blue-200',
+      Energy:         'bg-amber-50 text-amber-700 border-amber-200',
+      Family:         'bg-purple-50 text-purple-700 border-purple-200',
+      Income:         'bg-teal-50 text-teal-700 border-teal-200',
+      Transportation: 'bg-orange-50 text-orange-700 border-orange-200',
+      Utilities:      'bg-cyan-50 text-cyan-700 border-cyan-200',
     };
     const CATEGORY_DEFAULT_ICON = {
-      Food:'🍎', Health:'🏥', Housing:'🏠', Energy:'⚡', Family:'👶', Income:'💵'
+      Food:'🍎', Health:'🏥', Housing:'🏠', Energy:'⚡', Family:'👶',
+      Income:'💵', Transportation:'🚌', Utilities:'💧',
     };
     const iconFor = (program) =>
       (program.icon && program.icon.trim())
@@ -145,27 +140,15 @@
 
     function applyConfig() {
       const C = window.SITE_CONFIG;
-      document.title = `${C.name} · Government Program Help`;
+      document.title = `${C.name} · ${C.tagline || 'Government Program Help'}`;
       document.getElementById('hero-eyebrow').textContent = C.hero.eyebrow;
       document.getElementById('hero-heading').textContent = C.hero.heading;
       document.getElementById('hero-subhead').textContent = C.hero.subhead;
-      document.getElementById('hero-cta-1').textContent   = C.hero.ctaPrimary.label;
-      document.getElementById('hero-cta-1').href          = resolveBookHref(C.hero.ctaPrimary.href, C);
-      document.getElementById('hero-cta-2').textContent   = C.hero.ctaSecondary.label;
-      document.getElementById('hero-cta-2').href          = resolveBookHref(C.hero.ctaSecondary.href, C);
       document.getElementById('book-heading').textContent = C.book.heading;
       document.getElementById('book-subhead').textContent = C.book.subhead;
       document.getElementById('book-cta').textContent     = C.book.buttonLabel;
-      document.getElementById('footer-copyright').textContent = C.footer.copyright;
-
       applyBookingLinks(C);
-    }
-
-    /* If a CTA href points to "#book" we keep that as a same-page anchor.
-     * Everything else resolves through the booking-mode rules below. */
-    function resolveBookHref(href, C) {
-      if (href === '#book') return bookingHref(C);
-      return href;
+      window.mountFooter();
     }
 
     function bookingHref(C) {
@@ -174,7 +157,7 @@
 
     function applyBookingLinks(C) {
       const isInline = C.bookingMode === 'inline';
-      const href     = bookingHref(C);
+      const href = bookingHref(C);
       const link = (el) => {
         el.href = href;
         if (isInline) { el.removeAttribute('target'); el.removeAttribute('rel'); }
@@ -198,19 +181,25 @@
       gridEl.innerHTML = list.map(p => {
         const catClass = CATEGORY_COLORS[p.category] || 'bg-slate-100 text-slate-700 border-slate-200';
         return `
-        <a href="posts.html?title=${encodeURIComponent(p.slug)}"
-           class="program-card block bg-white border border-slate-200 rounded-2xl p-6 group">
+        <article class="program-card bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
           <div class="flex items-start justify-between mb-3">
             <div class="text-3xl">${iconFor(p)}</div>
             <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${catClass}">${p.category || 'Program'}</span>
           </div>
-          <h3 class="text-lg font-bold text-slate-900 group-hover:text-brand-700 mb-2 leading-snug">${p.title}</h3>
-          <p class="text-slate-600 text-sm leading-relaxed line-clamp-3">${p.summary || ''}</p>
-          <div class="mt-4 inline-flex items-center text-sm font-bold text-brand-700 group-hover:translate-x-1 transition-transform">
-            View guide
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">${p.title}</h3>
+          <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 flex-1">${p.summary || ''}</p>
+          <div class="mt-5 flex gap-2 flex-wrap">
+            <a href="posts.html?title=${encodeURIComponent(p.slug)}"
+               class="inline-flex items-center gap-1 bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+              Learn More
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="posts.html?title=${encodeURIComponent(p.slug)}&view=faq"
+               class="inline-flex items-center gap-1 bg-white border border-slate-300 hover:border-brand-700 hover:text-brand-700 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+              FAQ
+            </a>
           </div>
-        </a>`;
+        </article>`;
       }).join('');
     }
 
@@ -238,8 +227,7 @@
       try { list = await window.ProgramsDB.listHomepageFaqs(); }
       catch (e) { return; }
       if (!list || !list.length) return;
-      const top = list;
-      document.getElementById('faq-preview-list').innerHTML = top.map(f => `
+      document.getElementById('faq-preview-list').innerHTML = list.map(f => `
         <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-500 transition-colors">
           <summary class="flex items-center justify-between px-5 py-4 cursor-pointer font-bold text-slate-900">
             <span>${escapeHtml(f.question)}</span>
