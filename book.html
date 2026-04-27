@@ -22,8 +22,11 @@
   </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
-    .calendly-fill { height: 1100px; }
-    @media (max-width: 640px) { .calendly-fill { height: 1300px; } }
+    /* Calendly's inline widget renders at ~700–720px on desktop. The
+     * container is sized to match so there's no empty space beneath it.
+     * On mobile the flow is taller, so allow more height. */
+    .calendly-fill { height: 720px; min-width: 320px; }
+    @media (max-width: 640px) { .calendly-fill { height: 1150px; } }
   </style>
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
