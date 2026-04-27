@@ -46,8 +46,8 @@ window.SITE_CONFIG = {
    * Fill both in for production. The anon key is safe to expose — row-level
    * security on the Supabase side is what protects writes. See docs/DEPLOYMENT.md. */
   supabase: {
-    url:     '',
-    anonKey: '',
+    url:     'https://qvoxpfigbukidlmshiei.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b3hwZmlnYnVraWRsbXNoaWVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyOTM2OTEsImV4cCI6MjA2NTg2OTY5MX0.CEbyeIw6QiMxbLBhU7x7Re7SL_unWJMyaJQPS9y-k60',
   },
 
   /* Categories shown in the admin dropdown and used for card colors.
