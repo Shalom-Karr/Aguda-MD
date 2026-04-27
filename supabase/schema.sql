@@ -340,7 +340,8 @@ insert into public.agudah_md_ga_admins (email, full_name) values
   ('shalomkarrsphone@gmail.com',   'Shalom Karr'),
   ('asadwin@agudathisrael-md.org', 'A. Sadwin'),
   ('merlbaum@ahavasyisrael.org',   'Merlbaum (Ahavas Yisrael)'),
-  ('crothstein@ahavasyisrael.org', 'C. Rothstein (Ahavas Yisrael)')
+  ('crothstein@ahavasyisrael.org', 'C. Rothstein (Ahavas Yisrael)'),
+  ('alencz@agudathisrael-md.org',  'Alencz')
 on conflict (email) do nothing;
 
 
