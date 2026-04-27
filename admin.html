@@ -271,6 +271,14 @@
             <label class="block text-xs font-bold text-slate-600 mb-1">Calendly URL</label>
             <input data-setting="calendlyUrl" type="url" class="settings-input">
           </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">"Book a Call" button behavior</label>
+            <select data-setting="bookingMode" class="settings-input">
+              <option value="external">Link to Calendly (opens in a new tab)</option>
+              <option value="inline">Embed Calendly directly on the homepage</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-1">Inline keeps visitors on your site; external is a single-click jump.</p>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1">Contact email</label>

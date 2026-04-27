@@ -20,6 +20,13 @@ window.SITE_CONFIG = {
   contactEmail: 'hello@example.com',
   phone:        '',
 
+  /* How the "Book a Call" button on the homepage behaves.
+   *   'external' — clicking the button opens Calendly in a new tab.
+   *   'inline'   — Calendly is embedded directly on the homepage.
+   * The header "Book a Call" link adapts: scrolls to the embed when inline,
+   * or jumps straight to Calendly when external. */
+  bookingMode: 'external',
+
   /* Hero copy (homepage) */
   hero: {
     eyebrow:  'Free assistance',
