@@ -683,6 +683,8 @@
 
   function faqCardHtml(f) {
     const dirty = faqDirtyIds.has(f.id);
+    const showHome = f.show_on_homepage === true;
+    const showFaq  = f.show_on_faq_page !== false; // default true
     return `
       <div class="faq-card ${dirty ? 'dirty' : ''}" data-faq-id="${escapeHtml(f.id)}">
         <div>
@@ -693,11 +695,22 @@
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Answer <span class="text-slate-400 normal-case font-normal">(HTML allowed — &lt;ul&gt;, &lt;a&gt;, &lt;strong&gt;, etc.)</span></label>
           <textarea rows="3" class="settings-input" data-field="answer" placeholder="The answer.">${escapeHtml(f.answer || '')}</textarea>
         </div>
+        <div class="flex items-center gap-5 px-1 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 px-2">Show on</span>
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input type="checkbox" data-field="show_on_homepage" ${showHome ? 'checked' : ''} class="w-4 h-4 accent-brand-600">
+            Homepage
+          </label>
+          <label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input type="checkbox" data-field="show_on_faq_page" ${showFaq ? 'checked' : ''} class="w-4 h-4 accent-brand-600">
+            FAQ page
+          </label>
+        </div>
         <div class="faq-toolbar">
           <div class="flex items-center gap-3">
             <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Order</label>
             <input type="number" class="settings-input w-20 text-sm" data-field="sort_order" value="${f.sort_order || 0}">
-            <span class="text-xs text-slate-400">lower = appears first</span>
+            <span class="text-xs text-slate-400">lower = first</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-xs font-semibold text-slate-500">Draft</span>
@@ -717,7 +730,8 @@
 
       // Field changes mark dirty
       card.querySelectorAll('[data-field]').forEach(input => {
-        input.addEventListener('input', () => {
+        const evt = (input.type === 'checkbox') ? 'change' : 'input';
+        input.addEventListener(evt, () => {
           faqDirtyIds.add(id);
           card.classList.add('dirty');
           setStatus('Unsaved FAQ changes');
@@ -747,10 +761,12 @@
     return {
       ...orig,
       id: id.startsWith('new-') ? null : id,
-      question:     card.querySelector('[data-field="question"]').value,
-      answer:       card.querySelector('[data-field="answer"]').value,
-      sort_order:   parseInt(card.querySelector('[data-field="sort_order"]').value, 10) || 0,
-      is_published: card.querySelector('[data-action="toggle-pub"]').classList.contains('on'),
+      question:         card.querySelector('[data-field="question"]').value,
+      answer:           card.querySelector('[data-field="answer"]').value,
+      sort_order:       parseInt(card.querySelector('[data-field="sort_order"]').value, 10) || 0,
+      is_published:     card.querySelector('[data-action="toggle-pub"]').classList.contains('on'),
+      show_on_homepage: card.querySelector('[data-field="show_on_homepage"]').checked,
+      show_on_faq_page: card.querySelector('[data-field="show_on_faq_page"]').checked,
     };
   }
 
@@ -804,7 +820,10 @@
   function addFaq() {
     const tempId = 'new-' + Date.now();
     const nextOrder = (faqs.reduce((m, f) => Math.max(m, f.sort_order || 0), 0)) + 10;
-    faqs.push({ id: tempId, question: '', answer: '', sort_order: nextOrder, is_published: true });
+    faqs.push({
+      id: tempId, question: '', answer: '', sort_order: nextOrder,
+      is_published: true, show_on_homepage: false, show_on_faq_page: true,
+    });
     faqDirtyIds.add(tempId);
     renderFaqList();
     // Focus the question of the new card

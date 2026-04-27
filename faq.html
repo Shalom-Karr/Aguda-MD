@@ -79,7 +79,7 @@
     async function loadFaqs() {
       let list;
       try {
-        list = await window.ProgramsDB.listPublishedFaqs();
+        list = await window.ProgramsDB.listFaqPageFaqs();
       } catch (e) {
         console.error(e);
         list = [];

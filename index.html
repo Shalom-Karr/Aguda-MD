@@ -262,10 +262,10 @@
 
     async function loadFaqPreview() {
       let list;
-      try { list = await window.ProgramsDB.listPublishedFaqs(); }
+      try { list = await window.ProgramsDB.listHomepageFaqs(); }
       catch (e) { return; }
       if (!list || !list.length) return;
-      const top = list.slice(0, 5);
+      const top = list;
       document.getElementById('faq-preview-list').innerHTML = top.map(f => `
         <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-500 transition-colors">
           <summary class="flex items-center justify-between px-5 py-4 cursor-pointer font-bold text-slate-900">

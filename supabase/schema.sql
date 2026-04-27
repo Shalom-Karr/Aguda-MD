@@ -72,19 +72,27 @@ create index if not exists agudah_md_ga_admins_email_idx
 -- Frequently-asked questions, edited from the admin panel.
 -- =============================================================================
 create table if not exists public.agudah_md_ga_faqs (
-  id            uuid primary key default gen_random_uuid(),
-  question      text not null,
-  answer        text,
-  sort_order    int not null default 0,
-  is_published  boolean not null default true,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
+  id                uuid primary key default gen_random_uuid(),
+  question          text not null,
+  answer            text,
+  sort_order        int not null default 0,
+  is_published      boolean not null default true,
+  show_on_homepage  boolean not null default false,
+  show_on_faq_page  boolean not null default true,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
 );
 
 create index if not exists agudah_md_ga_faqs_sort_idx
   on public.agudah_md_ga_faqs (sort_order);
 create index if not exists agudah_md_ga_faqs_published_idx
   on public.agudah_md_ga_faqs (is_published, sort_order);
+create index if not exists agudah_md_ga_faqs_homepage_idx
+  on public.agudah_md_ga_faqs (show_on_homepage, sort_order)
+  where is_published = true;
+create index if not exists agudah_md_ga_faqs_faqpage_idx
+  on public.agudah_md_ga_faqs (show_on_faq_page, sort_order)
+  where is_published = true;
 
 
 -- =============================================================================

@@ -528,6 +528,20 @@ So you usually don't need to apply separately for those.`,
         if (error) throw error;
         return data || [];
       },
+      async listHomepageFaqs() {
+        const { data, error } = await client.from(FAQS_TABLE)
+          .select('*').eq('is_published', true).eq('show_on_homepage', true)
+          .order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
+      async listFaqPageFaqs() {
+        const { data, error } = await client.from(FAQS_TABLE)
+          .select('*').eq('is_published', true).eq('show_on_faq_page', true)
+          .order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
       async listAllFaqs() {
         const { data, error } = await client.from(FAQS_TABLE)
           .select('*').order('sort_order', { ascending: true });
@@ -585,6 +599,8 @@ So you usually don't need to apply separately for those.`,
       getSettings:    lazy('getSettings'),
       saveSettings:   lazy('saveSettings'),
       listPublishedFaqs: lazy('listPublishedFaqs'),
+      listHomepageFaqs:  lazy('listHomepageFaqs'),
+      listFaqPageFaqs:   lazy('listFaqPageFaqs'),
       listAllFaqs:    lazy('listAllFaqs'),
       saveFaq:        lazy('saveFaq'),
       removeFaq:      lazy('removeFaq'),
@@ -618,14 +634,14 @@ So you usually don't need to apply separately for those.`,
     /* ---------- Demo FAQs (localStorage) ------------------------------- */
     const FAQS_LS_KEY = 'agudah_md_ga_faqs_v1';
     const FAQ_SEED = [
-      { id:'faq-1', question:'Is this service really free?', answer:'Yes — 100% free. We never charge to help you apply for a government program. Our work is funded by community donations.', sort_order:10, is_published:true },
-      { id:'faq-2', question:'Do I need to be Jewish or part of a specific community?', answer:'No. We help anyone in Maryland regardless of religion, background, or immigration status.', sort_order:20, is_published:true },
-      { id:'faq-3', question:'Will applying for benefits affect my immigration status?', answer:'Most programs on this site (WIC, Medicaid for kids, school meals, emergency medical) do NOT count against you for public charge. SNAP and cash assistance can in some cases — we recommend booking a call before applying if you have concerns.', sort_order:30, is_published:true },
-      { id:'faq-4', question:'How long do applications take to be approved?', answer:'<ul class="list-disc pl-5 space-y-1"><li>SNAP: 30 days (7 days for emergencies)</li><li>Medicaid: up to 45 days (90 for disability)</li><li>WIC: same-day at your appointment</li><li>Energy Assistance: 30-50 days</li><li>Section 8 vouchers: 2-5 year waitlists typically</li></ul>', sort_order:40, is_published:true },
-      { id:'faq-5', question:'Can you submit the application for me?', answer:"We can't submit on your behalf, but we can sit with you (in person or on a video call) and walk through every question while you fill it out. Many people find that easier than doing it alone.", sort_order:50, is_published:true },
-      { id:'faq-6', question:'What if I was denied?', answer:"You have the right to appeal. Most denials have a 30-90 day appeal window. Book a call and we'll review the denial letter and help you file an appeal.", sort_order:60, is_published:true },
-      { id:'faq-7', question:'How do I know my information is safe?', answer:"We don't store your personal information after a call. All application data goes directly to the agency you're applying with — never through us.", sort_order:70, is_published:true },
-      { id:'faq-8', question:'What languages do you support?', answer:'English and Yiddish. For other languages, Maryland 211 (dial 211) provides interpreters in 170+ languages for benefits applications.', sort_order:80, is_published:true },
+      { id:'faq-1', question:'Is this service really free?', answer:'Yes — 100% free. We never charge to help you apply for a government program. Our work is funded by community donations.', sort_order:10, is_published:true, show_on_homepage:true,  show_on_faq_page:true },
+      { id:'faq-2', question:'Do I need to be Jewish or part of a specific community?', answer:'No. We help anyone in Maryland regardless of religion, background, or immigration status.', sort_order:20, is_published:true, show_on_homepage:true,  show_on_faq_page:true },
+      { id:'faq-3', question:'Will applying for benefits affect my immigration status?', answer:'Most programs on this site (WIC, Medicaid for kids, school meals, emergency medical) do NOT count against you for public charge. SNAP and cash assistance can in some cases — we recommend booking a call before applying if you have concerns.', sort_order:30, is_published:true, show_on_homepage:true,  show_on_faq_page:true },
+      { id:'faq-4', question:'How long do applications take to be approved?', answer:'<ul class="list-disc pl-5 space-y-1"><li>SNAP: 30 days (7 days for emergencies)</li><li>Medicaid: up to 45 days (90 for disability)</li><li>WIC: same-day at your appointment</li><li>Energy Assistance: 30-50 days</li><li>Section 8 vouchers: 2-5 year waitlists typically</li></ul>', sort_order:40, is_published:true, show_on_homepage:true,  show_on_faq_page:true },
+      { id:'faq-5', question:'Can you submit the application for me?', answer:"We can't submit on your behalf, but we can sit with you (in person or on a video call) and walk through every question while you fill it out. Many people find that easier than doing it alone.", sort_order:50, is_published:true, show_on_homepage:true,  show_on_faq_page:true },
+      { id:'faq-6', question:'What if I was denied?', answer:"You have the right to appeal. Most denials have a 30-90 day appeal window. Book a call and we'll review the denial letter and help you file an appeal.", sort_order:60, is_published:true, show_on_homepage:false, show_on_faq_page:true },
+      { id:'faq-7', question:'How do I know my information is safe?', answer:"We don't store your personal information after a call. All application data goes directly to the agency you're applying with — never through us.", sort_order:70, is_published:true, show_on_homepage:false, show_on_faq_page:true },
+      { id:'faq-8', question:'What languages do you support?', answer:'English and Yiddish. For other languages, Maryland 211 (dial 211) provides interpreters in 170+ languages for benefits applications.', sort_order:80, is_published:true, show_on_homepage:false, show_on_faq_page:true },
     ];
     function loadFaqs() {
       try {
@@ -637,6 +653,8 @@ So you usually don't need to apply separately for those.`,
     }
     function saveFaqs(list) { localStorage.setItem(FAQS_LS_KEY, JSON.stringify(list)); }
     demoDB.listPublishedFaqs = async () => loadFaqs().filter(f => f.is_published).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listHomepageFaqs  = async () => loadFaqs().filter(f => f.is_published && f.show_on_homepage).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listFaqPageFaqs   = async () => loadFaqs().filter(f => f.is_published && (f.show_on_faq_page !== false)).sort((a,b) => a.sort_order - b.sort_order);
     demoDB.listAllFaqs       = async () => loadFaqs().sort((a,b) => a.sort_order - b.sort_order);
     demoDB.saveFaq = async (faq) => {
       const list = loadFaqs();
