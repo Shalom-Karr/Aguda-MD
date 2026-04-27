@@ -172,6 +172,8 @@
         <span class="w-px h-6 bg-slate-300 mx-1"></span>
         <button class="tb-btn" onclick="document.getElementById('image-upload').click()" title="Upload an image (or paste / drag-drop directly)">🖼 Image</button>
         <input id="image-upload" type="file" accept="image/*" class="hidden">
+        <span class="w-px h-6 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="toggleFullscreen()" title="Distraction-free fullscreen mode (Esc to exit)">⛶ Fullscreen</button>
 
         <div class="ml-auto flex items-center gap-3 pr-1">
           <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
@@ -342,6 +344,10 @@
       </div>
     </div>
   </div>
+
+  <button class="fullscreen-exit" onclick="toggleFullscreen()" title="Exit fullscreen (Esc)">
+    ✕ Exit fullscreen
+  </button>
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>

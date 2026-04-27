@@ -646,6 +646,15 @@
   function showHelp()  { $('#help-modal').classList.remove('hidden'); }
   function closeHelp() { $('#help-modal').classList.add('hidden'); }
 
+  /* ============================ 15b. FULLSCREEN EDITOR ==================== */
+  function toggleFullscreen() {
+    document.body.classList.toggle('editor-fullscreen');
+    // Make sure we're on the editor view (not settings) when entering fullscreen
+    if (document.body.classList.contains('editor-fullscreen') && currentView !== 'editor') {
+      setView('editor');
+    }
+  }
+
   /* ===================================== 16. INIT ========================= */
   function populateCategoryDropdown() {
     const sel = $('#post-category');
@@ -662,7 +671,7 @@
       newPost, savePost, deletePost,
       saveSettings, setView,
       showHelp, closeHelp, signOut,
-      mdLink,
+      mdLink, toggleFullscreen,
       handleImageFileInput,
     });
     // Toolbar onclick handlers reference these:
@@ -682,7 +691,10 @@
       if (e.target.id === 'help-modal') closeHelp();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !$('#help-modal').classList.contains('hidden')) closeHelp();
+      if (e.key === 'Escape') {
+        if (!$('#help-modal').classList.contains('hidden')) closeHelp();
+        else if (document.body.classList.contains('editor-fullscreen')) toggleFullscreen();
+      }
     });
 
     // Image file picker
