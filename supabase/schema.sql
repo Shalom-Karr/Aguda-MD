@@ -31,6 +31,7 @@ create table if not exists public.agudah_md_ga_programs (
   category      text,
   icon          text,
   content_md    text,
+  faq_md        text,
   is_published  boolean not null default false,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()

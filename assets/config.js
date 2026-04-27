@@ -31,7 +31,7 @@ window.SITE_CONFIG = {
   hero: {
     eyebrow:  'A project of Ahavas Yisrael & Agudath Israel of Maryland',
     heading:  'Connecting You to Resources That Matter',
-    subhead:  "A nonprofit dedicated to helping community members access government assistance. We assess your situation, find the programs you're eligible for, and walk you through every application — at no cost.",
+    subhead:  'We help Maryland residents apply for SNAP, Medicaid, WIC, energy assistance, and more — free, fast, and step-by-step.',
     ctaPrimary:   { label: 'Browse programs', href: '#programs' },
     ctaSecondary: { label: 'Book a free call', href: '#book' },
   },
