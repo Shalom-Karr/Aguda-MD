@@ -201,6 +201,33 @@ body.editor-fullscreen #editor-main {
 .fullscreen-exit:hover { background: #1e40af; }
 body.editor-fullscreen .fullscreen-exit { display: inline-flex; align-items: center; gap: 6px; }
 
+/* ---------- Guide / FAQ tab toggle inside program editor ---------- */
+.editor-content-tabs {
+  display: inline-flex;
+  background: #e2e8f0;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+.editor-content-tabs button {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  color: #475569;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all .15s;
+}
+.editor-content-tabs button:hover { color: #1e3a8a; }
+.editor-content-tabs button.active {
+  background: white;
+  color: #1d4ed8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
+
 /* ---------- FAQ admin cards ---------- */
 .faq-card {
   background: white;

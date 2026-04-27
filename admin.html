@@ -199,14 +199,18 @@
       <!-- Editor + preview -->
       <div class="flex-1 flex overflow-hidden">
         <div class="w-1/2 bg-white border-r border-slate-200 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Write here <span class="text-slate-400 normal-case font-normal ml-2">— paste or drag images directly into this box</span>
+          <div class="px-3 pt-2 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+            <div class="editor-content-tabs">
+              <button data-editor-view="guide" class="active">📝 Step-by-Step Guide</button>
+              <button data-editor-view="faq">❓ FAQ</button>
+            </div>
+            <span class="text-[11px] text-slate-400 ml-auto pr-2 pb-2">paste or drag images here</span>
           </div>
           <textarea id="post-content" class="editor-textarea scroll-pane flex-1 w-full p-5 text-slate-800 placeholder-slate-400"
-                    placeholder="Just type normally. Select text and press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for a link.&#10;&#10;Use the toolbar buttons above for headings, lists, and quotes — or click the ? icon at the top for help.&#10;&#10;You can also paste or drag images directly into this box."></textarea>
+                    placeholder="Write the program guide here. Use the toolbar above for formatting, or paste / drag images directly into this box.&#10;&#10;Switch to the FAQ tab to write the FAQ that visitors see when they click the FAQ button on the program card."></textarea>
         </div>
         <div class="w-1/2 bg-stone-50 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
             Live preview (what visitors see)
           </div>
           <div id="preview" class="preview-pane scroll-pane flex-1 w-full p-5 text-slate-800"></div>

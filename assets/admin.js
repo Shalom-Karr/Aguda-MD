@@ -41,6 +41,7 @@
   let currentPost   = blankPost();
   let isDirty       = false;
   let currentView   = 'editor';                  // 'editor' | 'faqs' | 'settings'
+  let editorView    = 'guide';                   // 'guide' | 'faq' (within the program editor)
   let settingsCache = {};
   let settingsDirty = false;
   let faqDirtyIds   = new Set();
@@ -49,7 +50,7 @@
     return {
       id: null, slug: '', title: '', summary: '',
       category: (C.categories || ['General'])[0],
-      icon: '', content_md: '', is_published: false,
+      icon: '', content_md: '', faq_md: '', is_published: false,
     };
   }
 
@@ -255,13 +256,28 @@
     $('#post-slug').value     = currentPost.slug     || '';
     $('#post-category').value = currentPost.category || (C.categories || ['General'])[0];
     $('#post-summary').value  = currentPost.summary  || '';
-    $('#post-content').value  = currentPost.content_md || '';
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
     $('#delete-btn').classList.toggle('hidden', !currentPost.id);
     paintIconPicker();
     updateBreadcrumb();
     updatePublishUI();
     updatePreviewLink();
+    setEditorView('guide');   // reset to Guide tab on each post load
+  }
+
+  /* ---------- Guide / FAQ editor view toggle ---------- */
+  function setEditorView(view) {
+    editorView = view;
+    $$('.editor-content-tabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.editorView === view);
+    });
+    const ta = $('#post-content');
+    ta.value = (view === 'faq')
+      ? (currentPost.faq_md || '')
+      : (currentPost.content_md || '');
+    ta.placeholder = (view === 'faq')
+      ? "Write the FAQ for this program here. Visitors see this when they click the FAQ button on the program card.\n\nUse ## for each question and a short paragraph below for the answer."
+      : "Write the step-by-step guide here. Use the toolbar above for formatting, or paste / drag images directly into this box.";
     renderPreview();
   }
 
@@ -359,7 +375,8 @@
       markDirty();
     });
     $('#post-content').addEventListener('input', (e) => {
-      currentPost.content_md = e.target.value;
+      if (editorView === 'faq') currentPost.faq_md = e.target.value;
+      else                      currentPost.content_md = e.target.value;
       renderPreview();
       markDirty();
     });
@@ -392,7 +409,7 @@
       ta.selectionStart = s + before.length;
       ta.selectionEnd   = s + before.length + selected.length;
     }
-    currentPost.content_md = ta.value;
+    syncActiveContentMd();
     renderPreview();
     markDirty();
   }
@@ -405,7 +422,7 @@
     ta.value = v.slice(0, lineStart) + prefix + v.slice(lineStart);
     ta.focus();
     ta.selectionStart = ta.selectionEnd = s + prefix.length;
-    currentPost.content_md = ta.value;
+    syncActiveContentMd();
     renderPreview();
     markDirty();
   }
@@ -421,7 +438,7 @@
     ta.focus();
     ta.selectionStart = s + 1;
     ta.selectionEnd   = s + 1 + selected.length;
-    currentPost.content_md = ta.value;
+    syncActiveContentMd();
     renderPreview();
     markDirty();
   }
@@ -450,7 +467,7 @@
     ta.value = v.slice(0, s) + text + v.slice(e);
     ta.focus();
     ta.selectionStart = ta.selectionEnd = s + text.length;
-    currentPost.content_md = ta.value;
+    syncActiveContentMd();
     renderPreview();
     markDirty();
   }
@@ -856,7 +873,7 @@
   function exposeGlobals() {
     Object.assign(window, {
       newPost, savePost, deletePost,
-      saveSettings, setView,
+      saveSettings, setView, setEditorView,
       addFaq,
       showHelp, closeHelp, signOut,
       mdLink, toggleFullscreen,
@@ -887,6 +904,11 @@
 
     // Image file picker
     $('#image-upload').addEventListener('change', handleImageFileInput);
+
+    // Guide / FAQ tab toggle inside the program editor
+    $$('.editor-content-tabs button').forEach(b => {
+      b.addEventListener('click', () => setEditorView(b.dataset.editorView));
+    });
 
     wireEditorInputs();
     wireKeyboardShortcuts();
