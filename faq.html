@@ -67,7 +67,11 @@
     function applyConfig() {
       const C = window.SITE_CONFIG;
       document.getElementById('footer-copyright').textContent = C.footer.copyright;
-      document.getElementById('cta-book').href = C.calendlyUrl;
+      const cta = document.getElementById('cta-book');
+      const isInline = C.bookingMode === 'inline';
+      cta.href = isInline ? 'book.html' : C.calendlyUrl;
+      if (isInline) { cta.removeAttribute('target'); cta.removeAttribute('rel'); }
+      else          { cta.target = '_blank'; cta.rel = 'noopener'; }
     }
 
     function escapeHtml(s) {

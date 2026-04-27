@@ -101,19 +101,12 @@
     </div>
   </section>
 
-  <!-- Book a call -->
+  <!-- Book a call (CTA only — embed lives on /book) -->
   <section id="book" class="bg-stone-50 border-t border-slate-200">
-    <div class="max-w-5xl mx-auto px-6 pt-16 text-center">
+    <div class="max-w-4xl mx-auto px-6 py-16 text-center">
       <h2 id="book-heading" class="text-3xl font-extrabold text-slate-900 mb-3"></h2>
       <p id="book-subhead" class="text-slate-600 mb-7 text-lg"></p>
-    </div>
-    <!-- External-link mode: big CTA button -->
-    <div id="book-cta-wrapper" class="text-center pb-16">
-      <a id="book-cta" href="#" target="_blank" rel="noopener" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
-    </div>
-    <!-- Inline-embed mode: Calendly widget -->
-    <div id="book-inline-wrapper" class="hidden max-w-4xl mx-auto px-6 pb-16">
-      <div id="calendly-inline" class="rounded-2xl overflow-hidden border border-slate-200 bg-white" style="min-height: 700px;"></div>
+      <a id="book-cta" href="#" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
     </div>
   </section>
 
@@ -157,59 +150,39 @@
       document.getElementById('hero-heading').textContent = C.hero.heading;
       document.getElementById('hero-subhead').textContent = C.hero.subhead;
       document.getElementById('hero-cta-1').textContent   = C.hero.ctaPrimary.label;
-      document.getElementById('hero-cta-1').href          = C.hero.ctaPrimary.href;
+      document.getElementById('hero-cta-1').href          = resolveBookHref(C.hero.ctaPrimary.href, C);
       document.getElementById('hero-cta-2').textContent   = C.hero.ctaSecondary.label;
-      document.getElementById('hero-cta-2').href          = C.hero.ctaSecondary.href;
+      document.getElementById('hero-cta-2').href          = resolveBookHref(C.hero.ctaSecondary.href, C);
       document.getElementById('book-heading').textContent = C.book.heading;
       document.getElementById('book-subhead').textContent = C.book.subhead;
       document.getElementById('book-cta').textContent     = C.book.buttonLabel;
-      document.getElementById('book-cta').href            = C.calendlyUrl;
       document.getElementById('footer-copyright').textContent = C.footer.copyright;
 
-      applyBookingMode(C);
+      applyBookingLinks(C);
     }
 
-    function applyBookingMode(C) {
+    /* If a CTA href points to "#book" we keep that as a same-page anchor.
+     * Everything else resolves through the booking-mode rules below. */
+    function resolveBookHref(href, C) {
+      if (href === '#book') return bookingHref(C);
+      return href;
+    }
+
+    function bookingHref(C) {
+      return C.bookingMode === 'inline' ? 'book.html' : C.calendlyUrl;
+    }
+
+    function applyBookingLinks(C) {
       const isInline = C.bookingMode === 'inline';
-      const headerLink = document.getElementById('header-book-link');
-      const mobileLink = document.getElementById('header-book-mobile');
-
-      if (isInline) {
-        // Header links scroll to the embedded widget
-        headerLink.href = '#book';
-        headerLink.removeAttribute('target');
-        mobileLink.href = '#book';
-        mobileLink.removeAttribute('target');
-        document.getElementById('book-cta-wrapper').classList.add('hidden');
-        document.getElementById('book-inline-wrapper').classList.remove('hidden');
-        initCalendlyInline(C.calendlyUrl);
-      } else {
-        // Header links jump straight to Calendly
-        headerLink.href = C.calendlyUrl;
-        headerLink.target = '_blank';
-        headerLink.rel = 'noopener';
-        mobileLink.href = C.calendlyUrl;
-        mobileLink.target = '_blank';
-        mobileLink.rel = 'noopener';
-        document.getElementById('book-cta-wrapper').classList.remove('hidden');
-        document.getElementById('book-inline-wrapper').classList.add('hidden');
-      }
-    }
-
-    function initCalendlyInline(url) {
-      const target = document.getElementById('calendly-inline');
-      if (target.dataset.initializedFor === url) return;
-      target.innerHTML = `<div class="calendly-inline-widget" data-url="${url}" style="min-width:320px;height:700px;"></div>`;
-      target.dataset.initializedFor = url;
-      if (!document.getElementById('calendly-widget-script')) {
-        const s = document.createElement('script');
-        s.id = 'calendly-widget-script';
-        s.src = 'https://assets.calendly.com/assets/external/widget.js';
-        s.async = true;
-        document.body.appendChild(s);
-      } else if (window.Calendly) {
-        window.Calendly.initInlineWidget({ url, parentElement: target.querySelector('.calendly-inline-widget') });
-      }
+      const href     = bookingHref(C);
+      const link = (el) => {
+        el.href = href;
+        if (isInline) { el.removeAttribute('target'); el.removeAttribute('rel'); }
+        else          { el.target = '_blank'; el.rel = 'noopener'; }
+      };
+      link(document.getElementById('header-book-link'));
+      link(document.getElementById('header-book-mobile'));
+      link(document.getElementById('book-cta'));
     }
 
     function render(list) {
