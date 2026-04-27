@@ -19,18 +19,18 @@
   </script>
   <style>
     body { font-family: 'Inter', sans-serif; }
-    /* Calendly takes the rest of the viewport below the header + intro */
-    .calendly-fill {
-      min-height: calc(100vh - 64px - 220px);  /* header + intro + a little breathing room */
-    }
+    /* Tall enough that Calendly's calendar view fits without an internal
+     * scrollbar; the page document scrolls naturally if it overflows. */
+    .calendly-fill { height: 1100px; }
     @media (max-width: 640px) {
-      .calendly-fill { min-height: calc(100vh - 64px - 180px); }
+      .calendly-fill { height: 1300px; }
     }
   </style>
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
 
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+  <!-- Combined header: nav row + page heading row, both white -->
+  <header class="bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2">
         <img src="assets/logo.png" alt="Agudath Israel of Maryland" class="h-11 w-auto">
@@ -41,21 +41,16 @@
         <a href="book.html"  class="text-brand-700">Book a Call</a>
       </nav>
     </div>
+    <div class="max-w-7xl mx-auto px-6 pb-5 text-center">
+      <h1 id="page-heading" class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">Book a free call</h1>
+      <p id="page-subhead" class="text-slate-500 mt-1">Pick a time below — most calls are 20 minutes.</p>
+    </div>
   </header>
 
   <main>
-    <!-- Intro band -->
-    <div class="bg-gradient-to-br from-brand-700 to-brand-900 text-white">
-      <div class="max-w-4xl mx-auto px-6 py-10 text-center">
-        <h1 id="page-heading" class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Book a free call</h1>
-        <p id="page-subhead" class="text-brand-50/90 text-lg">Pick a time below — most calls are 20 minutes.</p>
-      </div>
-    </div>
-
-    <!-- Full-width Calendly embed -->
-    <div class="w-full">
-      <div id="calendly-inline" class="calendly-fill w-full"></div>
-    </div>
+    <!-- Full-width Calendly embed — tall enough that the widget renders
+         without its own scrollbar; page scrolls naturally if needed. -->
+    <div id="calendly-inline" class="calendly-fill w-full"></div>
   </main>
 
   <footer class="bg-slate-900 text-slate-400 text-sm">
@@ -85,7 +80,7 @@
       const target = document.getElementById('calendly-inline');
       if (target.dataset.initializedFor === url) return;
       target.dataset.initializedFor = url;
-      target.innerHTML = `<div class="calendly-inline-widget" data-url="${url}" style="min-width:320px;width:100%;height:100%"></div>`;
+      target.innerHTML = `<div class="calendly-inline-widget" data-url="${url}" style="min-width:320px;width:100%;height:100%;"></div>`;
       if (!document.getElementById('calendly-widget-script')) {
         const s = document.createElement('script');
         s.id = 'calendly-widget-script';
