@@ -395,6 +395,15 @@
     $('#preview').innerHTML = DOMPurify.sanitize(marked.parse(md || ''));
   }
 
+  /* Updates whichever field (content_md or faq_md) is currently active in
+   * the editor with the textarea's current value. Called by the toolbar
+   * helpers and the paste/drop handlers. */
+  function syncActiveContentMd() {
+    const v = $('#post-content').value;
+    if (editorView === 'faq') currentPost.faq_md = v;
+    else                      currentPost.content_md = v;
+  }
+
   /* =========================== 10. EDITOR — toolbar / shortcuts =========== */
   function md(before, after) {
     const ta = $('#post-content');

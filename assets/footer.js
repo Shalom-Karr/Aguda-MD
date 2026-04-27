@@ -98,11 +98,19 @@
           </ul>
         </div>
       </div>
-      <div class="relative border-t border-white/10 py-5 px-6 flex flex-col md:flex-row items-center justify-between gap-2">
-        <p class="text-xs text-blue-200/70">${escAttr(copyright)}</p>
-        <p class="text-[11px] text-blue-200/60">
-          Built by <a href="https://shalomkarr.pages.dev/" target="_blank" rel="noopener" class="text-blue-100 hover:text-white underline-offset-2 hover:underline">Shalom Karr</a>
-        </p>
+      <div class="relative border-t border-white/10 py-6 px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-blue-200/70 text-center md:text-left">${escAttr(copyright)}</p>
+        <a href="https://shalomkarr.pages.dev" target="_blank" rel="noopener"
+           class="group relative inline-flex items-center justify-center gap-3 px-5 py-2 bg-slate-900/60 hover:bg-slate-900 rounded-full border border-white/10 hover:border-blue-300/60 transition-all duration-500 hover:shadow-[0_0_25px_rgba(147,197,253,0.20)] active:scale-95">
+          <span class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-blue-300/10 to-transparent"></span>
+          <span class="relative text-[10px] uppercase tracking-[0.2em] text-blue-200/50 group-hover:text-blue-200 transition-colors font-bold">Built By</span>
+          <span class="relative flex items-center gap-2 border-l border-white/10 pl-3">
+            <span class="font-bold text-blue-100 group-hover:text-white transition-colors text-sm">Shalom Karr</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-blue-300 opacity-70 group-hover:opacity-100 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </span>
+        </a>
       </div>`;
   };
 })();
