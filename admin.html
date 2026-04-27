@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin · Agudah MD Resources</title>
+  <title>Admin · Agudath Israel of Maryland</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,18 +24,18 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; }
+
     .editor-textarea {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.65;
-      resize: none;
-      tab-size: 2;
+      font-size: 14px; line-height: 1.65;
+      resize: none; tab-size: 2;
     }
     .editor-textarea:focus { outline: none; }
+
     .preview-pane { font-size: 15px; }
-    .preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin-top: 1rem; margin-bottom: .5rem; }
-    .preview-pane h2 { font-size: 1.4rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: .5rem; color: #0f766e; }
-    .preview-pane h3 { font-size: 1.1rem; font-weight: 700; margin-top: 1rem; margin-bottom: .35rem; }
+    .preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin: 1rem 0 .5rem; }
+    .preview-pane h2 { font-size: 1.4rem; font-weight: 700; margin: 1.5rem 0 .5rem; color: #0f766e; }
+    .preview-pane h3 { font-size: 1.1rem; font-weight: 700; margin: 1rem 0 .35rem; }
     .preview-pane p  { margin-bottom: .85rem; line-height: 1.65; }
     .preview-pane ul, .preview-pane ol { margin: 0 0 .85rem 1.25rem; }
     .preview-pane ul { list-style: disc; }
@@ -49,68 +49,147 @@
     .preview-pane hr { margin: 1.5rem 0; border-color: #e2e8f0; }
     .preview-pane strong { font-weight: 700; }
 
-    /* Toolbar buttons */
-    .tb-btn { padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #475569; transition: all .15s; }
-    .tb-btn:hover { background: #e2e8f0; color: #0f172a; }
+    /* Toolbar buttons — bigger and labeled, friendlier for non-tech users */
+    .tb-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px; font-weight: 600;
+      color: #334155;
+      background: white;
+      border: 1px solid #cbd5e1;
+      transition: all .15s;
+      cursor: pointer;
+    }
+    .tb-btn:hover { background: #f0fdfa; border-color: #14b8a6; color: #0f766e; }
+    .tb-btn:active { transform: scale(.96); }
+    .tb-btn .shortcut {
+      font-size: 10px; color: #94a3b8; font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-    /* Sync scroll */
+    /* Publish toggle switch */
+    .pub-switch {
+      position: relative; display: inline-flex; align-items: center;
+      width: 56px; height: 28px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color .25s;
+    }
+    .pub-switch::after {
+      content: '';
+      position: absolute; top: 3px; left: 3px;
+      width: 22px; height: 22px;
+      background: white;
+      border-radius: 50%;
+      transition: transform .25s, background-color .25s;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    }
+    .pub-switch.on { background: #10b981; }
+    .pub-switch.on::after { transform: translateX(28px); }
+
     .scroll-pane { overflow-y: auto; }
+
+    /* Help modal */
+    .modal-bg { background: rgba(15, 23, 42, .55); backdrop-filter: blur(4px); }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
 
-  <!-- Demo banner -->
-  <div id="demo-banner" class="hidden bg-amber-100 border-b border-amber-300 text-amber-900 text-xs text-center py-1.5 px-4">
-    <strong>Demo mode</strong> — saves go to your browser's localStorage. No authentication is enforced.
-    Configure Supabase + auth before deploying to production. See <a href="docs/DEPLOYMENT.md" class="underline">docs/DEPLOYMENT.md</a>.
+  <!-- ============================================================== -->
+  <!-- LOGIN GATE (shown only when Supabase is configured + not signed in) -->
+  <!-- ============================================================== -->
+  <div id="auth-gate" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <img src="assets/logo.png" alt="" class="h-14 w-auto mx-auto mb-4">
+      <h1 class="text-2xl font-extrabold text-center text-slate-900 mb-2">Admin Login</h1>
+      <p class="text-sm text-center text-slate-500 mb-6">Sign in with your admin email and password.</p>
+
+      <form id="login-form" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Email</label>
+          <input id="login-email" type="email" required
+                 class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+          <input id="login-password" type="password" required
+                 class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+        </div>
+        <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-2.5 rounded-lg">
+          Sign in
+        </button>
+        <p id="login-error" class="text-sm text-red-600 text-center min-h-[1rem]"></p>
+      </form>
+    </div>
   </div>
 
-  <!-- Top bar -->
+  <!-- ============================================================== -->
+  <!-- DEMO BANNER -->
+  <!-- ============================================================== -->
+  <div id="demo-banner" class="hidden bg-amber-100 border-b border-amber-300 text-amber-900 text-xs text-center py-1.5 px-4 flex-shrink-0">
+    <strong>Demo mode</strong> — saves go to your browser's localStorage. No authentication is enforced.
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- TOP BAR -->
+  <!-- ============================================================== -->
   <header class="bg-white border-b border-slate-200 px-5 h-14 flex items-center justify-between flex-shrink-0">
     <div class="flex items-center gap-3">
       <a href="index.html" class="flex items-center gap-2">
-        <img src="assets/logo.png" alt="Agudath Israel of Maryland" class="h-9 w-auto">
-        <span class="font-bold text-brand-800 text-lg">Admin</span>
+        <img src="assets/logo.png" alt="" class="h-9 w-auto">
+        <span class="font-bold text-slate-800 text-lg">Admin</span>
       </a>
       <span class="text-xs text-slate-400">/</span>
       <span id="editor-breadcrumb" class="text-sm text-slate-500">New program</span>
     </div>
-    <div class="flex items-center gap-2">
-      <span id="save-status" class="text-xs text-slate-400"></span>
-      <button onclick="newPost()" class="text-sm font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg hover:bg-slate-100">+ New</button>
-      <button id="publish-toggle" onclick="togglePublish()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border">Draft</button>
+    <div class="flex items-center gap-3">
+      <span id="save-status" class="text-xs text-slate-400 min-w-[80px] text-right"></span>
+      <button onclick="showHelp()" title="Formatting help" class="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold">?</button>
+      <button id="signout-btn" onclick="signOut()" class="hidden text-sm font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Sign out</button>
       <button onclick="savePost()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
     </div>
   </header>
 
-  <!-- Main layout: sidebar + editor -->
+  <!-- ============================================================== -->
+  <!-- MAIN LAYOUT -->
+  <!-- ============================================================== -->
   <div class="flex-1 flex overflow-hidden">
 
-    <!-- Sidebar: post list -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
+    <!-- =========== SIDEBAR =========== -->
+    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
+      <!-- Big "New Draft" button -->
       <div class="p-3 border-b border-slate-200">
-        <input id="list-search" type="text" placeholder="Filter..." class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+        <button onclick="newPost()"
+                class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Create New Draft
+        </button>
+      </div>
+
+      <div class="p-3 border-b border-slate-200">
+        <input id="list-search" type="text" placeholder="Filter programs..."
+               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
       </div>
       <div id="post-list" class="flex-1 overflow-y-auto"></div>
       <div class="p-3 border-t border-slate-200 text-[11px] text-slate-400">
         <div>Mode: <span id="mode-label" class="font-mono font-semibold"></span></div>
-        <a href="docs/ADMIN_GUIDE.md" class="text-brand-700 hover:text-brand-900 font-semibold">Admin guide →</a>
       </div>
     </aside>
 
-    <!-- Editor area -->
+    <!-- =========== EDITOR AREA =========== -->
     <main class="flex-1 flex flex-col overflow-hidden">
 
-      <!-- Metadata fields -->
+      <!-- METADATA BAR -->
       <div class="bg-white border-b border-slate-200 p-4 space-y-3">
-        <div>
-          <input id="post-title" type="text" placeholder="Program title (e.g. SNAP Food Benefits)"
-                 class="w-full text-2xl font-extrabold border-0 p-0 focus:ring-0 outline-none placeholder-slate-300">
-        </div>
+        <input id="post-title" type="text" placeholder="Program title (e.g. SNAP Food Benefits)"
+               class="w-full text-2xl font-extrabold border-0 p-0 focus:ring-0 outline-none placeholder-slate-300">
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Slug <span class="text-slate-400">(URL: /posts?title=<span id="slug-preview" class="text-brand-700"></span>)</span></label>
-            <input id="post-slug" type="text" placeholder="auto-generated-from-title"
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">URL slug</label>
+            <input id="post-slug" type="text" placeholder="auto-from-title"
                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 font-mono focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
           </div>
           <div>
@@ -119,57 +198,97 @@
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Short summary</label>
-            <input id="post-summary" type="text" placeholder="One-line description for the program card"
+            <input id="post-summary" type="text" placeholder="One-line description for the homepage card"
                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+          </div>
+        </div>
+
+        <!-- Status row: clear toggle switch -->
+        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5">
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Status</span>
+            <span id="status-label" class="text-sm font-bold">Draft</span>
+            <span id="status-help" class="text-xs text-slate-400">Only visible to admins</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold text-slate-500">Draft</span>
+            <button id="pub-switch" class="pub-switch" onclick="togglePublish()" aria-label="Toggle publish status"></button>
+            <span class="text-xs font-semibold text-slate-500">Published</span>
+            <a id="preview-link" href="#" target="_blank" class="hidden ml-3 text-xs text-brand-700 hover:text-brand-900 font-semibold">View on site ↗</a>
           </div>
         </div>
       </div>
 
-      <!-- Markdown toolbar -->
-      <div class="bg-slate-100 border-b border-slate-200 px-2 py-1 flex items-center gap-1 text-xs flex-wrap">
-        <button class="tb-btn" onclick="md('# ', '')" title="Heading 1"><strong>H1</strong></button>
-        <button class="tb-btn" onclick="md('## ', '')" title="Heading 2"><strong>H2</strong></button>
-        <button class="tb-btn" onclick="md('### ', '')" title="Heading 3"><strong>H3</strong></button>
-        <span class="w-px h-5 bg-slate-300 mx-1"></span>
-        <button class="tb-btn" onclick="md('**', '**')" title="Bold"><strong>B</strong></button>
-        <button class="tb-btn" onclick="md('*', '*')" title="Italic"><em>I</em></button>
-        <button class="tb-btn" onclick="md('`', '`')" title="Inline code"><code>&lt;/&gt;</code></button>
-        <span class="w-px h-5 bg-slate-300 mx-1"></span>
-        <button class="tb-btn" onclick="md('- ', '')" title="Bullet list">• List</button>
-        <button class="tb-btn" onclick="md('1. ', '')" title="Numbered list">1. List</button>
-        <button class="tb-btn" onclick="md('> ', '')" title="Quote">❝ Quote</button>
-        <span class="w-px h-5 bg-slate-300 mx-1"></span>
-        <button class="tb-btn" onclick="mdLink()" title="Link">🔗 Link</button>
-        <button class="tb-btn" onclick="md('---\n', '')" title="Horizontal rule">— HR</button>
-        <div class="ml-auto flex items-center gap-3 pr-2">
+      <!-- TOOLBAR -->
+      <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 flex items-center gap-1.5 flex-wrap">
+        <button class="tb-btn" onclick="md('**','**')" title="Bold (Ctrl+B)"><strong>B</strong> <span class="shortcut">⌃B</span></button>
+        <button class="tb-btn" onclick="md('*','*')" title="Italic (Ctrl+I)"><em>I</em> <span class="shortcut">⌃I</span></button>
+        <button class="tb-btn" onclick="mdLink()" title="Link (Ctrl+K)">🔗 Link <span class="shortcut">⌃K</span></button>
+        <span class="w-px h-6 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="mdLine('## ')" title="Section heading">H Section</button>
+        <button class="tb-btn" onclick="mdLine('### ')" title="Subsection heading">h Subsection</button>
+        <span class="w-px h-6 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="mdLine('- ')" title="Bullet list">• Bullet</button>
+        <button class="tb-btn" onclick="mdLine('1. ')" title="Numbered list">1. Numbered</button>
+        <button class="tb-btn" onclick="mdLine('> ')" title="Quote block">❝ Quote</button>
+
+        <div class="ml-auto flex items-center gap-3 pr-1">
           <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
             <input id="sync-scroll" type="checkbox" checked class="w-3.5 h-3.5 accent-brand-600">
             Sync scroll
           </label>
-          <span class="text-[11px] text-slate-400 hidden md:inline">
-            <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono">⌘S</kbd> save
-          </span>
         </div>
       </div>
 
-      <!-- Side-by-side editor / preview -->
+      <!-- EDITOR + PREVIEW -->
       <div class="flex-1 flex overflow-hidden">
-        <!-- Editor (left) -->
         <div class="w-1/2 bg-white border-r border-slate-200 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Markdown</div>
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Write here</div>
           <textarea id="post-content" class="editor-textarea scroll-pane flex-1 w-full p-5 text-slate-800 placeholder-slate-400"
-                    placeholder="# Program title&#10;&#10;Write the application guide here using Markdown...&#10;&#10;## Who qualifies?&#10;&#10;- Bullet one&#10;- Bullet two&#10;&#10;## How to apply&#10;&#10;1. Step one&#10;2. Step two"></textarea>
+                    placeholder="Just type normally. Select text and press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for a link.&#10;&#10;Use the toolbar buttons above for headings, lists, and quotes — or click the ? icon at the top for help."></textarea>
         </div>
-        <!-- Preview (right) -->
         <div class="w-1/2 bg-stone-50 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-            <span>Live preview</span>
-            <a id="preview-link" href="#" target="_blank" class="text-brand-700 hover:text-brand-900 font-semibold normal-case tracking-normal hidden">Open in new tab ↗</a>
-          </div>
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Live preview (what visitors see)</div>
           <div id="preview" class="preview-pane scroll-pane flex-1 w-full p-5 text-slate-800"></div>
         </div>
       </div>
+
+      <!-- DELETE (subtle, bottom-left) -->
+      <div class="bg-white border-t border-slate-200 px-4 py-2 flex items-center justify-between flex-shrink-0">
+        <button id="delete-btn" onclick="deletePost()" class="hidden text-xs font-semibold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+          Delete this guide
+        </button>
+        <span class="text-[11px] text-slate-400 ml-auto">
+          <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘S</kbd> to save
+        </span>
+      </div>
     </main>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- HELP MODAL -->
+  <!-- ============================================================== -->
+  <div id="help-modal" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4" onclick="if(event.target===this)closeHelp()">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-extrabold text-slate-900">Formatting tips</h2>
+        <button onclick="closeHelp()" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700">✕</button>
+      </div>
+      <p class="text-sm text-slate-600 mb-5">You don't need to memorize anything — just use the toolbar buttons. But here are the keyboard shortcuts if you prefer them:</p>
+      <table class="w-full text-sm">
+        <tbody class="divide-y divide-slate-100">
+          <tr><td class="py-2 font-semibold">Bold</td>      <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+B</kbd></td></tr>
+          <tr><td class="py-2 font-semibold">Italic</td>    <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+I</kbd></td></tr>
+          <tr><td class="py-2 font-semibold">Link</td>      <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+K</kbd></td></tr>
+          <tr><td class="py-2 font-semibold">Save</td>      <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+S</kbd></td></tr>
+        </tbody>
+      </table>
+      <div class="mt-6 p-4 bg-brand-50 rounded-lg text-sm text-slate-700">
+        <p class="font-bold mb-2">How it works</p>
+        <p>Select some text first, then press the shortcut (or click the toolbar button). The formatting wraps around your selection. Stars (<code class="bg-white px-1 rounded">**</code>) and other markers will show in the editor — those become bold/italic/headings on the live site.</p>
+      </div>
+    </div>
   </div>
 
   <script src="assets/config.js"></script>
@@ -181,7 +300,7 @@
       document.getElementById('demo-banner').classList.remove('hidden');
     }
 
-    // Populate category dropdown
+    // -------------------- Categories --------------------
     const catSel = document.getElementById('post-category');
     (C.categories || ['General']).forEach(c => {
       const opt = document.createElement('option');
@@ -189,7 +308,53 @@
       catSel.appendChild(opt);
     });
 
-    // ------- STATE -------
+    // -------------------- Auth gate (Supabase mode only) --------------------
+    async function requireAdmin() {
+      if (window.PROGRAMS_MODE !== 'supabase') return true;
+
+      const user = await window.ProgramsDB.getCurrentUser();
+      if (!user) { showLogin(); return false; }
+
+      const allowed = await window.ProgramsDB.isAdmin(user.email);
+      if (!allowed) {
+        document.body.innerHTML = `
+          <div class="flex items-center justify-center h-screen p-6 text-center">
+            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md">
+              <h1 class="text-2xl font-extrabold text-slate-900 mb-2">Not authorized</h1>
+              <p class="text-slate-600 mb-5">Your account (<strong>${user.email}</strong>) is not in the admin list.</p>
+              <button onclick="window.ProgramsDB.signOut().then(()=>location.reload())" class="bg-slate-900 text-white font-bold px-5 py-2 rounded-lg">Sign out</button>
+            </div>
+          </div>`;
+        return false;
+      }
+
+      document.getElementById('signout-btn').classList.remove('hidden');
+      return true;
+    }
+
+    function showLogin() {
+      document.getElementById('auth-gate').classList.remove('hidden');
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pw    = document.getElementById('login-password').value;
+        const errEl = document.getElementById('login-error');
+        errEl.textContent = '';
+        try {
+          await window.ProgramsDB.signIn(email, pw);
+          location.reload();
+        } catch (err) {
+          errEl.textContent = err.message || 'Login failed';
+        }
+      });
+    }
+
+    async function signOut() {
+      await window.ProgramsDB.signOut();
+      location.reload();
+    }
+
+    // -------------------- Editor state --------------------
     let currentPost = blankPost();
     let isDirty = false;
 
@@ -197,7 +362,7 @@
       return { id: null, slug: '', title: '', summary: '', category: C.categories[0], content_md: '', is_published: false };
     }
 
-    // ------- POST LIST SIDEBAR -------
+    // -------------------- Sidebar list --------------------
     async function loadPostList() {
       const listEl = document.getElementById('post-list');
       const filter = document.getElementById('list-search').value.toLowerCase().trim();
@@ -205,36 +370,39 @@
       try { posts = await window.ProgramsDB.listAll(); }
       catch (e) { listEl.innerHTML = '<div class="p-4 text-xs text-red-600">Failed to load posts.</div>'; return; }
       const filtered = filter
-        ? posts.filter(p => p.title.toLowerCase().includes(filter) || (p.slug || '').includes(filter))
+        ? posts.filter(p => (p.title||'').toLowerCase().includes(filter) || (p.slug||'').includes(filter))
         : posts;
       if (!filtered.length) {
-        listEl.innerHTML = '<div class="p-4 text-xs text-slate-400">No programs yet.</div>';
+        listEl.innerHTML = '<div class="p-6 text-sm text-slate-400 text-center">No programs yet.<br><span class="text-xs">Click "Create New Draft" to start.</span></div>';
         return;
       }
       listEl.innerHTML = filtered.map(p => `
-        <div class="post-list-item group border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50' : ''}">
+        <div class="border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50 border-l-4 border-l-brand-600' : ''}">
           <button onclick="loadPost('${p.id}')" class="w-full text-left px-3 py-2.5">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-slate-900 truncate">${p.title || '(untitled)'}</div>
+                <div class="font-semibold text-sm text-slate-900 truncate">${escapeHtml(p.title || '(untitled)')}</div>
                 <div class="text-[11px] text-slate-500 font-mono truncate">${p.slug || '—'}</div>
               </div>
               ${p.is_published
                 ? '<span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Live</span>'
-                : '<span class="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
+                : '<span class="text-[10px] font-bold uppercase text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
             </div>
             <div class="text-[10px] text-slate-400 mt-1">
-              ${p.category || ''} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
+              ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
             </div>
           </button>
         </div>`).join('');
     }
-
     document.getElementById('list-search').addEventListener('input', loadPostList);
 
-    // ------- LOAD / NEW -------
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // -------------------- Load / new --------------------
     async function loadPost(id) {
-      if (isDirty && !confirm('You have unsaved changes. Discard and load another post?')) return;
+      if (isDirty && !confirm('You have unsaved changes. Discard them and load another post?')) return;
       const all = await window.ProgramsDB.listAll();
       const p = all.find(x => x.id === id);
       if (!p) return;
@@ -246,7 +414,7 @@
     }
 
     function newPost() {
-      if (isDirty && !confirm('You have unsaved changes. Start a new post anyway?')) return;
+      if (isDirty && !confirm('You have unsaved changes. Start a new draft anyway?')) return;
       currentPost = blankPost();
       paintFromState();
       isDirty = false;
@@ -256,84 +424,88 @@
     }
 
     function paintFromState() {
-      document.getElementById('post-title').value   = currentPost.title || '';
-      document.getElementById('post-slug').value    = currentPost.slug || '';
+      document.getElementById('post-title').value    = currentPost.title || '';
+      document.getElementById('post-slug').value     = currentPost.slug  || '';
       document.getElementById('post-category').value = currentPost.category || C.categories[0];
-      document.getElementById('post-summary').value = currentPost.summary || '';
-      document.getElementById('post-content').value = currentPost.content_md || '';
+      document.getElementById('post-summary').value  = currentPost.summary || '';
+      document.getElementById('post-content').value  = currentPost.content_md || '';
+      document.getElementById('post-slug').dataset.manual = currentPost.id ? '1' : '';
+      document.getElementById('delete-btn').classList.toggle('hidden', !currentPost.id);
       updateBreadcrumb();
-      updatePublishButton();
-      updateSlugPreview();
+      updatePublishUI();
+      updatePreviewLink();
       renderPreview();
     }
 
     function updateBreadcrumb() {
       document.getElementById('editor-breadcrumb').textContent =
-        currentPost.id ? (currentPost.title || '(untitled)') : 'New program';
+        currentPost.id ? (currentPost.title || '(untitled)') : 'New draft';
     }
 
-    // ------- PUBLISH TOGGLE -------
+    // -------------------- Publish toggle --------------------
     function togglePublish() {
       currentPost.is_published = !currentPost.is_published;
       markDirty();
-      updatePublishButton();
+      updatePublishUI();
     }
 
-    function updatePublishButton() {
-      const btn = document.getElementById('publish-toggle');
+    function updatePublishUI() {
+      const sw    = document.getElementById('pub-switch');
+      const label = document.getElementById('status-label');
+      const help  = document.getElementById('status-help');
       if (currentPost.is_published) {
-        btn.textContent = '● Published';
-        btn.className = 'text-sm font-semibold px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700';
+        sw.classList.add('on');
+        label.textContent = 'Published';
+        label.className = 'text-sm font-bold text-emerald-700';
+        help.textContent = 'Live on the website';
       } else {
-        btn.textContent = 'Draft';
-        btn.className = 'text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600';
+        sw.classList.remove('on');
+        label.textContent = 'Draft';
+        label.className = 'text-sm font-bold text-amber-700';
+        help.textContent = 'Only visible to admins';
       }
+      updatePreviewLink();
     }
 
-    // ------- INPUT BINDINGS -------
-    ['post-title','post-slug','post-category','post-summary','post-content'].forEach(id => {
-      document.getElementById(id).addEventListener('input', markDirty);
-    });
-
+    // -------------------- Inputs --------------------
     document.getElementById('post-title').addEventListener('input', (e) => {
       currentPost.title = e.target.value;
-      // Auto-fill slug only if slug is empty or user hasn't manually set it yet (new post)
       if (!currentPost.id && !document.getElementById('post-slug').dataset.manual) {
-        document.getElementById('post-slug').value = window.slugify(e.target.value);
-        currentPost.slug = document.getElementById('post-slug').value;
-        updateSlugPreview();
+        const auto = window.slugify(e.target.value);
+        document.getElementById('post-slug').value = auto;
+        currentPost.slug = auto;
+        updatePreviewLink();
       }
       updateBreadcrumb();
+      markDirty();
     });
     document.getElementById('post-slug').addEventListener('input', (e) => {
       currentPost.slug = e.target.value;
       e.target.dataset.manual = '1';
-      updateSlugPreview();
+      updatePreviewLink();
+      markDirty();
     });
     document.getElementById('post-category').addEventListener('change', (e) => {
       currentPost.category = e.target.value;
+      markDirty();
     });
     document.getElementById('post-summary').addEventListener('input', (e) => {
       currentPost.summary = e.target.value;
+      markDirty();
     });
     document.getElementById('post-content').addEventListener('input', (e) => {
       currentPost.content_md = e.target.value;
       renderPreview();
+      markDirty();
     });
 
-    function markDirty() {
-      isDirty = true;
-      setStatus('Unsaved changes');
-    }
-
+    function markDirty() { isDirty = true; setStatus('Unsaved changes'); }
     function setStatus(msg, color = '#94a3b8') {
       const el = document.getElementById('save-status');
-      el.textContent = msg;
-      el.style.color = color;
+      el.textContent = msg; el.style.color = color;
     }
 
-    function updateSlugPreview() {
-      document.getElementById('slug-preview').textContent = currentPost.slug || '(slug)';
+    function updatePreviewLink() {
       const link = document.getElementById('preview-link');
       if (currentPost.slug && currentPost.is_published) {
         link.href = `posts.html?title=${encodeURIComponent(currentPost.slug)}`;
@@ -343,14 +515,14 @@
       }
     }
 
-    // ------- MARKDOWN PREVIEW -------
+    // -------------------- Markdown preview --------------------
     function renderPreview() {
       const md = document.getElementById('post-content').value;
-      const rendered = marked.parse(md || '');
-      document.getElementById('preview').innerHTML = DOMPurify.sanitize(rendered);
+      document.getElementById('preview').innerHTML =
+        DOMPurify.sanitize(marked.parse(md || ''));
     }
 
-    // ------- TOOLBAR HELPERS -------
+    // -------------------- Toolbar / shortcuts --------------------
     function md(before, after) {
       const ta = document.getElementById('post-content');
       const { selectionStart: s, selectionEnd: e, value: v } = ta;
@@ -358,8 +530,27 @@
       const replacement = before + selected + after;
       ta.value = v.slice(0, s) + replacement + v.slice(e);
       ta.focus();
-      const cursorPos = s + before.length + selected.length;
-      ta.selectionStart = ta.selectionEnd = cursorPos;
+      // Place cursor inside the formatting if nothing was selected
+      if (selected.length === 0) {
+        ta.selectionStart = ta.selectionEnd = s + before.length;
+      } else {
+        ta.selectionStart = s + before.length;
+        ta.selectionEnd   = s + before.length + selected.length;
+      }
+      currentPost.content_md = ta.value;
+      renderPreview();
+      markDirty();
+    }
+
+    function mdLine(prefix) {
+      const ta = document.getElementById('post-content');
+      const { selectionStart: s, value: v } = ta;
+      // Find start of line
+      let lineStart = s;
+      while (lineStart > 0 && v[lineStart - 1] !== '\n') lineStart--;
+      ta.value = v.slice(0, lineStart) + prefix + v.slice(lineStart);
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = s + prefix.length;
       currentPost.content_md = ta.value;
       renderPreview();
       markDirty();
@@ -369,24 +560,39 @@
       const ta = document.getElementById('post-content');
       const { selectionStart: s, selectionEnd: e, value: v } = ta;
       const selected = v.slice(s, e) || 'link text';
-      const url = prompt('URL:', 'https://');
+      const url = prompt('Enter the URL:', 'https://');
       if (!url) return;
       const replacement = `[${selected}](${url})`;
       ta.value = v.slice(0, s) + replacement + v.slice(e);
+      ta.focus();
+      ta.selectionStart = s + 1;
+      ta.selectionEnd   = s + 1 + selected.length;
       currentPost.content_md = ta.value;
       renderPreview();
       markDirty();
-      ta.focus();
     }
 
-    // ------- SYNC SCROLL -------
+    // Keyboard shortcuts: Ctrl/Cmd + B / I / K / S
+    document.getElementById('post-content').addEventListener('keydown', (e) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === 'b' || e.key === 'B') { e.preventDefault(); md('**','**'); }
+      else if (e.key === 'i' || e.key === 'I') { e.preventDefault(); md('*','*'); }
+      else if (e.key === 'k' || e.key === 'K') { e.preventDefault(); mdLink(); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault(); savePost();
+      }
+    });
+
+    // -------------------- Sync scroll --------------------
     const editorEl  = document.getElementById('post-content');
     const previewEl = document.getElementById('preview');
     let syncing = false;
     function pairScroll(src, dst) {
       src.addEventListener('scroll', () => {
-        if (syncing) return;
-        if (!document.getElementById('sync-scroll').checked) return;
+        if (syncing || !document.getElementById('sync-scroll').checked) return;
         syncing = true;
         const pct = src.scrollTop / (src.scrollHeight - src.clientHeight || 1);
         dst.scrollTop = pct * (dst.scrollHeight - dst.clientHeight);
@@ -396,10 +602,13 @@
     pairScroll(editorEl, previewEl);
     pairScroll(previewEl, editorEl);
 
-    // ------- SAVE -------
+    // -------------------- Save / delete --------------------
     async function savePost() {
-      if (!currentPost.title.trim()) { alert('Please enter a title.'); return; }
-      if (!currentPost.slug.trim())  { currentPost.slug = window.slugify(currentPost.title); document.getElementById('post-slug').value = currentPost.slug; }
+      if (!currentPost.title.trim()) { alert('Please enter a title before saving.'); return; }
+      if (!currentPost.slug.trim()) {
+        currentPost.slug = window.slugify(currentPost.title);
+        document.getElementById('post-slug').value = currentPost.slug;
+      }
       setStatus('Saving...', '#64748b');
       try {
         const saved = await window.ProgramsDB.save(currentPost);
@@ -407,29 +616,49 @@
         isDirty = false;
         setStatus('Saved ✓', '#059669');
         setTimeout(() => setStatus(''), 2000);
-        updateSlugPreview();
+        document.getElementById('delete-btn').classList.remove('hidden');
+        updatePreviewLink();
         loadPostList();
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         setStatus('Error saving', '#dc2626');
-        alert('Save failed: ' + (e.message || e));
+        alert('Save failed: ' + (err.message || err));
       }
     }
 
-    // Keyboard shortcut: Cmd/Ctrl+S
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); savePost(); }
-    });
+    async function deletePost() {
+      if (!currentPost.id) return;
+      const title = currentPost.title || '(untitled)';
+      if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return;
+      try {
+        await window.ProgramsDB.remove(currentPost.id);
+        newPost();
+        loadPostList();
+        setStatus('Deleted', '#dc2626');
+        setTimeout(() => setStatus(''), 2000);
+      } catch (err) {
+        console.error(err);
+        alert('Delete failed: ' + (err.message || err));
+      }
+    }
 
-    // Warn before leaving with unsaved changes
+    // -------------------- Help modal --------------------
+    function showHelp()  { document.getElementById('help-modal').classList.remove('hidden'); }
+    function closeHelp() { document.getElementById('help-modal').classList.add('hidden'); }
+
+    // -------------------- Beforeunload --------------------
     window.addEventListener('beforeunload', (e) => {
       if (isDirty) { e.preventDefault(); e.returnValue = ''; }
     });
 
-    // ------- INIT -------
-    paintFromState();
-    renderPreview();
-    loadPostList();
+    // -------------------- INIT --------------------
+    (async () => {
+      const ok = await requireAdmin();
+      if (!ok) return;
+      paintFromState();
+      renderPreview();
+      loadPostList();
+    })();
   </script>
 </body>
 </html>

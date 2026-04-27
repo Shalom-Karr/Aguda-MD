@@ -425,9 +425,13 @@ So you usually don't need to apply separately for those.`,
         document.head.appendChild(s);
       });
     }
-    const client = window.supabase.createClient(cfg.url, cfg.anonKey);
+    const client = window.supabase.createClient(cfg.url, cfg.anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: 'agudah-md-ga-auth' }
+    });
+    window.__supabaseClient = client;  // expose for admin auth flow
 
-    const TABLE = 'programs';
+    const TABLE        = 'agudah_md_ga_programs';
+    const ADMINS_TABLE = 'agudah_md_ga_admins';
 
     return {
       async listPublished() {
@@ -467,6 +471,27 @@ So you usually don't need to apply separately for those.`,
         const { error } = await client.from(TABLE).delete().eq('id', id);
         if (error) throw error;
       },
+
+      /* -------- Auth helpers (Supabase mode only) ------------------------ */
+      async getCurrentUser() {
+        const { data: { session } } = await client.auth.getSession();
+        return session ? session.user : null;
+      },
+      async signIn(email, password) {
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        return data.user;
+      },
+      async signOut() {
+        await client.auth.signOut();
+      },
+      async isAdmin(email) {
+        if (!email) return false;
+        const { data, error } = await client.from(ADMINS_TABLE)
+          .select('email').ilike('email', email).maybeSingle();
+        if (error) return false;
+        return !!data;
+      },
     };
   }
 
@@ -480,14 +505,25 @@ So you usually don't need to apply separately for those.`,
       return db[method](...args);
     };
     window.ProgramsDB = {
-      listPublished: lazy('listPublished'),
-      listAll:       lazy('listAll'),
+      mode: 'supabase',
+      listPublished:  lazy('listPublished'),
+      listAll:        lazy('listAll'),
+      getCurrentUser: lazy('getCurrentUser'),
+      signIn:         lazy('signIn'),
+      signOut:        lazy('signOut'),
+      isAdmin:        lazy('isAdmin'),
       getBySlug:     lazy('getBySlug'),
       getBySlugAny:  lazy('getBySlugAny'),
       save:          lazy('save'),
       remove:        lazy('remove'),
     };
   } else {
+    // Demo mode — auth is a no-op (admin page is open in demo)
+    demoDB.mode = 'demo';
+    demoDB.getCurrentUser = async () => ({ email: 'demo@local' });
+    demoDB.signIn  = async () => ({ email: 'demo@local' });
+    demoDB.signOut = async () => {};
+    demoDB.isAdmin = async () => true;
     window.ProgramsDB = demoDB;
   }
 

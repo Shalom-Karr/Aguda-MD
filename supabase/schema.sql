@@ -1,19 +1,29 @@
 -- =============================================================================
--- Agudah MD Resources — Supabase schema
+-- Agudath Israel of Maryland — Government Assistance Resource Site
+-- Supabase schema
 -- -----------------------------------------------------------------------------
--- Run this once in the Supabase SQL Editor (https://supabase.com/dashboard).
--- Then fill in `supabase.url` and `supabase.anonKey` in assets/config.js.
+-- All tables are namespaced with the prefix `agudah_md_ga_` so this database
+-- can be shared with other Agudah projects later without naming collisions.
 --
--- This schema enables:
---   - Public read access to published programs
---   - Authenticated write access (insert/update/delete)
---   - Automatic `updated_at` timestamps
+-- HOW TO USE:
+--   1. Create a new Supabase project at https://supabase.com.
+--   2. In the Supabase dashboard, open SQL Editor → New query.
+--   3. Paste this entire file. Click Run.
+--   4. Copy your project URL + anon key (Settings → API) into
+--      assets/config.js.
+--   5. In Supabase Auth → Users, create the first admin user (email +
+--      password). The email must match a row in agudah_md_ga_admins —
+--      see the bootstrap section near the end of this file and edit the
+--      placeholder before running.
+--
+-- This script is idempotent — safe to re-run.
 -- =============================================================================
 
--- -----------------------------------------------------------------------------
--- 1. Main table
--- -----------------------------------------------------------------------------
-create table if not exists public.programs (
+
+-- =============================================================================
+-- 1. PROGRAMS TABLE
+-- =============================================================================
+create table if not exists public.agudah_md_ga_programs (
   id            uuid primary key default gen_random_uuid(),
   slug          text unique not null,
   title         text not null,
@@ -25,80 +35,159 @@ create table if not exists public.programs (
   updated_at    timestamptz not null default now()
 );
 
-create index if not exists programs_slug_idx         on public.programs (slug);
-create index if not exists programs_published_idx    on public.programs (is_published, updated_at desc);
-create index if not exists programs_category_idx     on public.programs (category);
+create index if not exists agudah_md_ga_programs_slug_idx
+  on public.agudah_md_ga_programs (slug);
+create index if not exists agudah_md_ga_programs_published_idx
+  on public.agudah_md_ga_programs (is_published, updated_at desc);
+create index if not exists agudah_md_ga_programs_category_idx
+  on public.agudah_md_ga_programs (category);
 
+
+-- =============================================================================
+-- 2. ADMINS TABLE
 -- -----------------------------------------------------------------------------
--- 2. Auto-update `updated_at` on any row change
--- -----------------------------------------------------------------------------
-create or replace function public.set_updated_at() returns trigger as $$
-begin new.updated_at = now(); return new; end;
+-- This is an allowlist of emails that have admin access. Login itself is
+-- handled by Supabase Auth — this table only controls who is permitted to
+-- write/edit programs once they've signed in.
+--
+-- To add a new admin:
+--   1. Insert their email here.
+--   2. Create a corresponding user in Supabase Auth → Users (same email).
+-- =============================================================================
+create table if not exists public.agudah_md_ga_admins (
+  id          uuid primary key default gen_random_uuid(),
+  email       text unique not null,
+  full_name   text,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists agudah_md_ga_admins_email_idx
+  on public.agudah_md_ga_admins (lower(email));
+
+
+-- =============================================================================
+-- 3. updated_at AUTO-TRIGGER
+-- =============================================================================
+create or replace function public.agudah_md_ga_set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
 $$ language plpgsql;
 
-drop trigger if exists programs_set_updated_at on public.programs;
-create trigger programs_set_updated_at
-  before update on public.programs
-  for each row execute function public.set_updated_at();
+drop trigger if exists agudah_md_ga_programs_set_updated_at
+  on public.agudah_md_ga_programs;
+create trigger agudah_md_ga_programs_set_updated_at
+  before update on public.agudah_md_ga_programs
+  for each row execute function public.agudah_md_ga_set_updated_at();
 
--- -----------------------------------------------------------------------------
--- 3. Row-Level Security
--- -----------------------------------------------------------------------------
-alter table public.programs enable row level security;
 
--- Anyone (anon key) can read published programs
-drop policy if exists "Public can read published programs" on public.programs;
+-- =============================================================================
+-- 4. ADMIN-CHECK HELPER FUNCTION
+-- -----------------------------------------------------------------------------
+-- Returns true if the current authenticated user's email is in the admins
+-- table. Used by RLS policies below.
+-- =============================================================================
+create or replace function public.agudah_md_ga_is_admin()
+returns boolean as $$
+  select exists (
+    select 1 from public.agudah_md_ga_admins
+    where lower(email) = lower((select email from auth.users where id = auth.uid()))
+  );
+$$ language sql stable security definer;
+
+
+-- =============================================================================
+-- 5. ROW-LEVEL SECURITY — programs
+-- =============================================================================
+alter table public.agudah_md_ga_programs enable row level security;
+
+-- Anyone (including anon visitors) can read PUBLISHED programs
+drop policy if exists "Public can read published programs"
+  on public.agudah_md_ga_programs;
 create policy "Public can read published programs"
-  on public.programs for select
+  on public.agudah_md_ga_programs for select
   using (is_published = true);
 
--- Authenticated users can read ALL programs (including drafts) — needed for admin
-drop policy if exists "Authenticated can read all programs" on public.programs;
-create policy "Authenticated can read all programs"
-  on public.programs for select
+-- Authenticated admins can read EVERYTHING (including drafts)
+drop policy if exists "Admins can read all programs"
+  on public.agudah_md_ga_programs;
+create policy "Admins can read all programs"
+  on public.agudah_md_ga_programs for select
   to authenticated
-  using (true);
+  using (public.agudah_md_ga_is_admin());
 
--- Only authenticated users can insert / update / delete
-drop policy if exists "Authenticated can insert" on public.programs;
-create policy "Authenticated can insert"
-  on public.programs for insert
+-- Only authenticated admins can insert / update / delete
+drop policy if exists "Admins can insert programs"
+  on public.agudah_md_ga_programs;
+create policy "Admins can insert programs"
+  on public.agudah_md_ga_programs for insert
   to authenticated
-  with check (true);
+  with check (public.agudah_md_ga_is_admin());
 
-drop policy if exists "Authenticated can update" on public.programs;
-create policy "Authenticated can update"
-  on public.programs for update
+drop policy if exists "Admins can update programs"
+  on public.agudah_md_ga_programs;
+create policy "Admins can update programs"
+  on public.agudah_md_ga_programs for update
   to authenticated
-  using (true) with check (true);
+  using (public.agudah_md_ga_is_admin())
+  with check (public.agudah_md_ga_is_admin());
 
-drop policy if exists "Authenticated can delete" on public.programs;
-create policy "Authenticated can delete"
-  on public.programs for delete
+drop policy if exists "Admins can delete programs"
+  on public.agudah_md_ga_programs;
+create policy "Admins can delete programs"
+  on public.agudah_md_ga_programs for delete
   to authenticated
-  using (true);
+  using (public.agudah_md_ga_is_admin());
 
--- -----------------------------------------------------------------------------
--- 4. Seed data (optional — remove this section if you don't want sample content)
--- -----------------------------------------------------------------------------
-insert into public.programs (slug, title, summary, category, is_published, content_md) values
-('snap-food-supplement-program',
- 'SNAP (Food Supplement Program)', 'Monthly benefits to help pay for groceries for low-income Maryland households.',
- 'Food', true,
- E'## What is SNAP?\n\nThe Food Supplement Program (FSP) is Maryland''s name for SNAP — federal food assistance benefits loaded onto an EBT card each month.\n\n## Who qualifies?\n\nYou may qualify if your household''s gross monthly income is at or below 200% of the federal poverty level.\n\n## How to apply\n\n1. Online at mydhrbenefits.dhr.state.md.us\n2. In person at your local Department of Social Services\n3. By phone: 1-800-332-6347'),
 
-('medicaid-medical-assistance',
- 'Medicaid (Medical Assistance)',
- 'Free or low-cost health insurance for eligible children, adults, pregnant women, and seniors.',
- 'Health', true,
- E'## What is Medicaid?\n\nMaryland Medicaid covers doctor visits, hospital care, prescriptions, dental, vision, and mental health — at no cost to most eligible people.\n\n## How to apply\n\n- Online at marylandhealthconnection.gov\n- By phone: 1-855-642-8572')
-on conflict (slug) do nothing;
+-- =============================================================================
+-- 6. ROW-LEVEL SECURITY — admins
+-- =============================================================================
+alter table public.agudah_md_ga_admins enable row level security;
 
+-- Authenticated admins can read the admin list
+drop policy if exists "Admins can read admin list"
+  on public.agudah_md_ga_admins;
+create policy "Admins can read admin list"
+  on public.agudah_md_ga_admins for select
+  to authenticated
+  using (public.agudah_md_ga_is_admin());
+
+-- Authenticated admins can manage (insert/update/delete) the admin list
+drop policy if exists "Admins can manage admin list"
+  on public.agudah_md_ga_admins;
+create policy "Admins can manage admin list"
+  on public.agudah_md_ga_admins for all
+  to authenticated
+  using (public.agudah_md_ga_is_admin())
+  with check (public.agudah_md_ga_is_admin());
+
+
+-- =============================================================================
+-- 7. BOOTSTRAP — first admin
 -- -----------------------------------------------------------------------------
--- Done. Next steps:
---   1. Go to Supabase Dashboard → Settings → API, copy the "anon public" key
---      and project URL into assets/config.js.
---   2. Enable Email auth in Supabase Dashboard → Authentication → Providers.
---   3. Create an admin user: Dashboard → Authentication → Users → Add User.
---   4. Add Supabase auth to admin.html (see docs/DEPLOYMENT.md).
+-- IMPORTANT: edit the email below to match the first admin's email BEFORE
+-- running this script.
+--
+-- After running, you must also create a matching user in:
+--   Supabase Dashboard → Authentication → Users → Add user
+-- using the SAME email and a strong password.
+-- =============================================================================
+insert into public.agudah_md_ga_admins (email, full_name) values
+  ('chani@agudathisrael-md.org', 'Chani Vilner')
+on conflict (email) do nothing;
+
+
+-- =============================================================================
+-- DONE.
 -- -----------------------------------------------------------------------------
+-- Verify with:
+--   select * from public.agudah_md_ga_programs;
+--   select * from public.agudah_md_ga_admins;
+--
+-- Next steps in the codebase:
+--   1. Fill in `supabase.url` and `supabase.anonKey` in assets/config.js.
+--   2. Push to production. Visit /admin and log in with the bootstrap user.
+-- =============================================================================
