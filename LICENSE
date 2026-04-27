@@ -1,0 +1,41 @@
+Copyright (c) 2026 Shalom Karr. All rights reserved.
+
+This software and its source code are the exclusive property of the copyright
+holder. They are licensed, not sold, to the operators of Baltimore Community
+Resource Network (BCRN) and its parent organizations (Ahavas Yisrael Charity
+Fund and Agudath Israel of Maryland) for the operation of the BCRN public
+website and admin console.
+
+Permitted, without prior written permission, only for the licensees named
+above:
+
+  1. Running the software on first-party infrastructure to operate the BCRN
+     website.
+  2. Modifying the source code internally to maintain or extend that website.
+  3. Backing up the source code and database for disaster-recovery purposes.
+
+Without prior written permission from the copyright holder, you may NOT:
+
+  1. Copy, redistribute, sublicense, sell, rent, lease, or otherwise transfer
+     the software or any substantial portion of it to a third party.
+  2. Use the software, in whole or in part, to operate any website other than
+     the BCRN site referenced above.
+  3. Remove, alter, or obscure copyright, trademark, or attribution notices
+     (including the "Built by Shalom Karr" footer link).
+  4. Use the BCRN, Ahavas Yisrael, or Agudath Israel of Maryland names,
+     logos, or trademarks except as required to operate the BCRN website.
+
+Third-party components included or loaded at runtime retain their original
+licenses (Tailwind CSS, marked, DOMPurify, Supabase JS, the Calendly embed,
+etc.) and are not redistributed by this license.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF,
+OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+For licensing inquiries: contact the copyright holder via
+https://shalomkarr.pages.dev.
