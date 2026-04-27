@@ -26,3 +26,7 @@ build/
 
 # Misc
 .cache/
+
+# Source material from the client (PDFs, raw logos) — kept locally but not
+# committed. Contents already migrated into the database via supabase/.
+NEW/
