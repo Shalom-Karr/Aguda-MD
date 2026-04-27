@@ -48,28 +48,36 @@
     const phone   = C.phone || '';
     const address = C.address || '';
 
-    const addressHtml = address
-      ? address.split(',').map(s => escAttr(s.trim())).join('<br>')
-      : '';
+    // "Street, City, State ZIP" -> "Street<br>City, State ZIP" (split on first comma only)
+    let addressHtml = '';
+    if (address) {
+      const idx = address.indexOf(',');
+      if (idx > 0) {
+        addressHtml = escAttr(address.slice(0, idx).trim()) + '<br>' +
+                      escAttr(address.slice(idx + 1).trim());
+      } else {
+        addressHtml = escAttr(address);
+      }
+    }
 
     target.className = 'bg-slate-900 text-slate-300 mt-20';
     target.innerHTML = `
-      <div class="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-10">
-        <div>
+      <div class="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-12 gap-8 md:gap-10">
+        <div class="md:col-span-5">
           <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">${escAttr(aboutLabel)}</p>
-          <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-3">
             <a href="${escAttr(p1Url)}" target="_blank" rel="noopener" title="${escAttr(p1Name)}"
-               class="bg-white rounded-lg p-3 inline-block hover:scale-105 transition-transform">
-              <img src="assets/logo-ay.png" alt="${escAttr(p1Name)}" class="h-12 w-auto">
+               class="bg-white rounded-lg p-2 inline-flex items-center hover:scale-105 transition-transform">
+              <img src="assets/logo-ay.png" alt="${escAttr(p1Name)}" class="h-10 w-auto">
             </a>
             <a href="${escAttr(p2Url)}" target="_blank" rel="noopener" title="${escAttr(p2Name)}"
-               class="bg-white rounded-lg p-3 inline-block hover:scale-105 transition-transform">
-              <img src="assets/logo-aimd.png" alt="${escAttr(p2Name)}" class="h-12 w-auto">
+               class="bg-white rounded-lg p-2 inline-flex items-center hover:scale-105 transition-transform">
+              <img src="assets/logo-aimd.png" alt="${escAttr(p2Name)}" class="h-10 w-auto">
             </a>
           </div>
         </div>
 
-        <div>
+        <div class="md:col-span-4">
           <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">${escAttr(contactLabel)}</p>
           <ul class="space-y-2 text-sm">
             ${email   ? `<li><a href="mailto:${escAttr(email)}" class="hover:text-white">${escAttr(email)}</a></li>` : ''}
@@ -78,7 +86,7 @@
           </ul>
         </div>
 
-        <div>
+        <div class="md:col-span-3">
           <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">${escAttr(linksLabel)}</p>
           <ul class="space-y-2 text-sm">
             <li><a href="index.html" class="hover:text-white">Programs</a></li>
