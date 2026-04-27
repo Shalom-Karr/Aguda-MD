@@ -1,0 +1,166 @@
+/* ============================================================================
+ * admin.css — admin-page-specific styles
+ * ========================================================================== */
+
+body { font-family: 'Inter', sans-serif; }
+
+/* ---------- Markdown source textarea ---------- */
+.editor-textarea {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.65;
+  resize: none;
+  tab-size: 2;
+}
+.editor-textarea:focus { outline: none; }
+
+/* ---------- Live preview pane (mirrors posts.html prose styling) ---------- */
+.preview-pane { font-size: 15px; }
+.preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin: 1rem 0 .5rem; }
+.preview-pane h2 { font-size: 1.4rem; font-weight: 700; margin: 1.5rem 0 .5rem; color: #0f766e; }
+.preview-pane h3 { font-size: 1.1rem; font-weight: 700; margin: 1rem 0 .35rem; }
+.preview-pane p  { margin-bottom: .85rem; line-height: 1.65; }
+.preview-pane ul, .preview-pane ol { margin: 0 0 .85rem 1.25rem; }
+.preview-pane ul { list-style: disc; }
+.preview-pane ol { list-style: decimal; }
+.preview-pane li { margin-bottom: .25rem; }
+.preview-pane a { color: #0f766e; text-decoration: underline; }
+.preview-pane blockquote {
+  border-left: 4px solid #14b8a6;
+  background: #f0fdfa;
+  padding: .5rem 1rem;
+  margin: .85rem 0;
+  border-radius: 0 .5rem .5rem 0;
+}
+.preview-pane code {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+.preview-pane pre {
+  background: #0f172a;
+  color: #f1f5f9;
+  padding: 1rem;
+  border-radius: .5rem;
+  overflow-x: auto;
+}
+.preview-pane pre code { background: transparent; padding: 0; color: inherit; }
+.preview-pane hr { margin: 1.5rem 0; border-color: #e2e8f0; }
+.preview-pane strong { font-weight: 700; }
+.preview-pane img { max-width: 100%; border-radius: .5rem; margin: .85rem 0; }
+
+/* ---------- Toolbar buttons ---------- */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  background: white;
+  border: 1px solid #cbd5e1;
+  transition: all .15s;
+  cursor: pointer;
+}
+.tb-btn:hover  { background: #f0fdfa; border-color: #14b8a6; color: #0f766e; }
+.tb-btn:active { transform: scale(.96); }
+.tb-btn .shortcut {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ---------- Publish toggle switch ---------- */
+.pub-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 56px;
+  height: 28px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color .25s;
+}
+.pub-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  transition: transform .25s, background-color .25s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.pub-switch.on        { background: #10b981; }
+.pub-switch.on::after { transform: translateX(28px); }
+
+/* ---------- Settings form inputs ---------- */
+.settings-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: white;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.settings-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+}
+
+/* ---------- Icon picker ---------- */
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 6px;
+}
+.icon-picker button {
+  height: 48px;
+  font-size: 22px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-picker button:hover    { border-color: #14b8a6; background: #f0fdfa; }
+.icon-picker button.selected { border-color: #0d9488; background: #ccfbf1; }
+.icon-picker .icon-default {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #64748b;
+}
+
+/* ---------- Other ---------- */
+.scroll-pane { overflow-y: auto; }
+.modal-bg { background: rgba(15, 23, 42, .55); backdrop-filter: blur(4px); }
+
+/* Drop zone overlay shown when dragging an image into the editor */
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 184, 166, .12);
+  border: 2px dashed #0d9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #0f766e;
+  pointer-events: none;
+  z-index: 10;
+}

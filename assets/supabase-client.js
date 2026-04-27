@@ -430,8 +430,10 @@ So you usually don't need to apply separately for those.`,
     });
     window.__supabaseClient = client;  // expose for admin auth flow
 
-    const TABLE        = 'agudah_md_ga_programs';
-    const ADMINS_TABLE = 'agudah_md_ga_admins';
+    const TABLE          = 'agudah_md_ga_programs';
+    const ADMINS_TABLE   = 'agudah_md_ga_admins';
+    const SETTINGS_TABLE = 'agudah_md_ga_settings';
+    const IMAGES_BUCKET  = 'agudah-md-ga-images';
 
     return {
       async listPublished() {
@@ -492,6 +494,42 @@ So you usually don't need to apply separately for those.`,
         if (error) return false;
         return !!data;
       },
+
+      /* -------- Settings (key/value JSONB) ------------------------------- */
+      async getSettings() {
+        const { data, error } = await client.from(SETTINGS_TABLE)
+          .select('id, data').limit(1).maybeSingle();
+        if (error) throw error;
+        return data ? { id: data.id, ...(data.data || {}) } : null;
+      },
+      async saveSettings(settingsData) {
+        // Strip the synthetic `id` we added in getSettings()
+        const { id: _id, ...rest } = settingsData || {};
+        const { data: existing } = await client.from(SETTINGS_TABLE)
+          .select('id').limit(1).maybeSingle();
+        if (existing) {
+          const { error } = await client.from(SETTINGS_TABLE)
+            .update({ data: rest }).eq('id', existing.id);
+          if (error) throw error;
+        } else {
+          const { error } = await client.from(SETTINGS_TABLE)
+            .insert({ data: rest });
+          if (error) throw error;
+        }
+        return rest;
+      },
+
+      /* -------- Image upload --------------------------------------------- */
+      async uploadImage(file) {
+        const ext  = (file.name.split('.').pop() || 'png').toLowerCase();
+        const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+        const { error: upErr } = await client.storage
+          .from(IMAGES_BUCKET)
+          .upload(path, file, { cacheControl: '31536000', upsert: false });
+        if (upErr) throw upErr;
+        const { data } = client.storage.from(IMAGES_BUCKET).getPublicUrl(path);
+        return data.publicUrl;
+      },
     };
   }
 
@@ -512,10 +550,13 @@ So you usually don't need to apply separately for those.`,
       signIn:         lazy('signIn'),
       signOut:        lazy('signOut'),
       isAdmin:        lazy('isAdmin'),
-      getBySlug:     lazy('getBySlug'),
-      getBySlugAny:  lazy('getBySlugAny'),
-      save:          lazy('save'),
-      remove:        lazy('remove'),
+      getBySlug:      lazy('getBySlug'),
+      getBySlugAny:   lazy('getBySlugAny'),
+      save:           lazy('save'),
+      remove:         lazy('remove'),
+      getSettings:    lazy('getSettings'),
+      saveSettings:   lazy('saveSettings'),
+      uploadImage:    lazy('uploadImage'),
     };
   } else {
     // Demo mode — auth is a no-op (admin page is open in demo)
@@ -524,6 +565,23 @@ So you usually don't need to apply separately for those.`,
     demoDB.signIn  = async () => ({ email: 'demo@local' });
     demoDB.signOut = async () => {};
     demoDB.isAdmin = async () => true;
+    const SETTINGS_LS_KEY = 'agudah_md_ga_settings_v1';
+    demoDB.getSettings = async () => {
+      try { return JSON.parse(localStorage.getItem(SETTINGS_LS_KEY) || 'null'); }
+      catch (e) { return null; }
+    };
+    demoDB.saveSettings = async (data) => {
+      const { id: _id, ...rest } = data || {};
+      localStorage.setItem(SETTINGS_LS_KEY, JSON.stringify(rest));
+      return rest;
+    };
+    demoDB.uploadImage = async (file) =>
+      await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload  = () => resolve(r.result);   // data URL — works inline in markdown
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
     window.ProgramsDB = demoDB;
   }
 

@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>FAQ · Agudah MD Resources</title>
+  <title>FAQ · Agudath Israel of Maryland</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,9 +42,7 @@
     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3">Frequently asked questions</h1>
     <p class="text-lg text-slate-600 mb-12">Can't find your question? <a href="index.html#book" class="text-brand-700 font-semibold underline decoration-2 underline-offset-2 hover:text-brand-900">Book a call</a>.</p>
 
-    <div class="space-y-3" id="faq-list">
-      <!-- Populated from FAQS below. Edit that array to change questions. -->
-    </div>
+    <div class="space-y-3" id="faq-list"></div>
 
     <div class="mt-16 p-8 bg-gradient-to-br from-brand-700 to-brand-800 text-white rounded-2xl text-center">
       <h2 class="text-2xl font-bold mb-2">Still stuck?</h2>
@@ -61,48 +59,36 @@
   </footer>
 
   <script src="assets/config.js"></script>
+  <script src="assets/supabase-client.js"></script>
+  <script src="assets/apply-config.js"></script>
   <script>
-    /* --------- Edit FAQs below. Supports basic HTML in answers. --------- */
+    /* ---------- Edit FAQs here. Answers support basic HTML. ---------- */
     const FAQS = [
-      {
-        q: 'Is this service really free?',
-        a: 'Yes — 100% free. We never charge to help you apply for a government program. Our work is funded by community donations.'
-      },
-      {
-        q: 'Do I need to be Jewish or part of a specific community?',
-        a: 'No. We help anyone in Maryland regardless of religion, background, or immigration status.'
-      },
-      {
-        q: 'Will applying for benefits affect my immigration status?',
-        a: 'Most programs on this site (WIC, Medicaid for kids, school meals, emergency medical) do NOT count against you for public charge. SNAP and cash assistance can in some cases — we recommend booking a call before applying if you have concerns.'
-      },
-      {
-        q: 'How long do applications take to be approved?',
-        a: '<ul class="list-disc pl-5 space-y-1"><li>SNAP: 30 days (7 days for emergencies)</li><li>Medicaid: up to 45 days (90 for disability)</li><li>WIC: same-day at your appointment</li><li>Energy Assistance: 30-50 days</li><li>Section 8 vouchers: 2-5 year waitlists typically</li></ul>'
-      },
-      {
-        q: 'Can you submit the application for me?',
-        a: "We can't submit on your behalf, but we can sit with you (in person or on a video call) and walk through every question while you fill it out. Many people find that easier than doing it alone."
-      },
-      {
-        q: 'What if I was denied?',
-        a: "You have the right to appeal. Most denials have a 30-90 day appeal window. Book a call and we'll review the denial letter and help you file an appeal."
-      },
-      {
-        q: 'How do I know my information is safe?',
-        a: "We don't store your personal information after a call. All application data goes directly to the agency you're applying with — never through us."
-      },
-      {
-        q: 'What languages do you support?',
-        a: 'English and Yiddish. For other languages, Maryland 211 (dial 211) provides interpreters in 170+ languages for benefits applications.'
-      },
+      { q: 'Is this service really free?',
+        a: 'Yes — 100% free. We never charge to help you apply for a government program. Our work is funded by community donations.' },
+      { q: 'Do I need to be Jewish or part of a specific community?',
+        a: 'No. We help anyone in Maryland regardless of religion, background, or immigration status.' },
+      { q: 'Will applying for benefits affect my immigration status?',
+        a: 'Most programs on this site (WIC, Medicaid for kids, school meals, emergency medical) do NOT count against you for public charge. SNAP and cash assistance can in some cases — we recommend booking a call before applying if you have concerns.' },
+      { q: 'How long do applications take to be approved?',
+        a: '<ul class="list-disc pl-5 space-y-1"><li>SNAP: 30 days (7 days for emergencies)</li><li>Medicaid: up to 45 days (90 for disability)</li><li>WIC: same-day at your appointment</li><li>Energy Assistance: 30-50 days</li><li>Section 8 vouchers: 2-5 year waitlists typically</li></ul>' },
+      { q: 'Can you submit the application for me?',
+        a: "We can't submit on your behalf, but we can sit with you (in person or on a video call) and walk through every question while you fill it out. Many people find that easier than doing it alone." },
+      { q: 'What if I was denied?',
+        a: "You have the right to appeal. Most denials have a 30-90 day appeal window. Book a call and we'll review the denial letter and help you file an appeal." },
+      { q: 'How do I know my information is safe?',
+        a: "We don't store your personal information after a call. All application data goes directly to the agency you're applying with — never through us." },
+      { q: 'What languages do you support?',
+        a: 'English and Yiddish. For other languages, Maryland 211 (dial 211) provides interpreters in 170+ languages for benefits applications.' },
     ];
 
-    const C = window.SITE_CONFIG;
-    document.getElementById('footer-copyright').textContent = C.footer.copyright;
-    document.getElementById('cta-book').href = C.calendlyUrl;
+    function applyConfig() {
+      const C = window.SITE_CONFIG;
+      document.getElementById('footer-copyright').textContent = C.footer.copyright;
+      document.getElementById('cta-book').href = C.calendlyUrl;
+    }
 
-    document.getElementById('faq-list').innerHTML = FAQS.map((f, i) => `
+    document.getElementById('faq-list').innerHTML = FAQS.map(f => `
       <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-500 transition-colors">
         <summary class="flex items-center justify-between px-6 py-5 cursor-pointer font-bold text-lg text-slate-900">
           <span>${f.q}</span>
@@ -111,8 +97,11 @@
           </svg>
         </summary>
         <div class="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4">${f.a}</div>
-      </details>
-    `).join('');
+      </details>`).join('');
+
+    /* Init */
+    applyConfig();
+    window.applyDynamicConfig().then(applyConfig);
   </script>
 </body>
 </html>

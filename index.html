@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>Agudah MD Resources · Government Program Help</title>
+  <title>Agudath Israel of Maryland · Government Program Help</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Free, step-by-step guides to help you apply for government assistance programs in Maryland.">
 
@@ -13,17 +13,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            brand: {
-              50:'#f0fdfa', 100:'#ccfbf1', 500:'#14b8a6',
-              600:'#0d9488', 700:'#0f766e', 800:'#115e59', 900:'#134e4a',
-            }
-          }
-        }
-      }
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+      }}
     }
   </script>
   <style>
@@ -35,12 +28,11 @@
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
 
-  <!-- Demo-mode banner (hidden when Supabase is configured) -->
   <div id="demo-banner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 text-xs text-center py-2 px-4">
     <strong>Demo mode</strong> — content is stored in your browser (localStorage). Configure Supabase in <code>assets/config.js</code> to go live.
   </div>
 
-  <!-- Top Nav -->
+  <!-- Top nav -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2">
@@ -64,14 +56,14 @@
         <h1 id="hero-heading" class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5"></h1>
         <p id="hero-subhead" class="text-lg md:text-xl text-brand-50/90 mb-8 leading-relaxed"></p>
         <div class="flex flex-wrap gap-3">
-          <a id="hero-cta-1" href="#programs" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl transition-colors shadow-lg">Browse programs</a>
-          <a id="hero-cta-2" href="#book" class="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-xl backdrop-blur transition-colors border border-white/20">Book a free call</a>
+          <a id="hero-cta-1" href="#programs" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl transition-colors shadow-lg"></a>
+          <a id="hero-cta-2" href="#book" class="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-xl backdrop-blur transition-colors border border-white/20"></a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Programs -->
+  <!-- Programs grid -->
   <main id="programs" class="max-w-6xl mx-auto px-6 py-16">
     <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
       <div>
@@ -89,17 +81,15 @@
     </div>
   </main>
 
-  <!-- Book a Call -->
+  <!-- Book a call -->
   <section id="book" class="bg-white border-t border-slate-200">
     <div class="max-w-4xl mx-auto px-6 py-16 text-center">
       <h2 id="book-heading" class="text-3xl font-extrabold text-slate-900 mb-3"></h2>
       <p id="book-subhead" class="text-slate-600 mb-7 text-lg"></p>
       <a id="book-cta" href="#" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
-      <p id="book-note" class="hidden text-xs text-slate-400 mt-4">(Placeholder link — edit <code>calendlyUrl</code> in <code>assets/config.js</code>)</p>
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="bg-slate-900 text-slate-400 text-sm">
     <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
       <p id="footer-copyright"></p>
@@ -112,28 +102,9 @@
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
+  <script src="assets/apply-config.js"></script>
   <script>
-    const C = window.SITE_CONFIG;
-    document.title = `${C.name} · Government Program Help`;
-    document.getElementById('hero-eyebrow').textContent = C.hero.eyebrow;
-    document.getElementById('hero-heading').textContent = C.hero.heading;
-    document.getElementById('hero-subhead').textContent = C.hero.subhead;
-    document.getElementById('hero-cta-1').textContent = C.hero.ctaPrimary.label;
-    document.getElementById('hero-cta-1').href       = C.hero.ctaPrimary.href;
-    document.getElementById('hero-cta-2').textContent = C.hero.ctaSecondary.label;
-    document.getElementById('hero-cta-2').href       = C.hero.ctaSecondary.href;
-    document.getElementById('book-heading').textContent = C.book.heading;
-    document.getElementById('book-subhead').textContent = C.book.subhead;
-    document.getElementById('book-cta').textContent = C.book.buttonLabel;
-    document.getElementById('book-cta').href = C.calendlyUrl;
-    document.getElementById('footer-copyright').textContent = C.footer.copyright;
-    if (C.calendlyUrl.includes('your-organization')) {
-      document.getElementById('book-note').classList.remove('hidden');
-    }
-    if (window.PROGRAMS_MODE === 'demo') {
-      document.getElementById('demo-banner').classList.remove('hidden');
-    }
-
+    /* ----- Card styling ----- */
     const CATEGORY_COLORS = {
       Food:    'bg-emerald-50 text-emerald-700 border-emerald-200',
       Health:  'bg-rose-50 text-rose-700 border-rose-200',
@@ -142,25 +113,31 @@
       Family:  'bg-purple-50 text-purple-700 border-purple-200',
       Income:  'bg-teal-50 text-teal-700 border-teal-200',
     };
-    const iconFor = (cat) => ({
+    const CATEGORY_DEFAULT_ICON = {
       Food:'🍎', Health:'🏥', Housing:'🏠', Energy:'⚡', Family:'👶', Income:'💵'
-    }[cat] || '📋');
+    };
+    const iconFor = (program) =>
+      (program.icon && program.icon.trim())
+        ? program.icon
+        : (CATEGORY_DEFAULT_ICON[program.category] || '📋');
 
     let allPrograms = [];
 
-    async function load() {
-      const loadingEl = document.getElementById('loading');
-      const gridEl    = document.getElementById('programs-grid');
-      try {
-        allPrograms = await window.ProgramsDB.listPublished();
-      } catch (e) {
-        console.error(e);
-        loadingEl.textContent = 'Failed to load programs. Check your Supabase config.';
-        return;
-      }
-      loadingEl.classList.add('hidden');
-      gridEl.classList.remove('hidden');
-      render(allPrograms);
+    function applyConfig() {
+      const C = window.SITE_CONFIG;
+      document.title = `${C.name} · Government Program Help`;
+      document.getElementById('hero-eyebrow').textContent = C.hero.eyebrow;
+      document.getElementById('hero-heading').textContent = C.hero.heading;
+      document.getElementById('hero-subhead').textContent = C.hero.subhead;
+      document.getElementById('hero-cta-1').textContent   = C.hero.ctaPrimary.label;
+      document.getElementById('hero-cta-1').href          = C.hero.ctaPrimary.href;
+      document.getElementById('hero-cta-2').textContent   = C.hero.ctaSecondary.label;
+      document.getElementById('hero-cta-2').href          = C.hero.ctaSecondary.href;
+      document.getElementById('book-heading').textContent = C.book.heading;
+      document.getElementById('book-subhead').textContent = C.book.subhead;
+      document.getElementById('book-cta').textContent     = C.book.buttonLabel;
+      document.getElementById('book-cta').href            = C.calendlyUrl;
+      document.getElementById('footer-copyright').textContent = C.footer.copyright;
     }
 
     function render(list) {
@@ -179,7 +156,7 @@
         <a href="posts.html?title=${encodeURIComponent(p.slug)}"
            class="program-card block bg-white border border-slate-200 rounded-2xl p-6 group">
           <div class="flex items-start justify-between mb-3">
-            <div class="text-3xl">${iconFor(p.category)}</div>
+            <div class="text-3xl">${iconFor(p)}</div>
             <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${catClass}">${p.category || 'Program'}</span>
           </div>
           <h3 class="text-lg font-bold text-slate-900 group-hover:text-brand-700 mb-2 leading-snug">${p.title}</h3>
@@ -192,6 +169,19 @@
       }).join('');
     }
 
+    async function loadPrograms() {
+      try {
+        allPrograms = await window.ProgramsDB.listPublished();
+      } catch (e) {
+        console.error(e);
+        document.getElementById('loading').textContent = 'Failed to load programs. Check your Supabase config.';
+        return;
+      }
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('programs-grid').classList.remove('hidden');
+      render(allPrograms);
+    }
+
     document.getElementById('search').addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       if (!q) return render(allPrograms);
@@ -202,7 +192,11 @@
       ));
     });
 
-    load();
+    /* Init */
+    if (window.PROGRAMS_MODE === 'demo') document.getElementById('demo-banner').classList.remove('hidden');
+    applyConfig();
+    window.applyDynamicConfig().then(applyConfig);
+    loadPrograms();
   </script>
 </body>
 </html>

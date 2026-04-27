@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
-  <title>Program Guide · Agudah MD Resources</title>
+  <title>Program Guide · Agudath Israel of Maryland</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,14 +12,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' }
-          }
-        }
-      }
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: { brand: { 50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } }
+      }}
     }
   </script>
 
@@ -33,6 +29,7 @@
     .prose a:hover { color: #115e59; }
     .prose blockquote { border-left-color: #14b8a6; background: #f0fdfa; padding: 0.5rem 1rem; border-radius: 0 0.5rem 0.5rem 0; }
     .prose ol li::marker { color: #0d9488; font-weight: 700; }
+    .prose img { border-radius: .75rem; box-shadow: 0 6px 24px -8px rgba(0,0,0,.15); margin: 1.5rem 0; }
     #progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg,#14b8a6,#0d9488); width: 0%; z-index: 60; transition: width .1s; }
   </style>
 </head>
@@ -67,7 +64,6 @@
       </div>
       <h1 id="title" class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight mb-4"></h1>
       <p id="summary" class="text-xl text-slate-600 leading-relaxed mb-10 pb-10 border-b border-slate-200"></p>
-
       <div id="content" class="prose prose-slate prose-lg max-w-none"></div>
 
       <aside class="mt-16 p-8 bg-gradient-to-br from-brand-700 to-brand-800 text-white rounded-2xl">
@@ -93,11 +89,8 @@
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
+  <script src="assets/apply-config.js"></script>
   <script>
-    const C = window.SITE_CONFIG;
-    document.getElementById('footer-copyright').textContent = C.footer.copyright;
-    document.getElementById('cta-calendly').href = C.calendlyUrl;
-
     const CATEGORY_COLORS = {
       Food:'bg-emerald-100 text-emerald-800',
       Health:'bg-rose-100 text-rose-800',
@@ -107,7 +100,18 @@
       Income:'bg-teal-100 text-teal-800',
     };
 
-    async function load() {
+    function applyConfig() {
+      const C = window.SITE_CONFIG;
+      document.getElementById('footer-copyright').textContent = C.footer.copyright;
+      document.getElementById('cta-calendly').href = C.calendlyUrl;
+    }
+
+    function showNotFound() {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('notfound').classList.remove('hidden');
+    }
+
+    async function loadPost() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('title');
       if (!slug) return showNotFound();
@@ -117,11 +121,11 @@
       catch (e) { console.error(e); return showNotFound(); }
       if (!post) return showNotFound();
 
+      const C = window.SITE_CONFIG;
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('article').classList.remove('hidden');
-
       document.title = `${post.title} · ${C.name}`;
-      document.getElementById('title').textContent = post.title;
+      document.getElementById('title').textContent   = post.title;
       document.getElementById('summary').textContent = post.summary || '';
 
       const cat = document.getElementById('category-badge');
@@ -137,20 +141,21 @@
           'Last updated ' + new Date(updated).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
       }
 
-      const rendered = marked.parse(post.content_md || '');
-      document.getElementById('content').innerHTML = DOMPurify.sanitize(rendered);
-    }
-    function showNotFound() {
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('notfound').classList.remove('hidden');
+      document.getElementById('content').innerHTML =
+        DOMPurify.sanitize(marked.parse(post.content_md || ''));
     }
 
+    /* Reading progress bar */
     window.addEventListener('scroll', () => {
       const h = document.documentElement;
-      document.getElementById('progress').style.width = ((h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100) + '%';
+      document.getElementById('progress').style.width =
+        ((h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100) + '%';
     });
 
-    load();
+    /* Init */
+    applyConfig();
+    window.applyDynamicConfig().then(applyConfig);
+    loadPost();
   </script>
 </body>
 </html>

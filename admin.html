@@ -22,119 +22,37 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-
-    .editor-textarea {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px; line-height: 1.65;
-      resize: none; tab-size: 2;
-    }
-    .editor-textarea:focus { outline: none; }
-
-    .preview-pane { font-size: 15px; }
-    .preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin: 1rem 0 .5rem; }
-    .preview-pane h2 { font-size: 1.4rem; font-weight: 700; margin: 1.5rem 0 .5rem; color: #0f766e; }
-    .preview-pane h3 { font-size: 1.1rem; font-weight: 700; margin: 1rem 0 .35rem; }
-    .preview-pane p  { margin-bottom: .85rem; line-height: 1.65; }
-    .preview-pane ul, .preview-pane ol { margin: 0 0 .85rem 1.25rem; }
-    .preview-pane ul { list-style: disc; }
-    .preview-pane ol { list-style: decimal; }
-    .preview-pane li { margin-bottom: .25rem; }
-    .preview-pane a { color: #0f766e; text-decoration: underline; }
-    .preview-pane blockquote { border-left: 4px solid #14b8a6; background: #f0fdfa; padding: .5rem 1rem; margin: .85rem 0; border-radius: 0 .5rem .5rem 0; }
-    .preview-pane code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-    .preview-pane pre { background: #0f172a; color: #f1f5f9; padding: 1rem; border-radius: .5rem; overflow-x: auto; }
-    .preview-pane pre code { background: transparent; padding: 0; color: inherit; }
-    .preview-pane hr { margin: 1.5rem 0; border-color: #e2e8f0; }
-    .preview-pane strong { font-weight: 700; }
-
-    /* Toolbar buttons — bigger and labeled, friendlier for non-tech users */
-    .tb-btn {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px; font-weight: 600;
-      color: #334155;
-      background: white;
-      border: 1px solid #cbd5e1;
-      transition: all .15s;
-      cursor: pointer;
-    }
-    .tb-btn:hover { background: #f0fdfa; border-color: #14b8a6; color: #0f766e; }
-    .tb-btn:active { transform: scale(.96); }
-    .tb-btn .shortcut {
-      font-size: 10px; color: #94a3b8; font-weight: 500;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Publish toggle switch */
-    .pub-switch {
-      position: relative; display: inline-flex; align-items: center;
-      width: 56px; height: 28px;
-      background: #cbd5e1;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: background-color .25s;
-    }
-    .pub-switch::after {
-      content: '';
-      position: absolute; top: 3px; left: 3px;
-      width: 22px; height: 22px;
-      background: white;
-      border-radius: 50%;
-      transition: transform .25s, background-color .25s;
-      box-shadow: 0 2px 6px rgba(0,0,0,.15);
-    }
-    .pub-switch.on { background: #10b981; }
-    .pub-switch.on::after { transform: translateX(28px); }
-
-    .scroll-pane { overflow-y: auto; }
-
-    /* Help modal */
-    .modal-bg { background: rgba(15, 23, 42, .55); backdrop-filter: blur(4px); }
-  </style>
+  <link rel="stylesheet" href="assets/admin.css">
 </head>
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex flex-col">
 
-  <!-- ============================================================== -->
-  <!-- LOGIN GATE (shown only when Supabase is configured + not signed in) -->
-  <!-- ============================================================== -->
+  <!-- ============================== LOGIN GATE ============================ -->
   <div id="auth-gate" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <img src="assets/logo.png" alt="" class="h-14 w-auto mx-auto mb-4">
       <h1 class="text-2xl font-extrabold text-center text-slate-900 mb-2">Admin Login</h1>
       <p class="text-sm text-center text-slate-500 mb-6">Sign in with your admin email and password.</p>
-
       <form id="login-form" class="space-y-3">
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Email</label>
-          <input id="login-email" type="email" required
-                 class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+          <input id="login-email" type="email" required class="settings-input">
         </div>
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
-          <input id="login-password" type="password" required
-                 class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+          <input id="login-password" type="password" required class="settings-input">
         </div>
-        <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-2.5 rounded-lg">
-          Sign in
-        </button>
+        <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-2.5 rounded-lg">Sign in</button>
         <p id="login-error" class="text-sm text-red-600 text-center min-h-[1rem]"></p>
       </form>
     </div>
   </div>
 
-  <!-- ============================================================== -->
-  <!-- DEMO BANNER -->
-  <!-- ============================================================== -->
+  <!-- ============================== DEMO BANNER =========================== -->
   <div id="demo-banner" class="hidden bg-amber-100 border-b border-amber-300 text-amber-900 text-xs text-center py-1.5 px-4 flex-shrink-0">
     <strong>Demo mode</strong> — saves go to your browser's localStorage. No authentication is enforced.
   </div>
 
-  <!-- ============================================================== -->
-  <!-- TOP BAR -->
-  <!-- ============================================================== -->
+  <!-- ============================== TOP BAR =============================== -->
   <header class="bg-white border-b border-slate-200 px-5 h-14 flex items-center justify-between flex-shrink-0">
     <div class="flex items-center gap-3">
       <a href="index.html" class="flex items-center gap-2">
@@ -142,46 +60,60 @@
         <span class="font-bold text-slate-800 text-lg">Admin</span>
       </a>
       <span class="text-xs text-slate-400">/</span>
-      <span id="editor-breadcrumb" class="text-sm text-slate-500">New program</span>
+      <span id="editor-breadcrumb" class="text-sm text-slate-500">New draft</span>
     </div>
     <div class="flex items-center gap-3">
-      <span id="save-status" class="text-xs text-slate-400 min-w-[80px] text-right"></span>
+      <span id="save-status" class="text-xs text-slate-400 min-w-[110px] text-right"></span>
       <button onclick="showHelp()" title="Formatting help" class="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold">?</button>
       <button id="signout-btn" onclick="signOut()" class="hidden text-sm font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Sign out</button>
-      <button onclick="savePost()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
+      <button id="save-program-btn" onclick="savePost()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
+      <button id="save-settings-btn" onclick="saveSettings()" class="hidden bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save settings</button>
     </div>
   </header>
 
-  <!-- ============================================================== -->
-  <!-- MAIN LAYOUT -->
-  <!-- ============================================================== -->
+  <!-- ============================== MAIN LAYOUT =========================== -->
   <div class="flex-1 flex overflow-hidden">
 
-    <!-- =========== SIDEBAR =========== -->
+    <!-- =========================== SIDEBAR ============================== -->
     <aside class="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0">
-      <!-- Big "New Draft" button -->
-      <div class="p-3 border-b border-slate-200">
-        <button onclick="newPost()"
-                class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          Create New Draft
-        </button>
+      <!-- Tab toggle: Programs / Site Settings -->
+      <div class="grid grid-cols-2 border-b border-slate-200 text-sm font-bold">
+        <button id="tab-programs" onclick="setView('editor')"   class="py-3 text-brand-700 border-b-2 border-brand-700 bg-brand-50/50">Programs</button>
+        <button id="tab-settings" onclick="setView('settings')" class="py-3 text-slate-500 hover:text-slate-800">Site Settings</button>
       </div>
 
-      <div class="p-3 border-b border-slate-200">
-        <input id="list-search" type="text" placeholder="Filter programs..."
-               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+      <!-- Programs sidebar -->
+      <div id="sidebar-programs" class="flex-1 flex flex-col overflow-hidden">
+        <div class="p-3 border-b border-slate-200">
+          <button onclick="newPost()" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Create New Draft
+          </button>
+        </div>
+        <div class="p-3 border-b border-slate-200">
+          <input id="list-search" type="text" placeholder="Filter programs..." class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+        </div>
+        <div id="post-list" class="flex-1 overflow-y-auto"></div>
       </div>
-      <div id="post-list" class="flex-1 overflow-y-auto"></div>
+
+      <!-- Settings sidebar -->
+      <div id="sidebar-settings" class="hidden flex-1 overflow-y-auto p-4 text-sm text-slate-600 space-y-3">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Site Settings</p>
+        <p>Edit the public-facing copy of your website. Changes apply across every page once saved.</p>
+        <p class="text-xs text-slate-400 leading-relaxed pt-2 border-t border-slate-200">
+          Tip: leave a field blank to use the default value from <code class="bg-slate-100 px-1 rounded">assets/config.js</code>.
+        </p>
+      </div>
+
       <div class="p-3 border-t border-slate-200 text-[11px] text-slate-400">
         <div>Mode: <span id="mode-label" class="font-mono font-semibold"></span></div>
       </div>
     </aside>
 
-    <!-- =========== EDITOR AREA =========== -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <!-- =========================== EDITOR VIEW ========================== -->
+    <main id="editor-main" class="flex-1 flex flex-col overflow-hidden">
 
-      <!-- METADATA BAR -->
+      <!-- Metadata bar -->
       <div class="bg-white border-b border-slate-200 p-4 space-y-3">
         <input id="post-title" type="text" placeholder="Program title (e.g. SNAP Food Benefits)"
                class="w-full text-2xl font-extrabold border-0 p-0 focus:ring-0 outline-none placeholder-slate-300">
@@ -189,19 +121,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">URL slug</label>
-            <input id="post-slug" type="text" placeholder="auto-from-title"
-                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 font-mono focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+            <input id="post-slug" type="text" placeholder="auto-from-title" class="settings-input font-mono text-sm">
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Category</label>
-            <select id="post-category" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none"></select>
+            <select id="post-category" class="settings-input text-sm"></select>
           </div>
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Short summary</label>
-            <input id="post-summary" type="text" placeholder="One-line description for the homepage card"
-                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+            <input id="post-summary" type="text" placeholder="One-line description for the homepage card" class="settings-input text-sm">
           </div>
         </div>
+
+        <!-- Icon picker -->
+        <details class="bg-slate-50 border border-slate-200 rounded-lg">
+          <summary class="cursor-pointer px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-700">
+            Card icon (optional — defaults to category icon)
+          </summary>
+          <div id="icon-picker" class="icon-picker p-4 pt-0"></div>
+        </details>
 
         <!-- Status row: clear toggle switch -->
         <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5">
@@ -212,25 +150,28 @@
           </div>
           <div class="flex items-center gap-3">
             <span class="text-xs font-semibold text-slate-500">Draft</span>
-            <button id="pub-switch" class="pub-switch" onclick="togglePublish()" aria-label="Toggle publish status"></button>
+            <button id="pub-switch" class="pub-switch" aria-label="Toggle publish status"></button>
             <span class="text-xs font-semibold text-slate-500">Published</span>
             <a id="preview-link" href="#" target="_blank" class="hidden ml-3 text-xs text-brand-700 hover:text-brand-900 font-semibold">View on site ↗</a>
           </div>
         </div>
       </div>
 
-      <!-- TOOLBAR -->
+      <!-- Toolbar -->
       <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 flex items-center gap-1.5 flex-wrap">
-        <button class="tb-btn" onclick="md('**','**')" title="Bold (Ctrl+B)"><strong>B</strong> <span class="shortcut">⌃B</span></button>
-        <button class="tb-btn" onclick="md('*','*')" title="Italic (Ctrl+I)"><em>I</em> <span class="shortcut">⌃I</span></button>
-        <button class="tb-btn" onclick="mdLink()" title="Link (Ctrl+K)">🔗 Link <span class="shortcut">⌃K</span></button>
+        <button class="tb-btn" onclick="md('**','**')"  title="Bold (Ctrl+B)"><strong>B</strong> <span class="shortcut">⌃B</span></button>
+        <button class="tb-btn" onclick="md('*','*')"    title="Italic (Ctrl+I)"><em>I</em> <span class="shortcut">⌃I</span></button>
+        <button class="tb-btn" onclick="mdLink()"       title="Link (Ctrl+K)">🔗 Link <span class="shortcut">⌃K</span></button>
         <span class="w-px h-6 bg-slate-300 mx-1"></span>
-        <button class="tb-btn" onclick="mdLine('## ')" title="Section heading">H Section</button>
+        <button class="tb-btn" onclick="mdLine('## ')"  title="Section heading">H Section</button>
         <button class="tb-btn" onclick="mdLine('### ')" title="Subsection heading">h Subsection</button>
         <span class="w-px h-6 bg-slate-300 mx-1"></span>
-        <button class="tb-btn" onclick="mdLine('- ')" title="Bullet list">• Bullet</button>
-        <button class="tb-btn" onclick="mdLine('1. ')" title="Numbered list">1. Numbered</button>
-        <button class="tb-btn" onclick="mdLine('> ')" title="Quote block">❝ Quote</button>
+        <button class="tb-btn" onclick="mdLine('- ')"   title="Bullet list">• Bullet</button>
+        <button class="tb-btn" onclick="mdLine('1. ')"  title="Numbered list">1. Numbered</button>
+        <button class="tb-btn" onclick="mdLine('> ')"   title="Quote block">❝ Quote</button>
+        <span class="w-px h-6 bg-slate-300 mx-1"></span>
+        <button class="tb-btn" onclick="document.getElementById('image-upload').click()" title="Upload an image (or paste / drag-drop directly)">🖼 Image</button>
+        <input id="image-upload" type="file" accept="image/*" class="hidden">
 
         <div class="ml-auto flex items-center gap-3 pr-1">
           <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
@@ -240,20 +181,24 @@
         </div>
       </div>
 
-      <!-- EDITOR + PREVIEW -->
+      <!-- Editor + preview -->
       <div class="flex-1 flex overflow-hidden">
         <div class="w-1/2 bg-white border-r border-slate-200 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Write here</div>
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            Write here <span class="text-slate-400 normal-case font-normal ml-2">— paste or drag images directly into this box</span>
+          </div>
           <textarea id="post-content" class="editor-textarea scroll-pane flex-1 w-full p-5 text-slate-800 placeholder-slate-400"
-                    placeholder="Just type normally. Select text and press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for a link.&#10;&#10;Use the toolbar buttons above for headings, lists, and quotes — or click the ? icon at the top for help."></textarea>
+                    placeholder="Just type normally. Select text and press Ctrl+B for bold, Ctrl+I for italic, Ctrl+K for a link.&#10;&#10;Use the toolbar buttons above for headings, lists, and quotes — or click the ? icon at the top for help.&#10;&#10;You can also paste or drag images directly into this box."></textarea>
         </div>
         <div class="w-1/2 bg-stone-50 flex flex-col">
-          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">Live preview (what visitors see)</div>
+          <div class="px-4 py-1.5 bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            Live preview (what visitors see)
+          </div>
           <div id="preview" class="preview-pane scroll-pane flex-1 w-full p-5 text-slate-800"></div>
         </div>
       </div>
 
-      <!-- DELETE (subtle, bottom-left) -->
+      <!-- Bottom bar: delete + shortcut hint -->
       <div class="bg-white border-t border-slate-200 px-4 py-2 flex items-center justify-between flex-shrink-0">
         <button id="delete-btn" onclick="deletePost()" class="hidden text-xs font-semibold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
@@ -264,12 +209,118 @@
         </span>
       </div>
     </main>
+
+    <!-- =========================== SETTINGS VIEW ======================== -->
+    <main id="settings-main" class="hidden flex-1 overflow-y-auto bg-stone-50">
+      <div class="max-w-3xl mx-auto px-6 py-8 space-y-8">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900">Site Settings</h1>
+          <p class="text-slate-500 mt-1">Edit the text that appears on the public-facing pages of your site.</p>
+        </div>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Identity</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Site name</label>
+              <input data-setting="name" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Short name (compact)</label>
+              <input data-setting="shortName" type="text" class="settings-input">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Tagline</label>
+            <input data-setting="tagline" type="text" class="settings-input">
+          </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Contact &amp; Booking</h2>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Calendly URL</label>
+            <input data-setting="calendlyUrl" type="url" class="settings-input">
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Contact email</label>
+              <input data-setting="contactEmail" type="email" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Phone (optional)</label>
+              <input data-setting="phone" type="tel" class="settings-input">
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Hero (Homepage)</h2>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Eyebrow (small label above heading)</label>
+            <input data-setting="hero.eyebrow" type="text" class="settings-input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Main heading</label>
+            <input data-setting="hero.heading" type="text" class="settings-input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Subheading</label>
+            <textarea data-setting="hero.subhead" rows="2" class="settings-input"></textarea>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Primary button label</label>
+              <input data-setting="hero.ctaPrimary.label" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Primary button link</label>
+              <input data-setting="hero.ctaPrimary.href" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Secondary button label</label>
+              <input data-setting="hero.ctaSecondary.label" type="text" class="settings-input">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Secondary button link</label>
+              <input data-setting="hero.ctaSecondary.href" type="text" class="settings-input">
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Book-a-Call Section</h2>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Heading</label>
+            <input data-setting="book.heading" type="text" class="settings-input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Subheading</label>
+            <textarea data-setting="book.subhead" rows="2" class="settings-input"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Button label</label>
+            <input data-setting="book.buttonLabel" type="text" class="settings-input">
+          </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Footer</h2>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Copyright text</label>
+            <input data-setting="footer.copyright" type="text" class="settings-input">
+          </div>
+        </section>
+
+        <p class="text-xs text-slate-400 pb-8">
+          Click <strong>Save settings</strong> in the top bar to apply changes site-wide.
+        </p>
+      </div>
+    </main>
   </div>
 
-  <!-- ============================================================== -->
-  <!-- HELP MODAL -->
-  <!-- ============================================================== -->
-  <div id="help-modal" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4" onclick="if(event.target===this)closeHelp()">
+  <!-- ============================== HELP MODAL ============================ -->
+  <div id="help-modal" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-extrabold text-slate-900">Formatting tips</h2>
@@ -282,6 +333,7 @@
           <tr><td class="py-2 font-semibold">Italic</td>    <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+I</kbd></td></tr>
           <tr><td class="py-2 font-semibold">Link</td>      <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+K</kbd></td></tr>
           <tr><td class="py-2 font-semibold">Save</td>      <td class="py-2 text-right"><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-xs">Ctrl+S</kbd></td></tr>
+          <tr><td class="py-2 font-semibold">Insert image</td><td class="py-2 text-right text-slate-500 text-xs">Click 🖼, paste, or drag-drop</td></tr>
         </tbody>
       </table>
       <div class="mt-6 p-4 bg-brand-50 rounded-lg text-sm text-slate-700">
@@ -293,372 +345,6 @@
 
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
-  <script>
-    const C = window.SITE_CONFIG;
-    document.getElementById('mode-label').textContent = window.PROGRAMS_MODE;
-    if (window.PROGRAMS_MODE === 'demo') {
-      document.getElementById('demo-banner').classList.remove('hidden');
-    }
-
-    // -------------------- Categories --------------------
-    const catSel = document.getElementById('post-category');
-    (C.categories || ['General']).forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c; opt.textContent = c;
-      catSel.appendChild(opt);
-    });
-
-    // -------------------- Auth gate (Supabase mode only) --------------------
-    async function requireAdmin() {
-      if (window.PROGRAMS_MODE !== 'supabase') return true;
-
-      const user = await window.ProgramsDB.getCurrentUser();
-      if (!user) { showLogin(); return false; }
-
-      const allowed = await window.ProgramsDB.isAdmin(user.email);
-      if (!allowed) {
-        document.body.innerHTML = `
-          <div class="flex items-center justify-center h-screen p-6 text-center">
-            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md">
-              <h1 class="text-2xl font-extrabold text-slate-900 mb-2">Not authorized</h1>
-              <p class="text-slate-600 mb-5">Your account (<strong>${user.email}</strong>) is not in the admin list.</p>
-              <button onclick="window.ProgramsDB.signOut().then(()=>location.reload())" class="bg-slate-900 text-white font-bold px-5 py-2 rounded-lg">Sign out</button>
-            </div>
-          </div>`;
-        return false;
-      }
-
-      document.getElementById('signout-btn').classList.remove('hidden');
-      return true;
-    }
-
-    function showLogin() {
-      document.getElementById('auth-gate').classList.remove('hidden');
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const pw    = document.getElementById('login-password').value;
-        const errEl = document.getElementById('login-error');
-        errEl.textContent = '';
-        try {
-          await window.ProgramsDB.signIn(email, pw);
-          location.reload();
-        } catch (err) {
-          errEl.textContent = err.message || 'Login failed';
-        }
-      });
-    }
-
-    async function signOut() {
-      await window.ProgramsDB.signOut();
-      location.reload();
-    }
-
-    // -------------------- Editor state --------------------
-    let currentPost = blankPost();
-    let isDirty = false;
-
-    function blankPost() {
-      return { id: null, slug: '', title: '', summary: '', category: C.categories[0], content_md: '', is_published: false };
-    }
-
-    // -------------------- Sidebar list --------------------
-    async function loadPostList() {
-      const listEl = document.getElementById('post-list');
-      const filter = document.getElementById('list-search').value.toLowerCase().trim();
-      let posts;
-      try { posts = await window.ProgramsDB.listAll(); }
-      catch (e) { listEl.innerHTML = '<div class="p-4 text-xs text-red-600">Failed to load posts.</div>'; return; }
-      const filtered = filter
-        ? posts.filter(p => (p.title||'').toLowerCase().includes(filter) || (p.slug||'').includes(filter))
-        : posts;
-      if (!filtered.length) {
-        listEl.innerHTML = '<div class="p-6 text-sm text-slate-400 text-center">No programs yet.<br><span class="text-xs">Click "Create New Draft" to start.</span></div>';
-        return;
-      }
-      listEl.innerHTML = filtered.map(p => `
-        <div class="border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50 border-l-4 border-l-brand-600' : ''}">
-          <button onclick="loadPost('${p.id}')" class="w-full text-left px-3 py-2.5">
-            <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-sm text-slate-900 truncate">${escapeHtml(p.title || '(untitled)')}</div>
-                <div class="text-[11px] text-slate-500 font-mono truncate">${p.slug || '—'}</div>
-              </div>
-              ${p.is_published
-                ? '<span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Live</span>'
-                : '<span class="text-[10px] font-bold uppercase text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">
-              ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
-            </div>
-          </button>
-        </div>`).join('');
-    }
-    document.getElementById('list-search').addEventListener('input', loadPostList);
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    // -------------------- Load / new --------------------
-    async function loadPost(id) {
-      if (isDirty && !confirm('You have unsaved changes. Discard them and load another post?')) return;
-      const all = await window.ProgramsDB.listAll();
-      const p = all.find(x => x.id === id);
-      if (!p) return;
-      currentPost = { ...p };
-      paintFromState();
-      isDirty = false;
-      setStatus('');
-      loadPostList();
-    }
-
-    function newPost() {
-      if (isDirty && !confirm('You have unsaved changes. Start a new draft anyway?')) return;
-      currentPost = blankPost();
-      paintFromState();
-      isDirty = false;
-      setStatus('');
-      loadPostList();
-      document.getElementById('post-title').focus();
-    }
-
-    function paintFromState() {
-      document.getElementById('post-title').value    = currentPost.title || '';
-      document.getElementById('post-slug').value     = currentPost.slug  || '';
-      document.getElementById('post-category').value = currentPost.category || C.categories[0];
-      document.getElementById('post-summary').value  = currentPost.summary || '';
-      document.getElementById('post-content').value  = currentPost.content_md || '';
-      document.getElementById('post-slug').dataset.manual = currentPost.id ? '1' : '';
-      document.getElementById('delete-btn').classList.toggle('hidden', !currentPost.id);
-      updateBreadcrumb();
-      updatePublishUI();
-      updatePreviewLink();
-      renderPreview();
-    }
-
-    function updateBreadcrumb() {
-      document.getElementById('editor-breadcrumb').textContent =
-        currentPost.id ? (currentPost.title || '(untitled)') : 'New draft';
-    }
-
-    // -------------------- Publish toggle --------------------
-    function togglePublish() {
-      currentPost.is_published = !currentPost.is_published;
-      markDirty();
-      updatePublishUI();
-    }
-
-    function updatePublishUI() {
-      const sw    = document.getElementById('pub-switch');
-      const label = document.getElementById('status-label');
-      const help  = document.getElementById('status-help');
-      if (currentPost.is_published) {
-        sw.classList.add('on');
-        label.textContent = 'Published';
-        label.className = 'text-sm font-bold text-emerald-700';
-        help.textContent = 'Live on the website';
-      } else {
-        sw.classList.remove('on');
-        label.textContent = 'Draft';
-        label.className = 'text-sm font-bold text-amber-700';
-        help.textContent = 'Only visible to admins';
-      }
-      updatePreviewLink();
-    }
-
-    // -------------------- Inputs --------------------
-    document.getElementById('post-title').addEventListener('input', (e) => {
-      currentPost.title = e.target.value;
-      if (!currentPost.id && !document.getElementById('post-slug').dataset.manual) {
-        const auto = window.slugify(e.target.value);
-        document.getElementById('post-slug').value = auto;
-        currentPost.slug = auto;
-        updatePreviewLink();
-      }
-      updateBreadcrumb();
-      markDirty();
-    });
-    document.getElementById('post-slug').addEventListener('input', (e) => {
-      currentPost.slug = e.target.value;
-      e.target.dataset.manual = '1';
-      updatePreviewLink();
-      markDirty();
-    });
-    document.getElementById('post-category').addEventListener('change', (e) => {
-      currentPost.category = e.target.value;
-      markDirty();
-    });
-    document.getElementById('post-summary').addEventListener('input', (e) => {
-      currentPost.summary = e.target.value;
-      markDirty();
-    });
-    document.getElementById('post-content').addEventListener('input', (e) => {
-      currentPost.content_md = e.target.value;
-      renderPreview();
-      markDirty();
-    });
-
-    function markDirty() { isDirty = true; setStatus('Unsaved changes'); }
-    function setStatus(msg, color = '#94a3b8') {
-      const el = document.getElementById('save-status');
-      el.textContent = msg; el.style.color = color;
-    }
-
-    function updatePreviewLink() {
-      const link = document.getElementById('preview-link');
-      if (currentPost.slug && currentPost.is_published) {
-        link.href = `posts.html?title=${encodeURIComponent(currentPost.slug)}`;
-        link.classList.remove('hidden');
-      } else {
-        link.classList.add('hidden');
-      }
-    }
-
-    // -------------------- Markdown preview --------------------
-    function renderPreview() {
-      const md = document.getElementById('post-content').value;
-      document.getElementById('preview').innerHTML =
-        DOMPurify.sanitize(marked.parse(md || ''));
-    }
-
-    // -------------------- Toolbar / shortcuts --------------------
-    function md(before, after) {
-      const ta = document.getElementById('post-content');
-      const { selectionStart: s, selectionEnd: e, value: v } = ta;
-      const selected = v.slice(s, e);
-      const replacement = before + selected + after;
-      ta.value = v.slice(0, s) + replacement + v.slice(e);
-      ta.focus();
-      // Place cursor inside the formatting if nothing was selected
-      if (selected.length === 0) {
-        ta.selectionStart = ta.selectionEnd = s + before.length;
-      } else {
-        ta.selectionStart = s + before.length;
-        ta.selectionEnd   = s + before.length + selected.length;
-      }
-      currentPost.content_md = ta.value;
-      renderPreview();
-      markDirty();
-    }
-
-    function mdLine(prefix) {
-      const ta = document.getElementById('post-content');
-      const { selectionStart: s, value: v } = ta;
-      // Find start of line
-      let lineStart = s;
-      while (lineStart > 0 && v[lineStart - 1] !== '\n') lineStart--;
-      ta.value = v.slice(0, lineStart) + prefix + v.slice(lineStart);
-      ta.focus();
-      ta.selectionStart = ta.selectionEnd = s + prefix.length;
-      currentPost.content_md = ta.value;
-      renderPreview();
-      markDirty();
-    }
-
-    function mdLink() {
-      const ta = document.getElementById('post-content');
-      const { selectionStart: s, selectionEnd: e, value: v } = ta;
-      const selected = v.slice(s, e) || 'link text';
-      const url = prompt('Enter the URL:', 'https://');
-      if (!url) return;
-      const replacement = `[${selected}](${url})`;
-      ta.value = v.slice(0, s) + replacement + v.slice(e);
-      ta.focus();
-      ta.selectionStart = s + 1;
-      ta.selectionEnd   = s + 1 + selected.length;
-      currentPost.content_md = ta.value;
-      renderPreview();
-      markDirty();
-    }
-
-    // Keyboard shortcuts: Ctrl/Cmd + B / I / K / S
-    document.getElementById('post-content').addEventListener('keydown', (e) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === 'b' || e.key === 'B') { e.preventDefault(); md('**','**'); }
-      else if (e.key === 'i' || e.key === 'I') { e.preventDefault(); md('*','*'); }
-      else if (e.key === 'k' || e.key === 'K') { e.preventDefault(); mdLink(); }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault(); savePost();
-      }
-    });
-
-    // -------------------- Sync scroll --------------------
-    const editorEl  = document.getElementById('post-content');
-    const previewEl = document.getElementById('preview');
-    let syncing = false;
-    function pairScroll(src, dst) {
-      src.addEventListener('scroll', () => {
-        if (syncing || !document.getElementById('sync-scroll').checked) return;
-        syncing = true;
-        const pct = src.scrollTop / (src.scrollHeight - src.clientHeight || 1);
-        dst.scrollTop = pct * (dst.scrollHeight - dst.clientHeight);
-        requestAnimationFrame(() => { syncing = false; });
-      });
-    }
-    pairScroll(editorEl, previewEl);
-    pairScroll(previewEl, editorEl);
-
-    // -------------------- Save / delete --------------------
-    async function savePost() {
-      if (!currentPost.title.trim()) { alert('Please enter a title before saving.'); return; }
-      if (!currentPost.slug.trim()) {
-        currentPost.slug = window.slugify(currentPost.title);
-        document.getElementById('post-slug').value = currentPost.slug;
-      }
-      setStatus('Saving...', '#64748b');
-      try {
-        const saved = await window.ProgramsDB.save(currentPost);
-        currentPost = { ...saved };
-        isDirty = false;
-        setStatus('Saved ✓', '#059669');
-        setTimeout(() => setStatus(''), 2000);
-        document.getElementById('delete-btn').classList.remove('hidden');
-        updatePreviewLink();
-        loadPostList();
-      } catch (err) {
-        console.error(err);
-        setStatus('Error saving', '#dc2626');
-        alert('Save failed: ' + (err.message || err));
-      }
-    }
-
-    async function deletePost() {
-      if (!currentPost.id) return;
-      const title = currentPost.title || '(untitled)';
-      if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return;
-      try {
-        await window.ProgramsDB.remove(currentPost.id);
-        newPost();
-        loadPostList();
-        setStatus('Deleted', '#dc2626');
-        setTimeout(() => setStatus(''), 2000);
-      } catch (err) {
-        console.error(err);
-        alert('Delete failed: ' + (err.message || err));
-      }
-    }
-
-    // -------------------- Help modal --------------------
-    function showHelp()  { document.getElementById('help-modal').classList.remove('hidden'); }
-    function closeHelp() { document.getElementById('help-modal').classList.add('hidden'); }
-
-    // -------------------- Beforeunload --------------------
-    window.addEventListener('beforeunload', (e) => {
-      if (isDirty) { e.preventDefault(); e.returnValue = ''; }
-    });
-
-    // -------------------- INIT --------------------
-    (async () => {
-      const ok = await requireAdmin();
-      if (!ok) return;
-      paintFromState();
-      renderPreview();
-      loadPostList();
-    })();
-  </script>
+  <script src="assets/admin.js"></script>
 </body>
 </html>
