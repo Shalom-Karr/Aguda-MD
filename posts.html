@@ -229,14 +229,15 @@
         return { id: unique, text: h.textContent || '', tag: h.tagName.toLowerCase() };
       });
 
-      const nav    = document.getElementById('toc-nav');
-      const navMob = document.getElementById('toc-mobile-nav');
+      const nav     = document.getElementById('toc-nav');
+      const navMob  = document.getElementById('toc-mobile-nav');
       const sidebar = document.getElementById('toc-sidebar');
       const mobile  = document.getElementById('toc-mobile');
 
       // Hide TOC if too few sections to be useful
       if (items.length < 2) {
         sidebar.classList.add('hidden');
+        sidebar.classList.remove('lg:block');
         mobile.classList.add('hidden');
         return;
       }
@@ -246,9 +247,10 @@
           ${escapeHtml(it.text)}
         </a>`).join('');
 
-      nav.innerHTML = html;
+      nav.innerHTML    = html;
       navMob.innerHTML = html;
-      sidebar.classList.remove('hidden');
+      // Sidebar visibility is controlled by Tailwind (hidden lg:block).
+      // Dropdown visibility is controlled by Tailwind (lg:hidden hidden) — show below lg only.
       mobile.classList.remove('hidden');
 
       // Smooth scroll + close mobile drawer on click
