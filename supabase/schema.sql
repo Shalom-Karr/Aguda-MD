@@ -80,6 +80,7 @@ create table if not exists public.agudah_md_ga_faqs (
   is_published      boolean not null default true,
   show_on_homepage  boolean not null default false,
   show_on_faq_page  boolean not null default true,
+  program_slug      text,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
@@ -93,6 +94,9 @@ create index if not exists agudah_md_ga_faqs_homepage_idx
   where is_published = true;
 create index if not exists agudah_md_ga_faqs_faqpage_idx
   on public.agudah_md_ga_faqs (show_on_faq_page, sort_order)
+  where is_published = true;
+create index if not exists agudah_md_ga_faqs_program_idx
+  on public.agudah_md_ga_faqs (program_slug, sort_order)
   where is_published = true;
 
 
