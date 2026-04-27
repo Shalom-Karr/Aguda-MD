@@ -87,8 +87,11 @@
           </ul>
         </div>
       </div>
-      <div class="border-t border-slate-800 py-5 px-6">
+      <div class="border-t border-slate-800 py-5 px-6 space-y-1">
         <p class="text-center text-xs text-slate-400">${escAttr(copyright)}</p>
+        <p class="text-center text-[11px] text-slate-500">
+          Built by <a href="https://github.com/Shalom-Karr" target="_blank" rel="noopener" class="text-slate-300 hover:text-white underline-offset-2 hover:underline">Shalom Karr</a>
+        </p>
       </div>`;
   };
 })();

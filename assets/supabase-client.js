@@ -523,7 +523,7 @@ So you usually don't need to apply separately for those.`,
       /* -------- FAQs ----------------------------------------------------- */
       async listPublishedFaqs() {
         const { data, error } = await client.from(FAQS_TABLE)
-          .select('*').eq('is_published', true)
+          .select('*').eq('is_published', true).is('program_slug', null)
           .order('sort_order', { ascending: true });
         if (error) throw error;
         return data || [];
@@ -531,6 +531,7 @@ So you usually don't need to apply separately for those.`,
       async listHomepageFaqs() {
         const { data, error } = await client.from(FAQS_TABLE)
           .select('*').eq('is_published', true).eq('show_on_homepage', true)
+          .is('program_slug', null)
           .order('sort_order', { ascending: true });
         if (error) throw error;
         return data || [];
@@ -538,6 +539,14 @@ So you usually don't need to apply separately for those.`,
       async listFaqPageFaqs() {
         const { data, error } = await client.from(FAQS_TABLE)
           .select('*').eq('is_published', true).eq('show_on_faq_page', true)
+          .is('program_slug', null)
+          .order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
+      async listProgramFaqs(programSlug) {
+        const { data, error } = await client.from(FAQS_TABLE)
+          .select('*').eq('is_published', true).eq('program_slug', programSlug)
           .order('sort_order', { ascending: true });
         if (error) throw error;
         return data || [];
@@ -601,6 +610,7 @@ So you usually don't need to apply separately for those.`,
       listPublishedFaqs: lazy('listPublishedFaqs'),
       listHomepageFaqs:  lazy('listHomepageFaqs'),
       listFaqPageFaqs:   lazy('listFaqPageFaqs'),
+      listProgramFaqs:   lazy('listProgramFaqs'),
       listAllFaqs:    lazy('listAllFaqs'),
       saveFaq:        lazy('saveFaq'),
       removeFaq:      lazy('removeFaq'),
@@ -652,10 +662,12 @@ So you usually don't need to apply separately for those.`,
       return FAQ_SEED.slice();
     }
     function saveFaqs(list) { localStorage.setItem(FAQS_LS_KEY, JSON.stringify(list)); }
-    demoDB.listPublishedFaqs = async () => loadFaqs().filter(f => f.is_published).sort((a,b) => a.sort_order - b.sort_order);
-    demoDB.listHomepageFaqs  = async () => loadFaqs().filter(f => f.is_published && f.show_on_homepage).sort((a,b) => a.sort_order - b.sort_order);
-    demoDB.listFaqPageFaqs   = async () => loadFaqs().filter(f => f.is_published && (f.show_on_faq_page !== false)).sort((a,b) => a.sort_order - b.sort_order);
-    demoDB.listAllFaqs       = async () => loadFaqs().sort((a,b) => a.sort_order - b.sort_order);
+    const isSiteWide = (f) => !f.program_slug;
+    demoDB.listPublishedFaqs = async () => loadFaqs().filter(f => f.is_published && isSiteWide(f)).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listHomepageFaqs  = async () => loadFaqs().filter(f => f.is_published && f.show_on_homepage && isSiteWide(f)).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listFaqPageFaqs   = async () => loadFaqs().filter(f => f.is_published && (f.show_on_faq_page !== false) && isSiteWide(f)).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listProgramFaqs   = async (slug) => loadFaqs().filter(f => f.is_published && f.program_slug === slug).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listAllFaqs       = async () => loadFaqs().sort((a,b) => (a.program_slug || '').localeCompare(b.program_slug || '') || (a.sort_order - b.sort_order));
     demoDB.saveFaq = async (faq) => {
       const list = loadFaqs();
       const now  = new Date().toISOString();
