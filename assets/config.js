@@ -29,7 +29,7 @@ window.SITE_CONFIG = {
 
   /* Hero copy (homepage) */
   hero: {
-    eyebrow:  'A project of Ahavas Yisrael & Agudath Israel of Maryland',
+    eyebrow:  'A project of Ahavas Yisrael & Agudah Maryland',
     heading:  'Connecting You to Resources That Matter',
     subhead:  'We help Maryland residents apply for SNAP, Medicaid, WIC, energy assistance, and more — free, fast, and step-by-step.',
     ctaPrimary:   { label: 'Browse programs', href: '#programs' },
@@ -40,7 +40,7 @@ window.SITE_CONFIG = {
   book: {
     heading: 'Not sure where to start?',
     subhead: "Book a free 20-minute call. We'll figure out which programs you qualify for and walk you through the next steps.",
-    buttonLabel: 'Schedule a free call',
+    buttonLabel: 'Book a Call',
   },
 
   /* Footer copy — every value here is editable from the admin Site Settings tab.
