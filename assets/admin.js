@@ -617,6 +617,18 @@
       settingsCache = { __loaded: true };
     }
     paintSettingsForm();
+    applyFaqTabVisibility();
+  }
+
+  /* The FAQs tab edits site-wide FAQs only. When the admin has flipped the
+   * "general FAQ section" off, that whole tab becomes pointless — so we hide
+   * the tab + sidebar/main and bounce the user back to the editor if they're
+   * on it. Per-program FAQs live inside the program editor, not affected. */
+  function applyFaqTabVisibility() {
+    const enabled = settingsCache.faqEnabled !== false &&
+                    (settingsCache.faqEnabled !== undefined || C.faqEnabled !== false);
+    $('#tab-faqs').classList.toggle('hidden', !enabled);
+    if (!enabled && currentView === 'faqs') setView('editor');
   }
 
   function paintSettingsForm() {
@@ -666,6 +678,7 @@
       settingsCache = saved || {};
       settingsCache.__loaded = true;
       settingsDirty = false;
+      applyFaqTabVisibility();
       setStatus('Settings saved ✓', '#059669');
       setTimeout(() => setStatus(''), 2000);
     } catch (err) {
@@ -954,6 +967,11 @@
     paintFromState();
     renderPreview();
     loadPostList();
+
+    // Pre-load settings so the FAQs tab can be hidden immediately when the
+    // general FAQ section is off (rather than only after the user clicks
+    // into Settings for the first time).
+    loadSettings();
   }
 
   init();
