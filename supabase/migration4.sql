@@ -49,11 +49,11 @@ set data = '{
   "hero": {
     "eyebrow": "A project of Ahavas Yisrael & Agudath Israel of Maryland",
     "heading": "Connecting You to Resources That Matter",
-    "subhead": "A nonprofit organization dedicated to helping community members access government assistance programs. We evaluate your situation, research eligible programs, and guide you through every step of the application process — free of charge."
+    "subhead": "A nonprofit dedicated to helping community members access government assistance. We assess your situation, find the programs you''re eligible for, and walk you through every application — at no cost."
   },
   "book": {
-    "heading": "Need a hand with your application?",
-    "subhead": "Book a free 20-minute call and we''ll walk you through your options, step by step.",
+    "heading": "Not sure where to start?",
+    "subhead": "Book a free 20-minute call. We''ll figure out which programs you qualify for and walk you through the next steps.",
     "buttonLabel": "Schedule a free call"
   },
   "footer": {

@@ -32,6 +32,56 @@
     details[open] summary .arrow { transform: rotate(180deg); }
     summary::-webkit-details-marker { display: none; }
     summary { list-style: none; }
+
+    /* Hero ----------------------------------------------------------------- */
+    .hero-wrap {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 800px; height: 800px;
+      top: -200px; left: -200px;
+      background: radial-gradient(circle at center, rgba(59, 130, 246, 0.35), transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-bg-logo {
+      position: absolute;
+      right: -6%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60%;
+      max-width: 720px;
+      opacity: 0.10;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      filter: brightness(2.4);
+      mask-image:         linear-gradient(to left, black 55%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to left, black 55%, transparent 100%);
+    }
+    @media (max-width: 768px) {
+      .hero-bg-logo { right: -25%; width: 90%; opacity: 0.07; }
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      color: #dbeafe;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .hero-eyebrow::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.25);
+    }
   </style>
 </head>
 <body class="bg-stone-50 text-slate-900 antialiased">
@@ -57,11 +107,16 @@
   </header>
 
   <!-- Intro / hero -->
-  <section class="bg-gradient-to-br from-brand-800 to-brand-900 text-white">
-    <div class="max-w-5xl mx-auto px-6 py-16 md:py-20 text-center">
-      <span id="hero-eyebrow" class="inline-block bg-white/15 text-blue-100 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-5"></span>
-      <h1 id="hero-heading" class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5"></h1>
-      <p id="hero-subhead" class="text-lg md:text-xl text-blue-50/90 leading-relaxed max-w-3xl mx-auto"></p>
+  <section class="hero-wrap bg-gradient-to-br from-brand-800 via-brand-900 to-slate-900 text-white">
+    <div class="hero-glow"></div>
+    <img src="assets/logo.png" alt="" aria-hidden="true" class="hero-bg-logo">
+
+    <div class="relative max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <div class="max-w-2xl">
+        <span id="hero-eyebrow" class="hero-eyebrow"></span>
+        <h1 id="hero-heading" class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6"></h1>
+        <p id="hero-subhead" class="text-lg md:text-xl text-blue-100/90 leading-relaxed"></p>
+      </div>
     </div>
   </section>
 
