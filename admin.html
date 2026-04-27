@@ -131,7 +131,7 @@
         <input id="post-title" type="text" placeholder="Program title (e.g. SNAP Food Benefits)"
                class="w-full text-2xl font-extrabold border-0 p-0 focus:ring-0 outline-none placeholder-slate-300">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">URL slug</label>
             <input id="post-slug" type="text" placeholder="auto-from-title" class="settings-input font-mono text-sm">
@@ -141,6 +141,10 @@
             <select id="post-category" class="settings-input text-sm"></select>
           </div>
           <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Order <span class="text-slate-400 normal-case font-normal">(lower = first)</span></label>
+            <input id="post-sort-order" type="number" placeholder="10" class="settings-input text-sm">
+          </div>
+          <div class="md:col-span-1">
             <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Short summary</label>
             <input id="post-summary" type="text" placeholder="One-line description for the homepage card" class="settings-input text-sm">
           </div>
@@ -355,6 +359,13 @@
         <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">FAQ Page</h2>
           <p class="text-xs text-slate-400 -mt-2">Copy shown on the <code class="bg-slate-100 px-1 rounded">/faq</code> page (heading at top + the CTA card at the bottom).</p>
+          <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+            <input data-setting="faqEnabled" data-bool="1" type="checkbox" class="w-4 h-4 mt-0.5 accent-brand-600">
+            <span class="text-sm text-slate-700">
+              <span class="font-bold">Enable the general FAQ section</span><br>
+              <span class="text-xs text-slate-500">When off, the "FAQ" link is removed from the header on every page, the homepage FAQ teaser is hidden, and the <code class="bg-white px-1 rounded">/faq</code> page returns "page not found." Per-program FAQs are not affected.</span>
+            </span>
+          </label>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Page heading</label>
             <input data-setting="faqPage.heading" type="text" class="settings-input">

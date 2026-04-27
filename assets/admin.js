@@ -51,6 +51,7 @@
       id: null, slug: '', title: '', summary: '',
       category: (C.categories || ['General'])[0],
       icon: '', content_md: '', faq_md: '', is_published: false,
+      sort_order: 100,
     };
   }
 
@@ -218,7 +219,7 @@
               : '<span class="text-[10px] font-bold uppercase text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
           </div>
           <div class="text-[10px] text-slate-400 mt-1">
-            ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
+            #${p.sort_order ?? '?'} · ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
           </div>
         </button>
       </div>`).join('');
@@ -252,10 +253,11 @@
   }
 
   function paintFromState() {
-    $('#post-title').value    = currentPost.title    || '';
-    $('#post-slug').value     = currentPost.slug     || '';
-    $('#post-category').value = currentPost.category || (C.categories || ['General'])[0];
-    $('#post-summary').value  = currentPost.summary  || '';
+    $('#post-title').value      = currentPost.title    || '';
+    $('#post-slug').value       = currentPost.slug     || '';
+    $('#post-category').value   = currentPost.category || (C.categories || ['General'])[0];
+    $('#post-summary').value    = currentPost.summary  || '';
+    $('#post-sort-order').value = (currentPost.sort_order ?? 100);
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
     $('#delete-btn').classList.toggle('hidden', !currentPost.id);
     paintIconPicker();
@@ -372,6 +374,11 @@
     });
     $('#post-summary').addEventListener('input', (e) => {
       currentPost.summary = e.target.value;
+      markDirty();
+    });
+    $('#post-sort-order').addEventListener('input', (e) => {
+      const n = parseInt(e.target.value, 10);
+      currentPost.sort_order = Number.isFinite(n) ? n : 100;
       markDirty();
     });
     $('#post-content').addEventListener('input', (e) => {
@@ -617,15 +624,22 @@
       const path = input.dataset.setting;
       const dbVal      = getByPath(settingsCache, path);
       const defaultVal = getByPath(C, path);
-      input.value = (dbVal != null ? dbVal : (defaultVal != null ? defaultVal : ''));
-      input.placeholder = defaultVal != null ? String(defaultVal) : input.placeholder;
+      if (input.dataset.bool) {
+        // Checkbox-backed boolean setting
+        const eff = (dbVal != null ? dbVal : (defaultVal != null ? defaultVal : false));
+        input.checked = !!eff;
+      } else {
+        input.value = (dbVal != null ? dbVal : (defaultVal != null ? defaultVal : ''));
+        input.placeholder = defaultVal != null ? String(defaultVal) : input.placeholder;
+      }
     });
     settingsDirty = false;
   }
 
   function wireSettingsInputs() {
     $$('[data-setting]').forEach(input => {
-      input.addEventListener('input', () => {
+      const evt = (input.type === 'checkbox') ? 'change' : 'input';
+      input.addEventListener(evt, () => {
         settingsDirty = true;
         setStatus('Unsaved settings');
       });
@@ -636,6 +650,10 @@
     const updates = {};
     $$('[data-setting]').forEach(input => {
       const path = input.dataset.setting;
+      if (input.dataset.bool) {
+        setByPath(updates, path, !!input.checked);
+        return;
+      }
       const val  = input.value;
       // Empty input = unset (revert to default from config.js)
       setByPath(updates, path, val === '' ? null : val);

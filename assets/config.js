@@ -27,6 +27,13 @@ window.SITE_CONFIG = {
    *   'inline'   — Calendly is embedded directly on the /book page. */
   bookingMode: 'inline',
 
+  /* Master switch for the *general* FAQ section (the site-wide one with
+   * questions about language/cost/religion/etc).
+   *   true  — FAQ link in header, FAQ teaser on homepage, /faq page live.
+   *   false — link removed everywhere, teaser hidden, /faq returns 404.
+   * Per-program FAQs (the FAQ tab on each guide) are not affected. */
+  faqEnabled: true,
+
   /* Hero copy (homepage) */
   hero: {
     eyebrow:  'A project of Ahavas Yisrael & Agudah Maryland',

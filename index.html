@@ -118,7 +118,7 @@
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="text-brand-700">Programs</a>
-        <a href="faq.html" class="hover:text-brand-700">FAQ</a>
+        <a id="nav-faq" href="faq.html" class="hidden hover:text-brand-700">FAQ</a>
         <a id="header-book-link" href="book.html" class="hover:text-brand-700">Book a Call</a>
         <a href="admin.html" class="text-xs text-slate-400 hover:text-slate-600">Admin</a>
       </nav>
@@ -223,6 +223,8 @@
       document.getElementById('book-subhead').textContent = C.book.subhead;
       document.getElementById('book-cta').textContent     = C.book.buttonLabel;
       applyBookingLinks(C);
+      // FAQ link in header — only shown if the general FAQ section is enabled
+      document.getElementById('nav-faq').classList.toggle('hidden', C.faqEnabled === false);
       window.mountFooter();
     }
 
@@ -298,6 +300,8 @@
     }
 
     async function loadFaqPreview() {
+      // Skip entirely if the general FAQ section is disabled
+      if (window.SITE_CONFIG && window.SITE_CONFIG.faqEnabled === false) return;
       let list;
       try { list = await window.ProgramsDB.listHomepageFaqs(); }
       catch (e) { return; }
@@ -331,9 +335,10 @@
     window.applyDynamicConfig().then(() => {
       applyConfig();
       document.getElementById('hero-text').classList.add('ready');
+      // Wait for merged settings before deciding whether to render the FAQ teaser
+      loadFaqPreview();
     });
     loadPrograms();
-    loadFaqPreview();
   </script>
 </body>
 </html>

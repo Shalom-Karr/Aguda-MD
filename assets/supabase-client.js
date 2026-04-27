@@ -75,6 +75,7 @@ You may qualify if your household's gross monthly income is at or below **200% o
 
 Book a free call with us and we'll walk through the application together.`,
       is_published: true,
+      sort_order: 10,
       created_at: '2026-02-15T10:00:00Z',
       updated_at: '2026-04-10T14:30:00Z',
     },
@@ -120,6 +121,7 @@ Income limits vary by category:
 
 Every year you must **renew** your Medicaid. Watch for the red envelope from DHS and respond within 30 days or your coverage will end.`,
       is_published: true,
+      sort_order: 20,
       created_at: '2026-02-20T11:00:00Z',
       updated_at: '2026-04-05T09:15:00Z',
     },
@@ -165,6 +167,7 @@ WIC provides **healthy food, infant formula, nutrition counseling, and breastfee
 - Kids age out at their **5th birthday** — renew every 6-12 months until then.
 - You can use your eWIC card at **most major grocery stores** in Maryland.`,
       is_published: true,
+      sort_order: 30,
       created_at: '2026-02-25T13:00:00Z',
       updated_at: '2026-04-01T10:00:00Z',
     },
@@ -217,6 +220,7 @@ Income at or below **175% of poverty** (about $54,600 for a family of 4).
 
 Apply **early in the season** (October/November). Funds are limited and the program sometimes runs out by spring.`,
       is_published: true,
+      sort_order: 40,
       created_at: '2026-03-01T09:00:00Z',
       updated_at: '2026-04-12T15:00:00Z',
     },
@@ -275,6 +279,7 @@ Each county/city has its own housing authority. Check openings at:
 
 **Need help navigating the waitlists?** Book a call — we help people apply strategically to multiple authorities.`,
       is_published: true,
+      sort_order: 100,
       created_at: '2026-03-05T10:00:00Z',
       updated_at: '2026-04-15T11:30:00Z',
     },
@@ -342,6 +347,7 @@ When you're approved for TCA, you're **automatically screened** for:
 
 So you usually don't need to apply separately for those.`,
       is_published: true,
+      sort_order: 50,
       created_at: '2026-03-10T12:00:00Z',
       updated_at: '2026-04-08T16:00:00Z',
     },
@@ -367,15 +373,18 @@ So you usually don't need to apply separately for those.`,
       .replace(/-+/g, '-');
   }
 
+  const sortBySortOrder = (a, b) => {
+    const sa = (a.sort_order ?? 999), sb = (b.sort_order ?? 999);
+    if (sa !== sb) return sa - sb;
+    return (b.updated_at || b.created_at || '').localeCompare(a.updated_at || a.created_at || '');
+  };
+
   const demoDB = {
     async listPublished() {
-      return demoLoad()
-        .filter(p => p.is_published)
-        .sort((a, b) => (b.updated_at || b.created_at).localeCompare(a.updated_at || a.created_at));
+      return demoLoad().filter(p => p.is_published).sort(sortBySortOrder);
     },
     async listAll() {
-      return demoLoad()
-        .sort((a, b) => (b.updated_at || b.created_at).localeCompare(a.updated_at || a.created_at));
+      return demoLoad().sort(sortBySortOrder);
     },
     async getBySlug(slug) {
       const list = demoLoad();
@@ -440,13 +449,16 @@ So you usually don't need to apply separately for those.`,
       async listPublished() {
         const { data, error } = await client.from(TABLE)
           .select('*').eq('is_published', true)
+          .order('sort_order', { ascending: true })
           .order('updated_at', { ascending: false });
         if (error) throw error;
         return data || [];
       },
       async listAll() {
         const { data, error } = await client.from(TABLE)
-          .select('*').order('updated_at', { ascending: false });
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('updated_at', { ascending: false });
         if (error) throw error;
         return data || [];
       },

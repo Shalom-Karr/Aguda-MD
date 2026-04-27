@@ -49,13 +49,21 @@
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="hover:text-brand-700">Programs</a>
-        <a href="faq.html"   class="text-brand-700">FAQ</a>
+        <a id="nav-faq" href="faq.html" class="hidden text-brand-700">FAQ</a>
         <a href="book.html"  class="hover:text-brand-700">Book a Call</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-3xl mx-auto px-6 py-12 md:py-16">
+  <!-- "Page not found" view, shown when the general FAQ section is disabled -->
+  <main id="notfound" class="hidden max-w-3xl mx-auto px-6 py-20 text-center">
+    <p class="text-7xl font-extrabold text-slate-200 mb-4">404</p>
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Page not found</h1>
+    <p class="text-slate-500 mb-8">The page you're looking for doesn't exist.</p>
+    <a href="index.html" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-6 py-3 rounded-xl">Back to programs</a>
+  </main>
+
+  <main id="faq-main" class="hidden max-w-3xl mx-auto px-6 py-12 md:py-16">
     <h1 id="faq-page-heading" class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3"></h1>
     <p id="faq-page-subhead" class="text-lg text-slate-600 mb-12"></p>
 
@@ -80,6 +88,9 @@
     function applyConfig() {
       const C = window.SITE_CONFIG;
       const fp = C.faqPage || {};
+
+      const faqLink = document.getElementById('nav-faq');
+      if (faqLink) faqLink.classList.toggle('hidden', C.faqEnabled === false);
 
       document.getElementById('faq-page-heading').textContent = fp.heading || 'Frequently asked questions';
       document.getElementById('faq-page-subhead').textContent = fp.subhead || "Can't find your question? Book a call below.";
@@ -121,10 +132,20 @@
         </details>`).join('');
     }
 
-    /* Init */
-    applyConfig();
-    window.applyDynamicConfig().then(applyConfig);
-    loadFaqs();
+    /* Init — wait for DB-merged config to know whether the FAQ page should
+     * even render. If faqEnabled === false, show the 404 view instead. */
+    window.applyDynamicConfig().then(() => {
+      const C = window.SITE_CONFIG;
+      if (C.faqEnabled === false) {
+        document.title = 'Page not found · ' + (C.name || 'BCRN');
+        document.getElementById('notfound').classList.remove('hidden');
+        window.mountFooter();
+        return;
+      }
+      document.getElementById('faq-main').classList.remove('hidden');
+      applyConfig();
+      loadFaqs();
+    });
   </script>
 </body>
 </html>

@@ -83,7 +83,7 @@
       </a>
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
         <a href="index.html" class="hover:text-brand-700">Programs</a>
-        <a href="faq.html" class="hover:text-brand-700">FAQ</a>
+        <a id="nav-faq" href="faq.html" class="hidden hover:text-brand-700">FAQ</a>
         <a href="book.html" class="hover:text-brand-700">Book a Call</a>
       </nav>
     </div>
@@ -179,6 +179,8 @@
       cta.href = isInline ? 'book.html' : C.calendlyUrl;
       if (isInline) { cta.removeAttribute('target'); cta.removeAttribute('rel'); }
       else          { cta.target = '_blank'; cta.rel = 'noopener'; }
+      const faqLink = document.getElementById('nav-faq');
+      if (faqLink) faqLink.classList.toggle('hidden', C.faqEnabled === false);
       window.mountFooter();
     }
 
