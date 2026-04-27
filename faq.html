@@ -56,17 +56,17 @@
   </header>
 
   <main class="max-w-3xl mx-auto px-6 py-12 md:py-16">
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3">Frequently asked questions</h1>
-    <p class="text-lg text-slate-600 mb-12">Can't find your question? <a href="book.html" class="text-brand-700 font-semibold underline decoration-2 underline-offset-2 hover:text-brand-900">Book a call</a>.</p>
+    <h1 id="faq-page-heading" class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3"></h1>
+    <p id="faq-page-subhead" class="text-lg text-slate-600 mb-12"></p>
 
     <div id="faq-loading" class="py-12 text-center text-slate-400 text-sm">Loading...</div>
     <div class="space-y-3" id="faq-list"></div>
     <div id="faq-empty" class="hidden py-12 text-center text-slate-400 text-sm">No FAQs published yet. Check back soon.</div>
 
     <div class="mt-16 p-8 bg-gradient-to-br from-brand-700 to-brand-800 text-white rounded-2xl text-center">
-      <h2 class="text-2xl font-bold mb-2">Still stuck?</h2>
-      <p class="text-blue-50/90 mb-5">Talk to a real person — it's free.</p>
-      <a id="cta-book" href="#" class="inline-block bg-white hover:bg-blue-50 text-brand-800 font-bold px-6 py-3 rounded-xl transition-colors">Book a free call</a>
+      <h2 id="faq-cta-heading" class="text-2xl font-bold mb-2"></h2>
+      <p id="faq-cta-subhead" class="text-blue-50/90 mb-5"></p>
+      <a id="cta-book" href="#" class="inline-block bg-white hover:bg-blue-50 text-brand-800 font-bold px-6 py-3 rounded-xl transition-colors"></a>
     </div>
   </main>
 
@@ -79,7 +79,15 @@
   <script>
     function applyConfig() {
       const C = window.SITE_CONFIG;
+      const fp = C.faqPage || {};
+
+      document.getElementById('faq-page-heading').textContent = fp.heading || 'Frequently asked questions';
+      document.getElementById('faq-page-subhead').textContent = fp.subhead || "Can't find your question? Book a call below.";
+      document.getElementById('faq-cta-heading').textContent  = fp.ctaHeading || 'Still stuck?';
+      document.getElementById('faq-cta-subhead').textContent  = fp.ctaSubhead || "Talk to a real person — it's free.";
+
       const cta = document.getElementById('cta-book');
+      cta.textContent = fp.ctaButton || 'Book a free call';
       const isInline = C.bookingMode === 'inline';
       cta.href = isInline ? 'book.html' : C.calendlyUrl;
       if (isInline) { cta.removeAttribute('target'); cta.removeAttribute('rel'); }

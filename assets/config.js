@@ -43,6 +43,15 @@ window.SITE_CONFIG = {
     buttonLabel: 'Book a Call',
   },
 
+  /* FAQ page (/faq) copy — heading at the top, then the bottom CTA card */
+  faqPage: {
+    heading:    'Frequently asked questions',
+    subhead:    "Can't find your question? Book a call below.",
+    ctaHeading: 'Still stuck?',
+    ctaSubhead: "Talk to a real person — it's free.",
+    ctaButton:  'Book a free call',
+  },
+
   /* Footer copy — every value here is editable from the admin Site Settings tab.
    * Logo image files (assets/logo-ay.png and assets/logo-aimd.png) are
    * referenced fixed paths; replace those files to change the actual
