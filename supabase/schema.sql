@@ -176,7 +176,8 @@ create policy "Admins can manage admin list"
 -- using the SAME email and a strong password.
 -- =============================================================================
 insert into public.agudah_md_ga_admins (email, full_name) values
-  ('chani@agudathisrael-md.org', 'Chani Vilner')
+  ('chani@agudathisrael-md.org', 'Chani Vilner'),
+  ('shalomkarrsphone@gmail.com', 'Shalom Karr')
 on conflict (email) do nothing;
 
 
