@@ -40,9 +40,10 @@
 
   let currentPost   = blankPost();
   let isDirty       = false;
-  let currentView   = 'editor';                  // 'editor' | 'settings'
+  let currentView   = 'editor';                  // 'editor' | 'faqs' | 'settings'
   let settingsCache = {};
   let settingsDirty = false;
+  let faqDirtyIds   = new Set();
 
   function blankPost() {
     return {
@@ -137,39 +138,43 @@
   function setView(view) {
     if (view === currentView) return;
 
-    // Warn on unsaved changes when leaving the editor
-    if (currentView === 'editor'   && isDirty       && !confirm('You have unsaved changes in the editor. Switch tabs anyway?')) return;
-    if (currentView === 'settings' && settingsDirty && !confirm('You have unsaved settings changes. Switch tabs anyway?')) return;
+    // Warn on unsaved changes when leaving
+    if (currentView === 'editor'   && isDirty            && !confirm('You have unsaved changes in the editor. Switch tabs anyway?')) return;
+    if (currentView === 'settings' && settingsDirty      && !confirm('You have unsaved settings changes. Switch tabs anyway?')) return;
+    if (currentView === 'faqs'     && faqDirtyIds.size   && !confirm('You have unsaved FAQ changes. Switch tabs anyway?')) return;
 
     currentView = view;
 
-    // Tab styling
-    $('#tab-programs').classList.toggle('text-brand-700',         view === 'editor');
-    $('#tab-programs').classList.toggle('border-b-2',             view === 'editor');
-    $('#tab-programs').classList.toggle('border-brand-700',       view === 'editor');
-    $('#tab-programs').classList.toggle('bg-brand-50/50',         view === 'editor');
-    $('#tab-programs').classList.toggle('text-slate-500',         view !== 'editor');
-
-    $('#tab-settings').classList.toggle('text-brand-700',         view === 'settings');
-    $('#tab-settings').classList.toggle('border-b-2',             view === 'settings');
-    $('#tab-settings').classList.toggle('border-brand-700',       view === 'settings');
-    $('#tab-settings').classList.toggle('bg-brand-50/50',         view === 'settings');
-    $('#tab-settings').classList.toggle('text-slate-500',         view !== 'settings');
+    // Tab styling helper
+    const setTab = (id, active) => {
+      const el = $(id);
+      el.classList.toggle('text-brand-700',   active);
+      el.classList.toggle('border-b-2',       active);
+      el.classList.toggle('border-brand-700', active);
+      el.classList.toggle('bg-brand-50/50',   active);
+      el.classList.toggle('text-slate-500',   !active);
+    };
+    setTab('#tab-programs', view === 'editor');
+    setTab('#tab-faqs',     view === 'faqs');
+    setTab('#tab-settings', view === 'settings');
 
     // Sidebar contents
     $('#sidebar-programs').classList.toggle('hidden', view !== 'editor');
+    $('#sidebar-faqs').classList.toggle('hidden',     view !== 'faqs');
     $('#sidebar-settings').classList.toggle('hidden', view !== 'settings');
 
     // Main content
     $('#editor-main').classList.toggle('hidden',   view !== 'editor');
+    $('#faqs-main').classList.toggle('hidden',     view !== 'faqs');
     $('#settings-main').classList.toggle('hidden', view !== 'settings');
 
-    // Save buttons
+    // Save buttons (FAQs save inline, no top-bar button)
     $('#save-program-btn').classList.toggle('hidden',  view !== 'editor');
     $('#save-settings-btn').classList.toggle('hidden', view !== 'settings');
 
-    // Lazy-load settings on first switch
+    // Lazy-load tab data
     if (view === 'settings' && !settingsCache.__loaded) loadSettings();
+    if (view === 'faqs')                                loadFaqList();
   }
 
   /* =================================== 5. SIDEBAR ========================= */
@@ -646,6 +651,169 @@
   function showHelp()  { $('#help-modal').classList.remove('hidden'); }
   function closeHelp() { $('#help-modal').classList.add('hidden'); }
 
+  /* ================================ 14b. FAQS ============================ */
+  let faqs = [];
+
+  async function loadFaqList() {
+    const listEl = $('#faq-list');
+    listEl.innerHTML = '<div class="text-sm text-slate-400 text-center py-8">Loading...</div>';
+    try {
+      faqs = await window.ProgramsDB.listAllFaqs();
+    } catch (e) {
+      console.error(e);
+      listEl.innerHTML = '<div class="text-sm text-red-600 text-center py-8">Failed to load FAQs.</div>';
+      return;
+    }
+    renderFaqList();
+  }
+
+  function renderFaqList() {
+    const listEl = $('#faq-list');
+    if (!faqs.length) {
+      listEl.innerHTML = `
+        <div class="text-center py-12 bg-white border-2 border-dashed border-slate-200 rounded-xl">
+          <p class="text-slate-500 mb-3">No FAQs yet.</p>
+          <button onclick="addFaq()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-2 rounded-lg">+ Add your first FAQ</button>
+        </div>`;
+      return;
+    }
+    listEl.innerHTML = faqs.map(f => faqCardHtml(f)).join('');
+    wireFaqCards();
+  }
+
+  function faqCardHtml(f) {
+    const dirty = faqDirtyIds.has(f.id);
+    return `
+      <div class="faq-card ${dirty ? 'dirty' : ''}" data-faq-id="${escapeHtml(f.id)}">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Question</label>
+          <input type="text" class="settings-input" data-field="question" value="${escapeHtml(f.question || '')}" placeholder="What's the question?">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Answer <span class="text-slate-400 normal-case font-normal">(HTML allowed — &lt;ul&gt;, &lt;a&gt;, &lt;strong&gt;, etc.)</span></label>
+          <textarea rows="3" class="settings-input" data-field="answer" placeholder="The answer.">${escapeHtml(f.answer || '')}</textarea>
+        </div>
+        <div class="faq-toolbar">
+          <div class="flex items-center gap-3">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Order</label>
+            <input type="number" class="settings-input w-20 text-sm" data-field="sort_order" value="${f.sort_order || 0}">
+            <span class="text-xs text-slate-400">lower = appears first</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold text-slate-500">Draft</span>
+            <button class="faq-pub-switch ${f.is_published ? 'on' : ''}" data-action="toggle-pub" aria-label="Toggle published"></button>
+            <span class="text-xs font-semibold text-slate-500">Live</span>
+            <span class="w-px h-5 bg-slate-300 mx-1"></span>
+            <button data-action="delete" class="text-xs font-semibold text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg">Delete</button>
+            <button data-action="save" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function wireFaqCards() {
+    $$('.faq-card').forEach(card => {
+      const id = card.dataset.faqId;
+
+      // Field changes mark dirty
+      card.querySelectorAll('[data-field]').forEach(input => {
+        input.addEventListener('input', () => {
+          faqDirtyIds.add(id);
+          card.classList.add('dirty');
+          setStatus('Unsaved FAQ changes');
+        });
+      });
+
+      // Toggle published
+      const pubBtn = card.querySelector('[data-action="toggle-pub"]');
+      pubBtn.addEventListener('click', () => {
+        pubBtn.classList.toggle('on');
+        faqDirtyIds.add(id);
+        card.classList.add('dirty');
+        setStatus('Unsaved FAQ changes');
+      });
+
+      // Save
+      card.querySelector('[data-action="save"]').addEventListener('click', () => saveFaqCard(card));
+
+      // Delete
+      card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteFaqCard(card));
+    });
+  }
+
+  function readFaqCard(card) {
+    const id = card.dataset.faqId;
+    const orig = faqs.find(f => f.id === id) || {};
+    return {
+      ...orig,
+      id: id.startsWith('new-') ? null : id,
+      question:     card.querySelector('[data-field="question"]').value,
+      answer:       card.querySelector('[data-field="answer"]').value,
+      sort_order:   parseInt(card.querySelector('[data-field="sort_order"]').value, 10) || 0,
+      is_published: card.querySelector('[data-action="toggle-pub"]').classList.contains('on'),
+    };
+  }
+
+  async function saveFaqCard(card) {
+    const data = readFaqCard(card);
+    if (!data.question.trim()) { alert('Please enter a question.'); return; }
+    setStatus('Saving FAQ...', '#64748b');
+    try {
+      const saved = await window.ProgramsDB.saveFaq(data);
+      // Replace entry in cache
+      const oldId = card.dataset.faqId;
+      const idx = faqs.findIndex(f => f.id === oldId);
+      if (idx >= 0) faqs[idx] = saved;
+      else faqs.push(saved);
+      faqDirtyIds.delete(oldId);
+      faqs.sort((a, b) => a.sort_order - b.sort_order);
+      renderFaqList();
+      setStatus('Saved ✓', '#059669');
+      setTimeout(() => setStatus(''), 2000);
+    } catch (err) {
+      console.error(err);
+      setStatus('Error saving FAQ', '#dc2626');
+      alert('Save failed: ' + (err.message || err));
+    }
+  }
+
+  async function deleteFaqCard(card) {
+    const id = card.dataset.faqId;
+    const orig = faqs.find(f => f.id === id) || {};
+    if (id.startsWith('new-')) {
+      // Unsaved new card — just remove from view
+      faqs = faqs.filter(f => f.id !== id);
+      faqDirtyIds.delete(id);
+      renderFaqList();
+      return;
+    }
+    if (!confirm(`Delete this FAQ?\n\n"${orig.question || '(no question yet)'}"\n\nThis cannot be undone.`)) return;
+    try {
+      await window.ProgramsDB.removeFaq(id);
+      faqs = faqs.filter(f => f.id !== id);
+      faqDirtyIds.delete(id);
+      renderFaqList();
+      setStatus('FAQ deleted', '#dc2626');
+      setTimeout(() => setStatus(''), 2000);
+    } catch (err) {
+      console.error(err);
+      alert('Delete failed: ' + (err.message || err));
+    }
+  }
+
+  function addFaq() {
+    const tempId = 'new-' + Date.now();
+    const nextOrder = (faqs.reduce((m, f) => Math.max(m, f.sort_order || 0), 0)) + 10;
+    faqs.push({ id: tempId, question: '', answer: '', sort_order: nextOrder, is_published: true });
+    faqDirtyIds.add(tempId);
+    renderFaqList();
+    // Focus the question of the new card
+    setTimeout(() => {
+      const card = document.querySelector(`[data-faq-id="${tempId}"]`);
+      card && card.querySelector('[data-field="question"]').focus();
+    }, 0);
+  }
+
   /* ============================ 15b. FULLSCREEN EDITOR ==================== */
   function toggleFullscreen() {
     document.body.classList.toggle('editor-fullscreen');
@@ -670,6 +838,7 @@
     Object.assign(window, {
       newPost, savePost, deletePost,
       saveSettings, setView,
+      addFaq,
       showHelp, closeHelp, signOut,
       mdLink, toggleFullscreen,
       handleImageFileInput,

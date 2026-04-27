@@ -67,6 +67,27 @@ create index if not exists agudah_md_ga_admins_email_idx
 
 
 -- =============================================================================
+-- 2a. FAQS TABLE
+-- -----------------------------------------------------------------------------
+-- Frequently-asked questions, edited from the admin panel.
+-- =============================================================================
+create table if not exists public.agudah_md_ga_faqs (
+  id            uuid primary key default gen_random_uuid(),
+  question      text not null,
+  answer        text,
+  sort_order    int not null default 0,
+  is_published  boolean not null default true,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create index if not exists agudah_md_ga_faqs_sort_idx
+  on public.agudah_md_ga_faqs (sort_order);
+create index if not exists agudah_md_ga_faqs_published_idx
+  on public.agudah_md_ga_faqs (is_published, sort_order);
+
+
+-- =============================================================================
 -- 2b. SETTINGS TABLE
 -- -----------------------------------------------------------------------------
 -- One-row table holding editable site settings (name, hero copy, Calendly URL,
@@ -106,6 +127,12 @@ drop trigger if exists agudah_md_ga_settings_set_updated_at
   on public.agudah_md_ga_settings;
 create trigger agudah_md_ga_settings_set_updated_at
   before update on public.agudah_md_ga_settings
+  for each row execute function public.agudah_md_ga_set_updated_at();
+
+drop trigger if exists agudah_md_ga_faqs_set_updated_at
+  on public.agudah_md_ga_faqs;
+create trigger agudah_md_ga_faqs_set_updated_at
+  before update on public.agudah_md_ga_faqs
   for each row execute function public.agudah_md_ga_set_updated_at();
 
 
@@ -212,6 +239,42 @@ create policy "Admins can update settings"
   to authenticated
   using (public.agudah_md_ga_is_admin())
   with check (public.agudah_md_ga_is_admin());
+
+
+-- =============================================================================
+-- 6b2. ROW-LEVEL SECURITY — faqs
+-- =============================================================================
+alter table public.agudah_md_ga_faqs enable row level security;
+
+drop policy if exists "Public can read published faqs" on public.agudah_md_ga_faqs;
+create policy "Public can read published faqs"
+  on public.agudah_md_ga_faqs for select
+  using (is_published = true);
+
+drop policy if exists "Admins can read all faqs" on public.agudah_md_ga_faqs;
+create policy "Admins can read all faqs"
+  on public.agudah_md_ga_faqs for select
+  to authenticated
+  using (public.agudah_md_ga_is_admin());
+
+drop policy if exists "Admins can insert faqs" on public.agudah_md_ga_faqs;
+create policy "Admins can insert faqs"
+  on public.agudah_md_ga_faqs for insert
+  to authenticated
+  with check (public.agudah_md_ga_is_admin());
+
+drop policy if exists "Admins can update faqs" on public.agudah_md_ga_faqs;
+create policy "Admins can update faqs"
+  on public.agudah_md_ga_faqs for update
+  to authenticated
+  using (public.agudah_md_ga_is_admin())
+  with check (public.agudah_md_ga_is_admin());
+
+drop policy if exists "Admins can delete faqs" on public.agudah_md_ga_faqs;
+create policy "Admins can delete faqs"
+  on public.agudah_md_ga_faqs for delete
+  to authenticated
+  using (public.agudah_md_ga_is_admin());
 
 
 -- =============================================================================

@@ -433,6 +433,7 @@ So you usually don't need to apply separately for those.`,
     const TABLE          = 'agudah_md_ga_programs';
     const ADMINS_TABLE   = 'agudah_md_ga_admins';
     const SETTINGS_TABLE = 'agudah_md_ga_settings';
+    const FAQS_TABLE     = 'agudah_md_ga_faqs';
     const IMAGES_BUCKET  = 'agudah-md-ga-images';
 
     return {
@@ -519,6 +520,33 @@ So you usually don't need to apply separately for those.`,
         return rest;
       },
 
+      /* -------- FAQs ----------------------------------------------------- */
+      async listPublishedFaqs() {
+        const { data, error } = await client.from(FAQS_TABLE)
+          .select('*').eq('is_published', true)
+          .order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
+      async listAllFaqs() {
+        const { data, error } = await client.from(FAQS_TABLE)
+          .select('*').order('sort_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      },
+      async saveFaq(faq) {
+        const payload = { ...faq, updated_at: new Date().toISOString() };
+        if (!faq.id) delete payload.id;
+        const { data, error } = await client.from(FAQS_TABLE)
+          .upsert(payload, { onConflict: 'id' }).select().single();
+        if (error) throw error;
+        return data;
+      },
+      async removeFaq(id) {
+        const { error } = await client.from(FAQS_TABLE).delete().eq('id', id);
+        if (error) throw error;
+      },
+
       /* -------- Image upload --------------------------------------------- */
       async uploadImage(file) {
         const ext  = (file.name.split('.').pop() || 'png').toLowerCase();
@@ -556,6 +584,10 @@ So you usually don't need to apply separately for those.`,
       remove:         lazy('remove'),
       getSettings:    lazy('getSettings'),
       saveSettings:   lazy('saveSettings'),
+      listPublishedFaqs: lazy('listPublishedFaqs'),
+      listAllFaqs:    lazy('listAllFaqs'),
+      saveFaq:        lazy('saveFaq'),
+      removeFaq:      lazy('removeFaq'),
       uploadImage:    lazy('uploadImage'),
     };
   } else {
@@ -582,6 +614,50 @@ So you usually don't need to apply separately for those.`,
         r.onerror = reject;
         r.readAsDataURL(file);
       });
+
+    /* ---------- Demo FAQs (localStorage) ------------------------------- */
+    const FAQS_LS_KEY = 'agudah_md_ga_faqs_v1';
+    const FAQ_SEED = [
+      { id:'faq-1', question:'Is this service really free?', answer:'Yes — 100% free. We never charge to help you apply for a government program. Our work is funded by community donations.', sort_order:10, is_published:true },
+      { id:'faq-2', question:'Do I need to be Jewish or part of a specific community?', answer:'No. We help anyone in Maryland regardless of religion, background, or immigration status.', sort_order:20, is_published:true },
+      { id:'faq-3', question:'Will applying for benefits affect my immigration status?', answer:'Most programs on this site (WIC, Medicaid for kids, school meals, emergency medical) do NOT count against you for public charge. SNAP and cash assistance can in some cases — we recommend booking a call before applying if you have concerns.', sort_order:30, is_published:true },
+      { id:'faq-4', question:'How long do applications take to be approved?', answer:'<ul class="list-disc pl-5 space-y-1"><li>SNAP: 30 days (7 days for emergencies)</li><li>Medicaid: up to 45 days (90 for disability)</li><li>WIC: same-day at your appointment</li><li>Energy Assistance: 30-50 days</li><li>Section 8 vouchers: 2-5 year waitlists typically</li></ul>', sort_order:40, is_published:true },
+      { id:'faq-5', question:'Can you submit the application for me?', answer:"We can't submit on your behalf, but we can sit with you (in person or on a video call) and walk through every question while you fill it out. Many people find that easier than doing it alone.", sort_order:50, is_published:true },
+      { id:'faq-6', question:'What if I was denied?', answer:"You have the right to appeal. Most denials have a 30-90 day appeal window. Book a call and we'll review the denial letter and help you file an appeal.", sort_order:60, is_published:true },
+      { id:'faq-7', question:'How do I know my information is safe?', answer:"We don't store your personal information after a call. All application data goes directly to the agency you're applying with — never through us.", sort_order:70, is_published:true },
+      { id:'faq-8', question:'What languages do you support?', answer:'English and Yiddish. For other languages, Maryland 211 (dial 211) provides interpreters in 170+ languages for benefits applications.', sort_order:80, is_published:true },
+    ];
+    function loadFaqs() {
+      try {
+        const raw = localStorage.getItem(FAQS_LS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      localStorage.setItem(FAQS_LS_KEY, JSON.stringify(FAQ_SEED));
+      return FAQ_SEED.slice();
+    }
+    function saveFaqs(list) { localStorage.setItem(FAQS_LS_KEY, JSON.stringify(list)); }
+    demoDB.listPublishedFaqs = async () => loadFaqs().filter(f => f.is_published).sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.listAllFaqs       = async () => loadFaqs().sort((a,b) => a.sort_order - b.sort_order);
+    demoDB.saveFaq = async (faq) => {
+      const list = loadFaqs();
+      const now  = new Date().toISOString();
+      if (faq.id) {
+        const idx = list.findIndex(f => f.id === faq.id);
+        if (idx >= 0) {
+          list[idx] = { ...list[idx], ...faq, updated_at: now };
+          saveFaqs(list);
+          return list[idx];
+        }
+      }
+      const fresh = { ...faq, id: 'local-faq-' + Date.now(), created_at: now, updated_at: now };
+      list.push(fresh);
+      saveFaqs(list);
+      return fresh;
+    };
+    demoDB.removeFaq = async (id) => {
+      saveFaqs(loadFaqs().filter(f => f.id !== id));
+    };
+
     window.ProgramsDB = demoDB;
   }
 
