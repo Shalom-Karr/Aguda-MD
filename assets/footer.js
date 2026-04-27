@@ -47,6 +47,7 @@
     const email   = C.contactEmail || '';
     const phone   = C.phone || '';
     const address = C.address || '';
+    const faqOn   = C.faqEnabled !== false;
 
     // "Street, City, State ZIP" -> "Street<br>City, State ZIP" (split on first comma only)
     let addressHtml = '';
@@ -93,7 +94,7 @@
           <p class="text-[11px] font-bold uppercase tracking-widest text-blue-200/70 mb-4">${escAttr(linksLabel)}</p>
           <ul class="space-y-2 text-sm">
             <li><a href="index.html"  class="text-blue-100 hover:text-white transition-colors">Programs</a></li>
-            <li><a href="faq.html"    class="text-blue-100 hover:text-white transition-colors">FAQ</a></li>
+            ${faqOn ? `<li><a href="faq.html"    class="text-blue-100 hover:text-white transition-colors">FAQ</a></li>` : ''}
             <li><a href="book.html"   class="text-blue-100 hover:text-white transition-colors">Book a Call</a></li>
           </ul>
         </div>
