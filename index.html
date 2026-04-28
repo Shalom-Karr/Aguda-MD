@@ -53,9 +53,13 @@
     summary { list-style: none; }
 
     /* Program-card icons live inside a soft blue rounded-square "tile",
-     * matching the original baltcrn.org design. The tile holds either
-     * a Lucide SVG line-icon (default) or, if the admin has set a custom
-     * emoji on the program, that emoji tinted to navy. */
+     * matching the original baltcrn.org design. The tile holds either a
+     * Lucide SVG line-icon (default) or, if the admin has set a custom
+     * emoji on the program, that emoji tinted to navy.
+     *
+     * Default state: light blue tile, navy line-art icon (outline only).
+     * Hover the card: the tile inverts — navy tile, light icon — and
+     * lifts slightly. Animated via transition so it's a smooth swap. */
     .program-icon-tile {
       display: inline-flex;
       align-items: center;
@@ -66,17 +70,29 @@
       border-radius: 12px;
       color: #1e3a5f;
       flex-shrink: 0;
+      transition: background-color .25s ease, color .25s ease, transform .25s ease;
     }
     .program-icon-tile svg {
       width: 24px;
       height: 24px;
     }
-    /* Admin-set emoji icons get the same navy tint via filter (since emoji
-     * glyphs aren't path-based). */
+    .program-card:hover .program-icon-tile {
+      background: #1e3a5f;
+      color: #dbeafe;
+      transform: scale(1.05);
+    }
+    /* Admin-set emoji icons get the same navy tint via filter (since
+     * emoji glyphs aren't path-based) and a slightly different filter
+     * on hover so they read against the inverted tile. */
     .program-icon-emoji {
       font-size: 24px;
       line-height: 1;
       filter: brightness(0) saturate(100%) invert(19%) sepia(40%) saturate(1200%) hue-rotate(186deg) brightness(95%) contrast(95%);
+      transition: filter .25s ease;
+    }
+    .program-card:hover .program-icon-emoji {
+      /* Light-blue tint to match the inverted tile colors */
+      filter: brightness(0) saturate(100%) invert(94%) sepia(8%) saturate(489%) hue-rotate(184deg) brightness(98%) contrast(95%);
     }
 
     /* Hero ----------------------------------------------------------------- */
