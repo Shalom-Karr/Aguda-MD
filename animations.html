@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <title>Animation test · Baltimore Community Resource Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 50:'#eff3f8',100:'#dbeafe',500:'#2e5a8f',600:'#25496f',700:'#1e3a5f',800:'#162d4a',900:'#0f2540' } }
+    }}}
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .program-card { transition: all .2s ease; }
+    .program-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -10px rgba(15,37,64,.22); border-color: #1e3a5f; }
+
+    /* Icon tile — same as index.html */
+    .program-icon-tile {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px;
+      background: #dbeafe; border-radius: 12px; color: #1e3a5f;
+      flex-shrink: 0;
+      transition: background-color .25s ease, color .25s ease, transform .25s ease;
+    }
+    .program-icon-tile svg { width: 24px; height: 24px; }
+    .program-card:hover .program-icon-tile {
+      background: #1e3a5f; color: #dbeafe; transform: scale(1.05);
+    }
+
+    /* ===== Animation A: staggered reveal on load =====
+       Each card animates from translated/transparent to its resting
+       position. The stagger comes from animation-delay set inline. */
+    .cards-staggered .program-card {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: cardReveal .55s ease-out forwards;
+    }
+    @keyframes cardReveal {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Animation B: fade-in on scroll =====
+       Cards start invisible and shifted; an IntersectionObserver toggles
+       the .in class when each one enters the viewport. */
+    .cards-scroll-reveal .program-card {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .7s ease-out, transform .7s ease-out;
+    }
+    .cards-scroll-reveal .program-card.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Honour reduced-motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .cards-staggered .program-card,
+      .cards-scroll-reveal .program-card {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    .replay-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600;
+      background: #1e3a5f; color: white;
+      padding: 6px 14px; border-radius: 999px;
+      transition: background .2s;
+    }
+    .replay-btn:hover { background: #0f2540; }
+  </style>
+</head>
+<body class="bg-stone-50 text-slate-900 antialiased">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="assets/logo.png" alt="" class="h-12 w-auto">
+        <span class="font-bold text-slate-700 text-sm">/ Animation Test</span>
+      </a>
+      <a href="index.html" class="text-sm font-semibold text-slate-500 hover:text-brand-700">← Back to site</a>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+
+    <section class="mb-12">
+      <p class="text-[11px] font-bold uppercase tracking-widest text-brand-700 mb-2">Internal preview</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-3">Animation comparison</h1>
+      <p class="text-slate-600 leading-relaxed max-w-2xl">
+        Two subtle motion treatments applied to the same program-card grid.
+        Refresh the page to see Option A re-run from scratch, or scroll
+        down to see Option B trigger as cards enter the viewport.
+      </p>
+    </section>
+
+    <!-- ============================== OPTION A ============================== -->
+    <section class="mb-24">
+      <div class="flex items-end justify-between flex-wrap gap-3 mb-2">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">Option A</p>
+          <h2 class="text-2xl font-extrabold text-slate-900">Staggered reveal on load</h2>
+          <p class="text-slate-600 text-sm mt-1">Cards fade up one after the other when the page first paints — quick (~50ms apart) so it feels alive without dragging.</p>
+        </div>
+        <button onclick="replayStagger()" class="replay-btn">↻ Replay</button>
+      </div>
+      <div id="staggered-loading" class="py-12 text-center text-slate-400 text-sm">Loading programs…</div>
+      <div id="staggered-grid" class="cards-staggered hidden grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- A long spacer so the user has to scroll into Option B -->
+    <div class="py-16 mb-12 text-center">
+      <div class="inline-flex flex-col items-center gap-2 text-slate-400">
+        <p class="text-xs font-bold uppercase tracking-widest">↓ Scroll to see Option B ↓</p>
+        <div class="h-32 w-px bg-slate-300"></div>
+      </div>
+    </div>
+
+    <!-- ============================== OPTION B ============================== -->
+    <section class="mb-24">
+      <div class="mb-6">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1">Option B</p>
+        <h2 class="text-2xl font-extrabold text-slate-900">Fade-in on scroll</h2>
+        <p class="text-slate-600 text-sm mt-1">Each card softly fades and lifts into place as it enters the viewport. Subtle, scroll-driven, no replay needed.</p>
+      </div>
+      <div id="scroll-reveal-loading" class="py-12 text-center text-slate-400 text-sm">Loading programs…</div>
+      <div id="scroll-reveal-grid" class="cards-scroll-reveal hidden grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <section class="mb-24 p-8 bg-white border border-slate-200 rounded-2xl">
+      <h3 class="font-bold text-slate-900 mb-2">Which do you prefer?</h3>
+      <p class="text-slate-600 text-sm leading-relaxed">
+        Reply with "A", "B", "both", or "neither" and I'll wire it into the production homepage. "Both" stacks them — Option A runs on initial load for the cards already on screen, then Option B handles anything below the fold as the user scrolls.
+      </p>
+    </section>
+
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/supabase-client.js"></script>
+  <script src="assets/apply-config.js"></script>
+  <script src="assets/footer.js"></script>
+  <script>
+    /* Same Lucide-icon system as index.html — kept inline for now since
+     * this is a temporary preview page. */
+    const ICON_SVG_BY_SLUG = {
+      'snap':                       '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+      'medicaid':                   '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
+      'wic':                        '<circle cx="9" cy="12" r=".5" fill="currentColor"/><circle cx="15" cy="12" r=".5" fill="currentColor"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
+      'energy-assistance':          '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+      'tca':                        '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+      'child-care-scholarship':     '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+      'water4all':                  '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+      'transportation-disabilities':'<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>',
+    };
+    const ICON_GENERIC = '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/>';
+    const CATEGORY_BADGE = 'bg-slate-50 text-slate-700 border-slate-200';
+
+    function iconHtml(p) {
+      const inner = ICON_SVG_BY_SLUG[p.slug] || ICON_GENERIC;
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    function cardHtml(p) {
+      return `
+        <article class="program-card bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
+          <div class="flex items-start justify-between mb-4">
+            <div class="program-icon-tile">${iconHtml(p)}</div>
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${CATEGORY_BADGE}">${escapeHtml(p.category || 'Program')}</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">${escapeHtml(p.title)}</h3>
+          <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 flex-1">${escapeHtml(p.summary || '')}</p>
+        </article>`;
+    }
+
+    let programs = [];
+
+    async function loadAndPaint() {
+      try {
+        programs = await window.ProgramsDB.listPublished();
+      } catch (e) {
+        console.error(e);
+        document.getElementById('staggered-loading').textContent = 'Failed to load programs.';
+        document.getElementById('scroll-reveal-loading').textContent = 'Failed to load programs.';
+        return;
+      }
+
+      paintStagger();
+      paintScrollReveal();
+    }
+
+    /* ----- Option A: Stagger ----- */
+    function paintStagger() {
+      const grid = document.getElementById('staggered-grid');
+      grid.innerHTML = programs.map((p, i) => {
+        // ~60ms per card so the whole sequence completes in well under a second
+        const delay = (i * 60) + 'ms';
+        return cardHtml(p).replace('<article ', `<article style="animation-delay:${delay}" `);
+      }).join('');
+      document.getElementById('staggered-loading').classList.add('hidden');
+      grid.classList.remove('hidden');
+    }
+
+    function replayStagger() {
+      // Re-paint to reset the animation
+      paintStagger();
+    }
+
+    /* ----- Option B: Scroll reveal via IntersectionObserver ----- */
+    function paintScrollReveal() {
+      const grid = document.getElementById('scroll-reveal-grid');
+      grid.innerHTML = programs.map(cardHtml).join('');
+      document.getElementById('scroll-reveal-loading').classList.add('hidden');
+      grid.classList.remove('hidden');
+
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+      grid.querySelectorAll('.program-card').forEach(c => observer.observe(c));
+    }
+
+    /* Init */
+    window.applyDynamicConfig().then(() => window.mountFooter());
+    loadAndPaint();
+  </script>
+</body>
+</html>
