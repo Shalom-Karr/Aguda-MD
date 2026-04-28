@@ -235,7 +235,7 @@
             <div class="text-[11px] text-slate-500 font-mono truncate">${escapeHtml(p.slug || '—')}</div>
           </div>
           <div class="text-[10px] text-slate-400 mt-1">
-            #${p.sort_order ?? '?'} · ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
+            #${p.sort_order ?? '?'} · ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}${p.is_listed === false ? ' · <span class="text-slate-500 font-semibold">Hidden from homepage</span>' : ''}
           </div>
         </button>
         <span class="row-status ${p.is_published ? 'live' : 'draft'}">${p.is_published ? 'Live' : 'Draft'}</span>

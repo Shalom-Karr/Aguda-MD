@@ -1,0 +1,31 @@
+# Cache-Control rules for Cloudflare Pages.
+# HTML and the live config/data layer revalidate fast — every deploy
+# should reach the browser within a few seconds. Static assets that
+# rarely change (logos, favicon, fonts) cache for a week.
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/admin.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*.css
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*.png
+  Cache-Control: public, max-age=604800
+
+/assets/*.jpg
+  Cache-Control: public, max-age=604800
+
+/favicon.png
+  Cache-Control: public, max-age=604800
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=3600
