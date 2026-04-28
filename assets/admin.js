@@ -314,6 +314,46 @@
     });
   }
 
+  /* ----- Settings sidebar navigation -----
+   * Clicking a nav link smooth-scrolls the settings pane to the matching
+   * section. An IntersectionObserver mirrors the active link to whichever
+   * section is currently centered in the viewport. */
+  let settingsNavObserver = null;
+  function wireSettingsNav() {
+    const links = $$('.settings-nav-link');
+    const main  = $('#settings-main');
+    if (!links.length || !main) return;
+
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById(link.dataset.target);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Optimistic active-state update — observer will reconfirm
+        links.forEach(l => l.classList.toggle('active', l === link));
+      });
+    });
+
+    if (settingsNavObserver) settingsNavObserver.disconnect();
+    settingsNavObserver = new IntersectionObserver((entries) => {
+      // Pick the entry closest to the top that's at least partly visible
+      const visible = entries.filter(e => e.isIntersecting);
+      if (!visible.length) return;
+      visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      const id = visible[0].target.id;
+      links.forEach(l => l.classList.toggle('active', l.dataset.target === id));
+    }, {
+      root: main,
+      rootMargin: '-10% 0px -55% 0px',
+      threshold: 0,
+    });
+    $$('.settings-section').forEach(s => settingsNavObserver.observe(s));
+
+    // Default the first link to active until the observer fires
+    links[0].classList.add('active');
+  }
+
   /* ----- Status filter pills (sidebar) ----- */
   function wireStatusFilter() {
     $$('#status-filter .filter-pill').forEach(btn => {
@@ -1203,6 +1243,7 @@
     wireEditorInputs();
     wireKeyboardShortcuts();
     wireSettingsInputs();
+    wireSettingsNav();
     wireStatusFilter();
 
     window.addEventListener('beforeunload', (e) => {
