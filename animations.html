@@ -94,11 +94,13 @@
       to   { opacity: 1; transform: scale(1); }
     }
 
-    /* The .play-* classes set the CSS animation. They start hidden so a
-     * "Replay" click can remove + re-add the class to retrigger. */
-    .anim-prep > * {
-      opacity: 0;
-    }
+    /* The .play-* classes set the CSS animation. The animated elements
+     * start hidden so there's no flash of the resting state before the
+     * animation fires. (Targets each animated element directly — not
+     * .anim-prep > * which would hide the wrapping grid as well.) */
+    .anim-prep .hero-eyebrow,
+    .anim-prep h1,
+    .anim-prep p,
     .anim-prep .hero-logo-col {
       opacity: 0;
     }
@@ -128,7 +130,10 @@
     .play-none .hero-logo-col { animation: none; opacity: 1; }
 
     @media (prefers-reduced-motion: reduce) {
-      .anim-prep > *, .anim-prep .hero-logo-col {
+      .anim-prep .hero-eyebrow,
+      .anim-prep h1,
+      .anim-prep p,
+      .anim-prep .hero-logo-col {
         opacity: 1 !important;
         animation: none !important;
         transform: none !important;
