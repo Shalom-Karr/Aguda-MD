@@ -46,6 +46,7 @@
   let settingsDirty = false;
   let faqDirtyIds   = new Set();
   let postFilter    = 'all';                     // 'all' | 'live' | 'draft'
+  let cmView        = null;                      // CodeMirror 6 EditorView (set up in initCmEditor)
 
   function blankPost() {
     return {
@@ -360,13 +361,10 @@
     $$('.editor-content-tabs button').forEach(b => {
       b.classList.toggle('active', b.dataset.editorView === view);
     });
-    const ta = $('#post-content');
-    ta.value = (view === 'faq')
+    const newDoc = (view === 'faq')
       ? (currentPost.faq_md || '')
       : (currentPost.content_md || '');
-    ta.placeholder = (view === 'faq')
-      ? "Write the FAQ for this program here. Visitors see this when they click the FAQ button on the program card.\n\nUse ## for each question and a short paragraph below for the answer."
-      : "Write the step-by-step guide here. Use the toolbar above for formatting, or paste / drag images directly into this box.";
+    cmSetValue(newDoc);
     renderPreview();
   }
 
@@ -469,12 +467,8 @@
       currentPost.sort_order = Number.isFinite(n) ? n : 100;
       markDirty();
     });
-    $('#post-content').addEventListener('input', (e) => {
-      if (editorView === 'faq') currentPost.faq_md = e.target.value;
-      else                      currentPost.content_md = e.target.value;
-      renderPreview();
-      markDirty();
-    });
+    // Note: the markdown editor's input listener lives inside CodeMirror
+    // (see initCmEditor) — no textarea wiring needed here.
     $('#pub-switch').addEventListener('click', togglePublish);
     $('#list-search').addEventListener('input', loadPostList);
   }
@@ -484,79 +478,135 @@
     setStatus('Unsaved changes');
   }
 
-  /* ============================ 9. EDITOR — preview rendering ============= */
+  /* ============================ 9. EDITOR — CodeMirror integration ========
+   * CM6 is loaded as an ES module in admin.html and exposed on window.CM6.
+   * initCmEditor() awaits it, instantiates the editor, and wires update /
+   * paste / drop / shortcut listeners. cmGetValue/cmSetValue/cmReplace are
+   * the small surface the rest of the file talks to so we don't sprinkle
+   * dispatch() calls everywhere. */
+  async function initCmEditor() {
+    if (!window.CM6) {
+      await new Promise(r => window.addEventListener('cm6-ready', r, { once: true }));
+    }
+    const { EditorView, basicSetup, keymap, markdown, markdownLanguage,
+            syntaxHighlighting, mdHighlight } = window.CM6;
+
+    cmView = new EditorView({
+      doc: '',
+      parent: $('#post-content-host'),
+      extensions: [
+        basicSetup,
+        EditorView.lineWrapping,
+        markdown({ base: markdownLanguage }),
+        syntaxHighlighting(mdHighlight),
+        EditorView.theme({
+          '&':            { height: '100%', backgroundColor: 'white' },
+          '.cm-scroller': { overflow: 'auto' },
+        }),
+        EditorView.updateListener.of(update => {
+          if (!update.docChanged) return;
+          syncActiveContentMd();
+          renderPreview();
+          markDirty();
+        }),
+        keymap.of([
+          { key: 'Mod-b', preventDefault: true, run: () => { md('**', '**'); return true; } },
+          { key: 'Mod-i', preventDefault: true, run: () => { md('*', '*');   return true; } },
+          { key: 'Mod-k', preventDefault: true, run: () => { mdLink();        return true; } },
+          { key: 'Mod-s', preventDefault: true, run: () => {
+            if (currentView === 'editor') savePost();
+            else                          saveSettings();
+            return true;
+          }},
+        ]),
+      ],
+    });
+
+    cmView.dom.addEventListener('paste',    handleEditorPaste);
+    cmView.dom.addEventListener('dragover', (e) => e.preventDefault());
+    cmView.dom.addEventListener('drop',     handleEditorDrop);
+  }
+
+  function cmGetValue() {
+    return cmView ? cmView.state.doc.toString() : '';
+  }
+  function cmSetValue(v) {
+    if (!cmView) return;
+    cmView.dispatch({
+      changes: { from: 0, to: cmView.state.doc.length, insert: v || '' },
+    });
+  }
+  function cmReplaceSelection(text, opts = {}) {
+    if (!cmView) return;
+    const sel = cmView.state.selection.main;
+    cmView.dispatch({
+      changes: { from: sel.from, to: sel.to, insert: text },
+      selection: opts.selectInserted
+        ? { anchor: sel.from, head: sel.from + text.length }
+        : { anchor: sel.from + text.length },
+    });
+  }
+
   function renderPreview() {
-    const md = $('#post-content').value;
-    $('#preview').innerHTML = DOMPurify.sanitize(marked.parse(md || ''));
+    $('#preview').innerHTML = DOMPurify.sanitize(marked.parse(cmGetValue() || ''));
   }
 
   /* Updates whichever field (content_md or faq_md) is currently active in
-   * the editor with the textarea's current value. Called by the toolbar
-   * helpers and the paste/drop handlers. */
+   * the editor with the editor's current value. Called by the toolbar
+   * helpers, paste/drop, and CM's update listener. */
   function syncActiveContentMd() {
-    const v = $('#post-content').value;
+    const v = cmGetValue();
     if (editorView === 'faq') currentPost.faq_md = v;
     else                      currentPost.content_md = v;
   }
 
   /* =========================== 10. EDITOR — toolbar / shortcuts =========== */
   function md(before, after) {
-    const ta = $('#post-content');
-    const { selectionStart: s, selectionEnd: e, value: v } = ta;
-    const selected = v.slice(s, e);
-    const replacement = before + selected + after;
-    ta.value = v.slice(0, s) + replacement + v.slice(e);
-    ta.focus();
-    if (selected.length === 0) {
-      ta.selectionStart = ta.selectionEnd = s + before.length;
-    } else {
-      ta.selectionStart = s + before.length;
-      ta.selectionEnd   = s + before.length + selected.length;
-    }
-    syncActiveContentMd();
-    renderPreview();
-    markDirty();
+    if (!cmView) return;
+    const sel  = cmView.state.selection.main;
+    const text = cmView.state.doc.sliceString(sel.from, sel.to);
+    cmView.dispatch({
+      changes: { from: sel.from, to: sel.to, insert: before + text + after },
+      selection: text.length === 0
+        ? { anchor: sel.from + before.length }
+        : { anchor: sel.from + before.length, head: sel.from + before.length + text.length },
+    });
+    cmView.focus();
   }
 
   function mdLine(prefix) {
-    const ta = $('#post-content');
-    const { selectionStart: s, value: v } = ta;
-    let lineStart = s;
-    while (lineStart > 0 && v[lineStart - 1] !== '\n') lineStart--;
-    ta.value = v.slice(0, lineStart) + prefix + v.slice(lineStart);
-    ta.focus();
-    ta.selectionStart = ta.selectionEnd = s + prefix.length;
-    syncActiveContentMd();
-    renderPreview();
-    markDirty();
+    if (!cmView) return;
+    const sel  = cmView.state.selection.main;
+    const line = cmView.state.doc.lineAt(sel.from);
+    cmView.dispatch({
+      changes: { from: line.from, to: line.from, insert: prefix },
+      selection: { anchor: sel.from + prefix.length },
+    });
+    cmView.focus();
   }
 
   function mdLink() {
-    const ta = $('#post-content');
-    const { selectionStart: s, selectionEnd: e, value: v } = ta;
-    const selected = v.slice(s, e) || 'link text';
-    const url = prompt('Enter the URL:', 'https://');
+    if (!cmView) return;
+    const sel = cmView.state.selection.main;
+    const text = cmView.state.doc.sliceString(sel.from, sel.to) || 'link text';
+    const url  = prompt('Enter the URL:', 'https://');
     if (!url) return;
-    const replacement = `[${selected}](${url})`;
-    ta.value = v.slice(0, s) + replacement + v.slice(e);
-    ta.focus();
-    ta.selectionStart = s + 1;
-    ta.selectionEnd   = s + 1 + selected.length;
-    syncActiveContentMd();
-    renderPreview();
-    markDirty();
+    const insert = `[${text}](${url})`;
+    cmView.dispatch({
+      changes: { from: sel.from, to: sel.to, insert },
+      selection: { anchor: sel.from + 1, head: sel.from + 1 + text.length },
+    });
+    cmView.focus();
   }
 
   function wireKeyboardShortcuts() {
-    $('#post-content').addEventListener('keydown', (e) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
-      const k = e.key.toLowerCase();
-      if (k === 'b') { e.preventDefault(); md('**', '**'); }
-      else if (k === 'i') { e.preventDefault(); md('*', '*'); }
-      else if (k === 'k') { e.preventDefault(); mdLink(); }
-    });
+    // ⌘B/I/K/S inside the editor are handled by the CM keymap (see
+    // initCmEditor). This catches ⌘S anywhere else on the admin page —
+    // e.g. saving from the Settings tab.
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        // Don't double-fire when the editor already handled it
+        if (cmView && cmView.dom.contains(document.activeElement)) return;
         e.preventDefault();
         if (currentView === 'editor') savePost();
         else                          saveSettings();
@@ -566,14 +616,7 @@
 
   /* ===================== 11. EDITOR — image upload + paste ================ */
   function insertAtCursor(text) {
-    const ta = $('#post-content');
-    const { selectionStart: s, selectionEnd: e, value: v } = ta;
-    ta.value = v.slice(0, s) + text + v.slice(e);
-    ta.focus();
-    ta.selectionStart = ta.selectionEnd = s + text.length;
-    syncActiveContentMd();
-    renderPreview();
-    markDirty();
+    cmReplaceSelection(text);
   }
 
   async function uploadAndInsertImage(file, placeholderName = 'image') {
@@ -582,21 +625,15 @@
     insertAtCursor(placeholder);
     setStatus('Uploading image...', '#64748b');
     try {
-      const url = await window.ProgramsDB.uploadImage(file);
-      const ta = $('#post-content');
-      ta.value = ta.value.replace(placeholder, `![${placeholderName}](${url})`);
-      currentPost.content_md = ta.value;
-      renderPreview();
-      markDirty();
+      const url   = await window.ProgramsDB.uploadImage(file);
+      const newMd = cmGetValue().replace(placeholder, `![${placeholderName}](${url})`);
+      cmSetValue(newMd);
       setStatus('Image uploaded ✓', '#059669');
       setTimeout(() => setStatus(''), 2000);
     } catch (err) {
       console.error(err);
       // Strip the placeholder on failure
-      const ta = $('#post-content');
-      ta.value = ta.value.replace(placeholder, '');
-      currentPost.content_md = ta.value;
-      renderPreview();
+      cmSetValue(cmGetValue().replace(placeholder, ''));
       setStatus('Upload failed', '#dc2626');
       alert('Image upload failed: ' + (err.message || err));
     }
@@ -608,32 +645,28 @@
     if (file) uploadAndInsertImage(file, file.name.replace(/\.[^.]+$/, ''));
   }
 
-  function wirePasteHandler() {
-    $('#post-content').addEventListener('paste', async (e) => {
-      const items = e.clipboardData && e.clipboardData.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type && item.type.startsWith('image/')) {
-          e.preventDefault();
-          const file = item.getAsFile();
-          if (file) await uploadAndInsertImage(file, 'pasted image');
-          return;
-        }
+  // CodeMirror's editor DOM receives the paste/drop events; these handlers
+  // are wired in initCmEditor().
+  async function handleEditorPaste(e) {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type && item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) await uploadAndInsertImage(file, 'pasted image');
+        return;
       }
-    });
+    }
   }
 
-  function wireDragDrop() {
-    const ta = $('#post-content');
-    ta.addEventListener('dragover', (e) => { e.preventDefault(); });
-    ta.addEventListener('drop', async (e) => {
-      const files = e.dataTransfer && e.dataTransfer.files;
-      if (!files || !files.length) return;
-      const file = files[0];
-      if (!file.type.startsWith('image/')) return;
-      e.preventDefault();
-      await uploadAndInsertImage(file, file.name.replace(/\.[^.]+$/, ''));
-    });
+  async function handleEditorDrop(e) {
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length) return;
+    const file = files[0];
+    if (!file.type.startsWith('image/')) return;
+    e.preventDefault();
+    await uploadAndInsertImage(file, file.name.replace(/\.[^.]+$/, ''));
   }
 
   /* ============================ 12. EDITOR — save / delete ================ */
@@ -678,8 +711,9 @@
 
   /* =========================== 13. EDITOR — sync scroll =================== */
   function wireSyncScroll() {
-    const editorEl  = $('#post-content');
+    const editorEl  = cmView ? cmView.scrollDOM : null;
     const previewEl = $('#preview');
+    if (!editorEl || !previewEl) return;
     let syncing = false;
     function pair(src, dst) {
       src.addEventListener('scroll', () => {
@@ -1040,9 +1074,6 @@
 
     wireEditorInputs();
     wireKeyboardShortcuts();
-    wirePasteHandler();
-    wireDragDrop();
-    wireSyncScroll();
     wireSettingsInputs();
     wireStatusFilter();
 
@@ -1058,6 +1089,11 @@
     // modal in dev tools leaves an empty page rather than exposing the UI.
     $('#admin-header').classList.remove('hidden');
     $('#admin-shell').classList.remove('hidden');
+
+    // CodeMirror first — every other editor flow (paintFromState ->
+    // setEditorView -> cmSetValue) assumes cmView exists.
+    await initCmEditor();
+    wireSyncScroll();
 
     paintFromState();
     renderPreview();

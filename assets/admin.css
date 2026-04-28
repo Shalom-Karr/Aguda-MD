@@ -14,6 +14,34 @@ body { font-family: 'Inter', sans-serif; }
 }
 .editor-textarea:focus { outline: none; }
 
+/* ---------- CodeMirror 6 host ----------
+ * The host div mounts a CM editor inside. CM creates .cm-editor as the
+ * top-level container; we make it fill the host so the editor stretches
+ * with the surrounding flex column. */
+#post-content-host { display: flex; min-height: 0; min-width: 0; }
+#post-content-host > .cm-editor { flex: 1; min-width: 0; height: 100%; }
+#post-content-host .cm-scroller {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.65;
+  background: white;
+}
+#post-content-host .cm-content { padding: 16px 20px; caret-color: #1e3a5f; }
+#post-content-host .cm-focused { outline: none; }
+#post-content-host .cm-line { padding: 0; }
+#post-content-host .cm-gutters {
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+#post-content-host .cm-activeLineGutter { background: #eff3f8; color: #1e3a5f; }
+#post-content-host .cm-activeLine { background: rgba(46, 90, 143, 0.04); }
+#post-content-host .cm-selectionBackground,
+#post-content-host .cm-selectionBackground.cm-selectionBackground {
+  background: #dbeafe !important;
+}
+
 /* ---------- Live preview pane (mirrors posts.html prose styling) ---------- */
 .preview-pane { font-size: 15px; }
 .preview-pane h1 { font-size: 1.8rem; font-weight: 800; margin: 1rem 0 .5rem; }
