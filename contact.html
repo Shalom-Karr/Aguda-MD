@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <title>Contact Us · Baltimore Community Resource Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Send us a message — we'll respond within one business day. Free help applying for SNAP, Medicaid, WIC, and other Maryland assistance programs.">
+
+  <link rel="canonical" href="https://baltcrn.org/contact">
+
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="Baltimore Community Resource Network">
+  <meta property="og:title"       content="Contact Us · Baltimore Community Resource Network">
+  <meta property="og:description" content="Send us a message — we'll respond within one business day.">
+  <meta property="og:url"         content="https://baltcrn.org/contact">
+  <meta property="og:image"       content="https://baltcrn.org/assets/logo.png">
+
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="Contact Us · Baltimore Community Resource Network">
+  <meta name="twitter:description" content="Send us a message — we'll respond within one business day.">
+  <meta name="twitter:image"       content="https://baltcrn.org/assets/logo.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 50:'#eff3f8',100:'#dbeafe',500:'#2e5a8f',600:'#25496f',700:'#1e3a5f',800:'#162d4a',900:'#0f2540' } }
+    }}}
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .form-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.625rem;
+      padding: 0.65rem 0.875rem;
+      background: white;
+      font-size: 0.95rem;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #1e3a5f;
+      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.12);
+    }
+    textarea.form-input { resize: vertical; min-height: 130px; line-height: 1.55; }
+  </style>
+</head>
+<body class="bg-stone-50 text-slate-900 antialiased">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
+        <a href="index.html#programs" class="hover:text-brand-700">Programs</a>
+        <a id="nav-faq" href="faq.html" class="hidden hover:text-brand-700">FAQ</a>
+        <a href="contact.html" class="text-brand-700">Contact</a>
+        <a href="book.html"    class="hover:text-brand-700">Book a Call</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-12 md:py-16">
+    <p class="text-[11px] font-bold uppercase tracking-widest text-brand-700 mb-3">Contact</p>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-3">Send us a message</h1>
+    <p class="text-lg text-slate-600 mb-10 leading-relaxed">
+      Tell us a bit about your situation and we'll get back to you within one business day. Prefer to talk?
+      <a href="book.html" class="font-semibold text-brand-700 hover:text-brand-900">Book a free call</a>.
+    </p>
+
+    <form id="contact-form" class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label for="contact-name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Your name</label>
+          <input id="contact-name" name="name" type="text" required autocomplete="name" class="form-input" placeholder="Jane Doe">
+        </div>
+        <div>
+          <label for="contact-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email</label>
+          <input id="contact-email" name="email" type="email" required autocomplete="email" class="form-input" placeholder="you@example.com">
+        </div>
+      </div>
+
+      <div>
+        <label for="contact-subject" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Subject <span class="text-slate-400 normal-case font-normal">(optional)</span></label>
+        <input id="contact-subject" name="subject" type="text" class="form-input" placeholder="Question about SNAP, Medicaid, etc.">
+      </div>
+
+      <div>
+        <label for="contact-message" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Message</label>
+        <textarea id="contact-message" name="message" required rows="6" class="form-input" placeholder="What can we help you with?"></textarea>
+      </div>
+
+      <!-- Honeypot field — bots fill it, humans don't see it. Submissions
+           with this field non-empty are dropped silently. -->
+      <input type="text" name="botcheck" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+
+      <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-4 pt-2">
+        <p class="text-xs text-slate-400">
+          We'll only use your email to respond. We never sell or share contact info.
+        </p>
+        <button type="submit" id="contact-submit"
+                class="bg-brand-700 hover:bg-brand-800 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold px-7 py-3 rounded-xl shadow-sm transition-colors">
+          Send message
+        </button>
+      </div>
+
+      <p id="contact-status" class="text-sm text-center hidden"></p>
+    </form>
+
+    <div class="mt-12 p-6 md:p-8 bg-white border border-slate-200 rounded-2xl">
+      <h2 class="text-xl font-bold text-slate-900 mb-3">Other ways to reach us</h2>
+      <ul class="space-y-2 text-slate-600 leading-relaxed">
+        <li><strong class="text-slate-800">Email:</strong> <a id="contact-email-link" href="#" class="text-brand-700 hover:text-brand-900"></a></li>
+        <li><strong class="text-slate-800">Phone:</strong> <a id="contact-phone-link" href="#" class="text-brand-700 hover:text-brand-900"></a></li>
+        <li id="contact-address-line"><strong class="text-slate-800">Address:</strong> <span id="contact-address" class="text-slate-600"></span></li>
+      </ul>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/supabase-client.js"></script>
+  <script src="assets/apply-config.js"></script>
+  <script src="assets/footer.js"></script>
+  <script>
+    function applyConfig() {
+      const C = window.SITE_CONFIG;
+      document.title = `Contact Us · ${C.name}`;
+
+      // Hide the FAQ nav link if the general FAQ section is disabled
+      const faqLink = document.getElementById('nav-faq');
+      if (faqLink) faqLink.classList.toggle('hidden', C.faqEnabled === false);
+
+      // Other ways to reach us
+      const emailEl = document.getElementById('contact-email-link');
+      if (C.contactEmail) {
+        emailEl.href = 'mailto:' + C.contactEmail;
+        emailEl.textContent = C.contactEmail;
+      } else {
+        emailEl.parentElement.style.display = 'none';
+      }
+
+      const phoneEl = document.getElementById('contact-phone-link');
+      if (C.phone) {
+        phoneEl.href = 'tel:' + C.phone.replace(/[^\d+]/g, '');
+        phoneEl.textContent = C.phone;
+      } else {
+        phoneEl.parentElement.style.display = 'none';
+      }
+
+      if (C.address) {
+        document.getElementById('contact-address').textContent = C.address;
+      } else {
+        document.getElementById('contact-address-line').style.display = 'none';
+      }
+
+      window.mountFooter();
+    }
+
+    /* Form handler — placeholder until the form-backend access key is in.
+     * Once set up (Web3Forms or EmailJS), this is where the POST goes. */
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = document.getElementById('contact-status');
+      const submit = document.getElementById('contact-submit');
+      const honeypot = e.target.querySelector('input[name="botcheck"]');
+      if (honeypot && honeypot.value) return; // silent drop on bots
+
+      status.classList.remove('hidden', 'text-emerald-700', 'text-red-700');
+      status.classList.add('text-slate-500');
+      status.textContent = 'Form backend not yet connected — message was not sent. Please email us directly for now.';
+    });
+
+    /* Init */
+    window.applyDynamicConfig().then(applyConfig);
+  </script>
+</body>
+</html>
