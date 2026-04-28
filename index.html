@@ -281,15 +281,21 @@
       Housing:        '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
     };
     const ICON_SVG_GENERIC = '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/>';
+    function svgWrap(inner) {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+    }
     function programIconHtml(p) {
-      // Admin-set custom emoji wins over the SVG default, kept tinted to navy
+      // For the 8 known BCRN programs, the slug-mapped SVG always wins —
+      // even if an old admin session left a custom emoji in p.icon. This
+      // keeps the homepage grid visually consistent (clean line-art
+      // instead of tinted-emoji silhouettes).
+      if (ICON_SVG_BY_SLUG[p.slug]) return svgWrap(ICON_SVG_BY_SLUG[p.slug]);
+      // For any other (future) program, an admin-picked emoji is honoured.
       if (p.icon && p.icon.trim()) {
         return `<span class="program-icon-emoji">${p.icon}</span>`;
       }
-      const inner = ICON_SVG_BY_SLUG[p.slug]
-                 || ICON_SVG_BY_CATEGORY[p.category]
-                 || ICON_SVG_GENERIC;
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+      // Otherwise fall back to a category-mapped SVG, then a generic shape.
+      return svgWrap(ICON_SVG_BY_CATEGORY[p.category] || ICON_SVG_GENERIC);
     }
     let allPrograms = [];
 
