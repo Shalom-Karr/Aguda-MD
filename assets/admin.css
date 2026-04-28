@@ -79,67 +79,21 @@ body { font-family: 'Inter', sans-serif; }
 .preview-pane strong { font-weight: 700; }
 .preview-pane img { max-width: 100%; border-radius: .5rem; margin: .85rem 0; }
 
-/* ---------- Settings sidebar nav ---------- */
-.settings-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 10px;
-}
-.settings-nav-link {
-  display: flex !important;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color .15s ease,
-              color .15s ease,
-              border-color .15s ease,
-              box-shadow .15s ease,
-              transform .12s ease;
-}
-.settings-nav-link:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #c7d6e7;
-  box-shadow: 0 2px 6px -2px rgba(15, 37, 64, 0.08);
-}
-.settings-nav-link:active { transform: translateY(1px); }
-.settings-nav-link .dot {
-  width: 7px; height: 7px;
-  border-radius: 999px;
-  background: #cbd5e1;
-  flex-shrink: 0;
-  transition: background-color .15s, transform .15s;
-}
-.settings-nav-link .label { flex: 1; }
-.settings-nav-link .chevron {
-  width: 14px; height: 14px;
-  color: #94a3b8;
-  flex-shrink: 0;
-  transition: transform .15s, color .15s;
-}
-.settings-nav-link:hover .chevron { color: #1e3a5f; transform: translateX(2px); }
+/* ---------- Settings sidebar nav ----------
+ * Layout (flex/gap/padding/border) is on the buttons themselves via
+ * Tailwind utility classes — see the markup in admin.html. This rule
+ * only handles the active state, which JS toggles per click. */
 .settings-nav-link.active {
-  background: #eff3f8;
-  color: #1e3a5f;
-  border-color: #1e3a5f;
+  background: #eff3f8 !important;
+  color: #1e3a5f !important;
+  border-color: #1e3a5f !important;
   box-shadow: 0 2px 8px -2px rgba(30, 58, 95, 0.18);
 }
 .settings-nav-link.active .dot {
-  background: #1e3a5f;
-  transform: scale(1.4);
+  background: #1e3a5f !important;
+  transform: scale(1.5);
 }
-.settings-nav-link.active .chevron { color: #1e3a5f; }
+.settings-nav-link.active svg { color: #1e3a5f !important; }
 
 /* Settings section anchors — leave room above each so when we scroll
  * to one, the heading clears the sticky top bar. */

@@ -18,43 +18,112 @@ This is a **test program guide** intended only to exercise the admin panel and t
 
 ## A 60-second Markdown primer
 
-Markdown is just plain text with a few special characters that the editor turns into formatted output. You don't have to memorize anything — the toolbar above the editor inserts each of these for you when you click a button.
+Markdown is just plain text with a few special characters that the editor turns into formatted output. Each example below shows the **source** you'd type, then what it **renders as**. You don't have to memorize anything — the toolbar above the editor inserts each of these for you when you click a button.
 
-### Inline formatting
+### Bold and italic
 
-You write **bold** by wrapping a word in two asterisks (`**bold**`) or by selecting it and pressing **⌘B**. *Italic* is one asterisk on each side, or **⌘I**. You can [add a link](https://baltcrn.org) by selecting the link text and pressing **⌘K** — a prompt asks for the URL.
+Source:
 
-External links (anything starting with `http://` or `https://` to a different host) automatically open in a new tab. Internal links to `baltcrn.org` stay in the same tab.
+```
+This sentence has **bold words** and *italic words*.
+```
+
+Renders as: This sentence has **bold words** and *italic words*.
+
+Shortcut: select the text and press **⌘B** for bold or **⌘I** for italic.
+
+### Links
+
+Source:
+
+```
+Visit [our homepage](https://baltcrn.org) for more info.
+```
+
+Renders as: Visit [our homepage](https://baltcrn.org) for more info.
+
+Shortcut: select the link text, press **⌘K**, paste the URL into the prompt. External URLs (different host than `baltcrn.org`) automatically open in a new tab; internal links stay in the same tab.
 
 ### Headings
 
-Use `##` for a major section heading and `###` for a sub-section. Don't use `#` (single hash) — that's reserved for the page title, which is set automatically from the program's Title field. Section headings appear in the floating "On this page" navigation that sits to the right on wide screens.
+Source:
 
-### Lists
+```
+## Major section heading
+### Sub-section heading
+```
 
-Unordered lists use a leading dash:
+Use `##` for major sections — they show up in the floating "On this page" navigation on the right. Use `###` for sub-sections under them. **Don't use a single `#`** — that's reserved for the program title, which the page sets automatically from the Title field above the editor.
 
-- The first item
-- The second item
-- A third item with **bold** in it for flavour
+### Unordered lists
 
-Ordered lists use a number and a period:
+Source:
+
+```
+- First thing
+- Second thing
+- Third thing
+```
+
+Renders as:
+
+- First thing
+- Second thing
+- Third thing
+
+### Ordered lists
+
+Source:
+
+```
+1. First, do this.
+2. Then this.
+3. Finally this.
+```
+
+Renders as:
 
 1. First, do this.
 2. Then this.
 3. Finally this.
 
-You don't have to keep the numbers in order — Markdown will renumber automatically when it renders. So `1. … 1. … 1.` works fine and is easier to edit.
+You don't have to keep the numbers correct — Markdown will renumber automatically. So `1. … 1. … 1.` works fine and is easier to edit when you reorder steps later.
 
 ### Blockquotes
 
-> A blockquote is a great place to put a warning, a quote from an official source, or anything that should stand out from the surrounding text.
->
-> It can run to multiple lines.
+Source:
+
+```
+> Use this for warnings, callouts, or anything that should
+> stand out from the surrounding paragraph.
+```
+
+Renders as:
+
+> Use this for warnings, callouts, or anything that should
+> stand out from the surrounding paragraph.
 
 ### Inline code and code blocks
 
-Use single backticks for inline code like `mydhrbenefits.dhr.state.md.us`. For longer snippets — a phone script, a sample form answer — use a fenced code block:
+Use single backticks for inline code:
+
+```
+Apply at `mydhrbenefits.dhr.state.md.us`.
+```
+
+Renders as: Apply at `mydhrbenefits.dhr.state.md.us`.
+
+For longer snippets — a phone script, a sample form answer, a multi-line URL — wrap them in a triple-backtick fence on its own line:
+
+````
+```
+Hi, my name is [Your Name], and I'm calling about my SNAP application
+submitted on [Date]. The case number is [Case #]. I haven't heard back
+about the interview yet — could you check the status?
+```
+````
+
+Renders as:
 
 ```
 Hi, my name is [Your Name], and I'm calling about my SNAP application
@@ -62,29 +131,61 @@ submitted on [Date]. The case number is [Case #]. I haven't heard back
 about the interview yet — could you check the status?
 ```
 
+The opening and closing fences each go on their own line. Anything between them is shown literally — Markdown formatting inside is ignored, so you can write `**not bold**` in a code block without it turning bold.
+
 ### Images
 
-Click the **🖼 Image** button on the toolbar, paste an image directly into the editor, or drag a file from your desktop onto the editor pane. The image is uploaded to Supabase Storage and inserted as Markdown:
+Source:
 
 ```
-![Description of image](https://...supabase.co/storage/v1/...)
+![Description of the image](https://example.com/photo.jpg)
 ```
 
-The **description** part is the alt text — it's shown if the image fails to load and is read aloud by screen readers, so make it descriptive.
+The text in the brackets is the **alt text** — shown if the image fails to load and read aloud by screen readers — so make it descriptive. The URL is whatever the upload returns; the toolbar's **🖼 Image** button (or paste / drag-drop) does this for you automatically.
 
-![Another placeholder showing a city map](https://picsum.photos/seed/bcrn-map/900/400)
+Live example:
+
+```
+![A friendly placeholder city map](https://picsum.photos/seed/bcrn-map/900/400)
+```
+
+Renders as:
+
+![A friendly placeholder city map](https://picsum.photos/seed/bcrn-map/900/400)
 
 ### Tables
 
-You can paste a Markdown table directly:
+Source:
 
-| Document | Where to get it | Cost |
-|----------|-----------------|------|
-| Photo ID | MVA            | $24  |
-| SS card  | ssa.gov         | Free |
-| Birth certificate | mdcourts.gov | $10–25 |
+```
+| Document          | Where to get it    | Cost    |
+|-------------------|--------------------|---------|
+| Photo ID          | MVA                | $24     |
+| SS card           | ssa.gov            | Free    |
+| Birth certificate | mdcourts.gov       | $10–25  |
+```
 
-Most of the time you won't need tables — bullet lists read more clearly on phones.
+Renders as:
+
+| Document          | Where to get it    | Cost    |
+|-------------------|--------------------|---------|
+| Photo ID          | MVA                | $24     |
+| SS card           | ssa.gov            | Free    |
+| Birth certificate | mdcourts.gov       | $10–25  |
+
+The pipes (`|`) separate columns. The dashed line under the header tells Markdown which row is the header. Tables read awkwardly on narrow phone screens — use bullet lists when possible.
+
+### Horizontal rule
+
+Source:
+
+```
+---
+```
+
+Renders as a horizontal divider line. Useful for separating major sections within a guide.
+
+---
 
 ## How to use the admin panel
 
@@ -119,6 +220,20 @@ The big editor pane has a tab switcher at the top: **📝 Step-by-Step Guide** a
 
 Each tab is independent — leaving the FAQ tab empty is fine; the FAQ button on the homepage card just won't appear for that program.
 
+For the FAQ tab specifically, every `##` heading is treated as a question and the paragraph(s) below it as the answer. So the source pattern is:
+
+```
+## How long does it take to be approved?
+
+Most applications are decided within 30 days. Emergency SNAP can be
+approved within 7 for households with very low income.
+
+## What if I'm denied?
+
+You have 30–90 days to file an appeal — the exact window is on the
+denial letter.
+```
+
 ### Image uploads
 
 Three ways to add an image, in order of how forgetful you can be:
@@ -127,7 +242,13 @@ Three ways to add an image, in order of how forgetful you can be:
 2. Drag a file from your Desktop / Finder / Downloads folder directly onto the editor pane.
 3. Copy an image (Cmd+C / Ctrl+C from anywhere — a screenshot, a web page, the Photos app) and paste it into the editor with **⌘V** / **Ctrl+V**.
 
-In all three cases the image is uploaded to Supabase Storage and the Markdown is inserted at the cursor.
+In all three cases the image is uploaded to Supabase Storage and the Markdown is inserted at the cursor as:
+
+```
+![placeholder name](https://...supabase.co/storage/v1/object/public/agudah-md-ga-images/...)
+```
+
+Edit the bracket text afterward to give the image a more descriptive alt-text.
 
 ### Previewing before you save
 
