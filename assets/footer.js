@@ -61,7 +61,7 @@
       }
     }
 
-    target.className = 'relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-900 to-slate-900 text-blue-100 mt-20';
+    target.className = 'relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 text-blue-100 mt-20';
     target.innerHTML = `
       <!-- Subtle radial glow to echo the hero (mirrored to bottom-right) -->
       <div aria-hidden="true" style="position:absolute;width:700px;height:700px;bottom:-250px;right:-200px;background:radial-gradient(circle at center, rgba(59,130,246,0.28), transparent 60%);pointer-events:none;z-index:0;"></div>

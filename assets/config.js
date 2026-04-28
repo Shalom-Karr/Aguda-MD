@@ -64,7 +64,7 @@ window.SITE_CONFIG = {
    * referenced fixed paths; replace those files to change the actual
    * partner logo images. */
   footer: {
-    copyright:    '© 2026 Baltimore Community Resource Network. All guides are for informational purposes only.',
+    copyright:    '© 2026 Baltimore Community Resource Network. A non-profit organization, not affiliated with any government agency. All guides are for informational purposes only.',
     aboutLabel:   'A project of',
     contactLabel: 'Contact',
     linksLabel:   'Site',
