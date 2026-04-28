@@ -258,6 +258,17 @@
             <a id="preview-link" href="#" target="_blank" class="hidden ml-3 text-xs text-brand-700 hover:text-brand-900 font-semibold">View on site ↗</a>
           </div>
         </div>
+
+        <!-- Listing row: hide a published program from the homepage grid
+             without unpublishing it. Used for cross-reference/supplementary
+             guides like the combined SNAP+Energy application. -->
+        <label class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 cursor-pointer">
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Listing</span>
+            <span class="text-xs text-slate-500">Show this program on the homepage grid</span>
+          </div>
+          <input id="post-is-listed" type="checkbox" checked class="w-4 h-4 accent-brand-600">
+        </label>
       </div>
 
       <!-- Toolbar -->

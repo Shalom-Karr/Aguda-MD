@@ -53,6 +53,7 @@
       id: null, slug: '', title: '', summary: '',
       category: (C.categories || ['General'])[0],
       icon: '', content_md: '', faq_md: '', is_published: false,
+      is_listed: true,
       sort_order: 100,
     };
   }
@@ -500,6 +501,7 @@
     $('#post-category').value   = currentPost.category || (C.categories || ['General'])[0];
     $('#post-summary').value    = currentPost.summary  || '';
     $('#post-sort-order').value = (currentPost.sort_order ?? 100);
+    $('#post-is-listed').checked = currentPost.is_listed !== false;
     updateSummaryCounter();
     $('#preview-draft-btn').classList.toggle('hidden', !currentPost.title);
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
@@ -621,6 +623,10 @@
     $('#post-sort-order').addEventListener('input', (e) => {
       const n = parseInt(e.target.value, 10);
       currentPost.sort_order = Number.isFinite(n) ? n : 100;
+      markDirty();
+    });
+    $('#post-is-listed').addEventListener('change', (e) => {
+      currentPost.is_listed = e.target.checked;
       markDirty();
     });
     // Note: the markdown editor's input listener lives inside CodeMirror

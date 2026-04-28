@@ -381,7 +381,9 @@ So you usually don't need to apply separately for those.`,
 
   const demoDB = {
     async listPublished() {
-      return demoLoad().filter(p => p.is_published).sort(sortBySortOrder);
+      return demoLoad()
+        .filter(p => p.is_published && p.is_listed !== false)
+        .sort(sortBySortOrder);
     },
     async listAll() {
       return demoLoad().sort(sortBySortOrder);
@@ -447,8 +449,11 @@ So you usually don't need to apply separately for those.`,
 
     return {
       async listPublished() {
+        // is_listed=false hides supplementary guides (e.g. the combined
+        // SNAP+Energy guide) from the homepage grid while keeping them
+        // accessible by direct URL.
         const { data, error } = await client.from(TABLE)
-          .select('*').eq('is_published', true)
+          .select('*').eq('is_published', true).neq('is_listed', false)
           .order('sort_order', { ascending: true })
           .order('updated_at', { ascending: false });
         if (error) throw error;
