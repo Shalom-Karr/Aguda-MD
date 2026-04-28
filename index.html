@@ -235,6 +235,12 @@
       <h2 id="book-heading" class="text-3xl font-extrabold text-slate-900 mb-3"></h2>
       <p id="book-subhead" class="text-slate-600 mb-7 text-lg"></p>
       <a id="book-cta" href="#" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
+      <p class="mt-5 text-sm text-slate-500">
+        Prefer email?
+        <a id="book-email-link" href="#" class="font-semibold text-brand-700 hover:text-brand-900 ml-1">
+          Send us a message <span aria-hidden="true">→</span>
+        </a>
+      </p>
     </div>
   </section>
 
@@ -296,6 +302,14 @@
       document.getElementById('book-heading').textContent = C.book.heading;
       document.getElementById('book-subhead').textContent = C.book.subhead;
       document.getElementById('book-cta').textContent     = C.book.buttonLabel;
+      // Secondary "Prefer email?" link under the booking button
+      const emailLink = document.getElementById('book-email-link');
+      if (C.contactEmail) {
+        emailLink.href = 'mailto:' + C.contactEmail;
+        emailLink.parentElement.classList.remove('hidden');
+      } else {
+        emailLink.parentElement.classList.add('hidden');
+      }
       applyBookingLinks(C);
       // FAQ link in header — only shown if the general FAQ section is enabled
       document.getElementById('nav-faq').classList.toggle('hidden', C.faqEnabled === false);

@@ -83,6 +83,15 @@
 
         <div class="md:col-span-4">
           <p class="text-[11px] font-bold uppercase tracking-widest text-blue-200/70 mb-4">${escAttr(contactLabel)}</p>
+          ${email ? `
+            <a href="mailto:${escAttr(email)}"
+               class="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-lg text-sm font-bold text-white transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              Message us
+            </a>` : ''}
           <ul class="space-y-2 text-sm">
             ${email   ? `<li><a href="mailto:${escAttr(email)}" class="text-blue-100 hover:text-white transition-colors">${escAttr(email)}</a></li>` : ''}
             ${phone   ? `<li><a href="tel:${escAttr(phone.replace(/[^\d+]/g,''))}" class="text-blue-100 hover:text-white transition-colors">${escAttr(phone)}</a></li>` : ''}
