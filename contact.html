@@ -167,18 +167,62 @@
       window.mountFooter();
     }
 
-    /* Form handler — placeholder until the form-backend access key is in.
-     * Once set up (Web3Forms or EmailJS), this is where the POST goes. */
+    /* Form submission — posts to Web3Forms. The destination email is
+     * configured in the Web3Forms dashboard against the access key. */
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const status = document.getElementById('contact-status');
-      const submit = document.getElementById('contact-submit');
-      const honeypot = e.target.querySelector('input[name="botcheck"]');
-      if (honeypot && honeypot.value) return; // silent drop on bots
+      const form    = e.target;
+      const status  = document.getElementById('contact-status');
+      const submit  = document.getElementById('contact-submit');
+      const honey   = form.querySelector('input[name="botcheck"]');
+      if (honey && honey.value) return; // silent drop on bots
 
-      status.classList.remove('hidden', 'text-emerald-700', 'text-red-700');
-      status.classList.add('text-slate-500');
-      status.textContent = 'Form backend not yet connected — message was not sent. Please email us directly for now.';
+      const setStatus = (text, kind) => {
+        status.classList.remove('hidden', 'text-slate-500', 'text-emerald-700', 'text-red-700');
+        status.classList.add(
+          kind === 'ok'    ? 'text-emerald-700' :
+          kind === 'error' ? 'text-red-700'    :
+                             'text-slate-500'
+        );
+        status.textContent = text;
+      };
+
+      const C = window.SITE_CONFIG;
+      if (!C || !C.web3formsKey) {
+        setStatus('Form backend not configured. Please email us directly.', 'error');
+        return;
+      }
+
+      submit.disabled = true;
+      const originalLabel = submit.textContent;
+      submit.textContent = 'Sending…';
+      setStatus('Sending your message…');
+
+      const data = new FormData(form);
+      data.append('access_key', C.web3formsKey);
+      data.append('subject',   data.get('subject') || `New message from ${C.name || 'BCRN'}`);
+      data.append('from_name', `${C.name || 'BCRN'} contact form`);
+
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: data,
+        });
+        const result = await res.json().catch(() => ({}));
+        if (res.ok && result.success) {
+          form.reset();
+          setStatus("Thanks! Your message was sent — we'll respond within one business day.", 'ok');
+        } else {
+          setStatus(result.message || "Something went wrong. Please try again or email us directly.", 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus('Network error — please check your connection and try again.', 'error');
+      } finally {
+        submit.disabled = false;
+        submit.textContent = originalLabel;
+      }
     });
 
     /* Init */

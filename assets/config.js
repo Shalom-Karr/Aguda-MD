@@ -34,6 +34,13 @@ window.SITE_CONFIG = {
    * Per-program FAQs (the FAQ tab on each guide) are not affected. */
   faqEnabled: true,
 
+  /* Web3Forms access key for the /contact form. The destination email
+   * (where submissions get delivered) is configured in the Web3Forms
+   * dashboard, not here — change it there if BCRN wants a different
+   * inbox. Not a secret: the key is rate-limited and only sends to the
+   * inbox already verified for this account. */
+  web3formsKey: '7f3ed223-aa3b-4cd6-bc07-e6470f680bd6',
+
   /* Hero copy (homepage) */
   hero: {
     eyebrow:  'A project of Ahavas Yisrael & Agudah Maryland',
