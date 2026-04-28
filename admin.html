@@ -158,29 +158,35 @@
       <!-- Settings sidebar — section nav -->
       <div id="sidebar-settings" class="hidden flex-1 overflow-y-auto">
         <p class="px-4 pt-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">Site Settings</p>
-        <nav id="settings-nav" class="px-2 pb-2">
-          <a class="settings-nav-link" href="#settings-identity" data-target="settings-identity">
-            <span class="dot"></span>Identity
-          </a>
-          <a class="settings-nav-link" href="#settings-contact" data-target="settings-contact">
-            <span class="dot"></span>Contact &amp; Booking
-          </a>
-          <a class="settings-nav-link" href="#settings-hero" data-target="settings-hero">
-            <span class="dot"></span>Hero (Homepage)
-          </a>
-          <a class="settings-nav-link" href="#settings-book" data-target="settings-book">
-            <span class="dot"></span>Book-a-Call Section
-          </a>
-          <a class="settings-nav-link" href="#settings-faq" data-target="settings-faq">
-            <span class="dot"></span>FAQ Page
-          </a>
-          <a class="settings-nav-link" href="#settings-footer" data-target="settings-footer">
-            <span class="dot"></span>Footer
-          </a>
-        </nav>
-        <p class="px-4 py-3 mt-2 border-t border-slate-200 text-[11px] text-slate-400 leading-relaxed">
+        <p class="px-4 pb-3 text-[11px] text-slate-400 leading-relaxed border-b border-slate-200">
           Tip: leave a field blank to fall back to the default in <code class="bg-slate-100 px-1 rounded">assets/config.js</code>.
         </p>
+        <nav id="settings-nav" class="settings-nav">
+          <button type="button" class="settings-nav-link" data-target="settings-identity">
+            <span class="dot"></span><span class="label">Identity</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="settings-nav-link" data-target="settings-contact">
+            <span class="dot"></span><span class="label">Contact &amp; Booking</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="settings-nav-link" data-target="settings-hero">
+            <span class="dot"></span><span class="label">Hero (Homepage)</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="settings-nav-link" data-target="settings-book">
+            <span class="dot"></span><span class="label">Book-a-Call Section</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="settings-nav-link" data-target="settings-faq">
+            <span class="dot"></span><span class="label">FAQ Page</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="settings-nav-link" data-target="settings-footer">
+            <span class="dot"></span><span class="label">Footer</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </nav>
       </div>
 
       <div class="p-3 border-t border-slate-200 text-[11px] text-slate-400">
