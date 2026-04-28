@@ -278,4 +278,8 @@ The strip at the bottom of the editor lists them, but for the record:
 - Settings → FAQ Page in the admin has a **Enable the general FAQ section** switch. Flip it off and the FAQ link disappears from every page header, the homepage teaser hides, and `/faq` becomes a 404.
 - If you accidentally close the tab with unsaved changes, the browser asks before letting you leave.
 
-That's the whole tour. Delete this fake program when you're done with it — its slug is **fake-article**, so it lives at `/posts.html?title=fake-article` until removed.
+That's the whole tour. This fake program lives at <https://baltcrn.org/posts?title=fake>.
+
+When you're done reading it, **switch its Status from Published back to Draft** so it disappears from the public homepage. The program stays in the admin sidebar so you can come back to it any time.
+
+To re-read this guide later without flipping it to Published again, open it from the admin sidebar and click the **Preview** button in the top-right corner of the editor — that opens the article exactly as visitors would see it, but without making it live.
