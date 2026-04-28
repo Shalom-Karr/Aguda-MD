@@ -5,6 +5,23 @@
   <title>Program Guide · Baltimore Community Resource Network</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- These five SEO tags are populated dynamically once the program loads
+       (see loadPost() below). The fallback values keep the page sensible
+       even when JS hasn't run, e.g. for a crawler that doesn't execute it. -->
+  <meta name="description"         id="seo-description"  content="Step-by-step guide for applying to Maryland government assistance programs.">
+  <link rel="canonical"            id="seo-canonical"    href="https://baltcrn.org/">
+  <meta property="og:type"         content="article">
+  <meta property="og:site_name"    content="Baltimore Community Resource Network">
+  <meta property="og:title"        id="seo-og-title"        content="Program Guide · Baltimore Community Resource Network">
+  <meta property="og:description"  id="seo-og-description"  content="Step-by-step guide for applying to Maryland government assistance programs.">
+  <meta property="og:url"          id="seo-og-url"          content="https://baltcrn.org/">
+  <meta property="og:image"        content="https://baltcrn.org/assets/logo.png">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       id="seo-tw-title"        content="Program Guide · Baltimore Community Resource Network">
+  <meta name="twitter:description" id="seo-tw-description"  content="Step-by-step guide for applying to Maryland government assistance programs.">
+  <meta name="twitter:image"       content="https://baltcrn.org/assets/logo.png">
+  <script id="seo-jsonld" type="application/ld+json"></script>
+
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
 
@@ -25,16 +42,19 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
   <script>
-    /* External links (http/https) open in a new tab. Internal/relative
-     * links stay in the same tab. */
+    /* External links open in a new tab. "External" = a different host than
+     * the current site, so absolute baltcrn.org URLs in admin-authored
+     * markdown still behave like internal links. */
     DOMPurify.addHook('afterSanitizeAttributes', function (node) {
-      if (node.tagName === 'A' && node.hasAttribute('href')) {
-        const href = node.getAttribute('href');
-        if (/^https?:\/\//i.test(href)) {
+      if (node.tagName !== 'A' || !node.hasAttribute('href')) return;
+      const href = node.getAttribute('href');
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.protocol.startsWith('http') && url.host !== window.location.host) {
           node.setAttribute('target', '_blank');
           node.setAttribute('rel', 'noopener noreferrer');
         }
-      }
+      } catch (e) { /* invalid URL — leave alone */ }
     });
   </script>
 
@@ -286,6 +306,36 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function applySeo(post) {
+      const C       = window.SITE_CONFIG;
+      const title   = `${post.title} · ${C.name}`;
+      const desc    = (post.summary || '').slice(0, 200);
+      const canon   = `https://baltcrn.org/posts.html?title=${encodeURIComponent(post.slug)}`;
+      const set = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+      set('seo-description',    'content', desc);
+      set('seo-canonical',      'href',    canon);
+      set('seo-og-title',       'content', title);
+      set('seo-og-description', 'content', desc);
+      set('seo-og-url',         'content', canon);
+      set('seo-tw-title',       'content', title);
+      set('seo-tw-description', 'content', desc);
+
+      // JSON-LD Article schema — helps Google show the guide as a rich result
+      const jsonld = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        'headline': post.title,
+        'description': desc,
+        'mainEntityOfPage': canon,
+        'datePublished': post.created_at || undefined,
+        'dateModified':  post.updated_at || post.created_at || undefined,
+        'author':    { '@type': 'Organization', 'name': C.name, 'url': 'https://baltcrn.org' },
+        'publisher': { '@type': 'Organization', 'name': C.name, 'logo': { '@type': 'ImageObject', 'url': 'https://baltcrn.org/assets/logo.png' } }
+      };
+      const ld = document.getElementById('seo-jsonld');
+      if (ld) ld.textContent = JSON.stringify(jsonld);
+    }
+
     async function loadPost() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('title');
@@ -302,6 +352,11 @@
       document.title = `${currentPost.title} · ${C.name}`;
       document.getElementById('title').textContent   = currentPost.title;
       document.getElementById('summary').textContent = currentPost.summary || '';
+
+      // SEO meta — title/description/canonical/OG/Twitter/JSON-LD all derived
+      // from the loaded program. Without this, every guide URL would share
+      // the same generic placeholder copy in search results and social cards.
+      applySeo(currentPost);
 
       const cat = document.getElementById('category-badge');
       if (currentPost.category) {
