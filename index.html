@@ -188,9 +188,11 @@
       mask-image:         radial-gradient(circle at center, black 55%, transparent 95%);
       -webkit-mask-image: radial-gradient(circle at center, black 55%, transparent 95%);
     }
-    /* Hero text slides in from the left, staggered. The whole block stays
-     * hidden (children opacity 0) until applyConfig() finishes and adds
-     * .ready — avoids the placeholder-text-flash on first paint. */
+    /* Hero animations:
+     *   - Text slides in from the left, eyebrow → h1 → paragraph staggered.
+     *   - Logo fades in while zooming up from 92% scale.
+     * Both are blocked until applyConfig() adds .ready to #hero-text /
+     * .ready to .hero-side-logo, so there's no placeholder flash. */
     .hero-text > * {
       opacity: 0;
       transform: translateX(-32px);
@@ -201,8 +203,20 @@
     @keyframes hero-slide-in {
       to { opacity: 1; transform: translateX(0); }
     }
+
+    .hero-side-logo {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    .hero-side-logo.ready {
+      animation: hero-logo-zoom .8s .10s ease-out forwards;
+    }
+    @keyframes hero-logo-zoom {
+      to { opacity: 1; transform: scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .hero-text > * {
+      .hero-text > *, .hero-side-logo {
         opacity: 1 !important;
         transform: none !important;
         animation: none !important;
@@ -523,6 +537,10 @@
     window.applyDynamicConfig().then(() => {
       applyConfig();
       document.getElementById('hero-text').classList.add('ready');
+      // Logo zooms in while the text is sliding — runs in parallel with
+      // its own .8s timing so the two reach rest at roughly the same moment.
+      const sideLogo = document.querySelector('.hero-side-logo');
+      if (sideLogo) sideLogo.classList.add('ready');
       // Wait for merged settings before deciding whether to render the FAQ teaser
       loadFaqPreview();
     });

@@ -139,13 +139,23 @@
   }
 
   /* =================================== 4. VIEW TOGGLE ===================== */
-  function setView(view) {
+  async function setView(view) {
     if (view === currentView) return;
 
     // Warn on unsaved changes when leaving
-    if (currentView === 'editor'   && isDirty            && !confirm('You have unsaved changes in the editor. Switch tabs anyway?')) return;
-    if (currentView === 'settings' && settingsDirty      && !confirm('You have unsaved settings changes. Switch tabs anyway?')) return;
-    if (currentView === 'faqs'     && faqDirtyIds.size   && !confirm('You have unsaved FAQ changes. Switch tabs anyway?')) return;
+    const dirtyMsg = currentView === 'editor'   && isDirty          ? 'editor'
+                   : currentView === 'settings' && settingsDirty    ? 'settings'
+                   : currentView === 'faqs'     && faqDirtyIds.size ? 'FAQs'
+                   : null;
+    if (dirtyMsg) {
+      const ok = await adminConfirm({
+        title: 'Discard unsaved changes?',
+        body:  `You have unsaved edits in the ${dirtyMsg} tab. Switching away will discard them.`,
+        okLabel: 'Discard and switch',
+        tone:    'warn',
+      });
+      if (!ok) return;
+    }
 
     currentView = view;
 
@@ -216,22 +226,18 @@
 
     listEl.innerHTML = filtered.map(p => `
       <div class="post-row border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50 border-l-4 border-l-brand-600' : ''}">
-        <button data-load-post="${p.id}" class="w-full text-left px-3 py-2.5 pr-20">
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0 flex-1">
-              <div class="font-semibold text-sm text-slate-900 truncate">
-                ${p.icon ? `<span class="mr-1">${escapeHtml(p.icon)}</span>` : ''}${escapeHtml(p.title || '(untitled)')}
-              </div>
-              <div class="text-[11px] text-slate-500 font-mono truncate">${escapeHtml(p.slug || '—')}</div>
+        <button data-load-post="${p.id}" class="w-full text-left px-3 py-2.5 pr-20 pb-9">
+          <div class="min-w-0">
+            <div class="font-semibold text-sm text-slate-900 truncate pr-12">
+              ${p.icon ? `<span class="mr-1">${escapeHtml(p.icon)}</span>` : ''}${escapeHtml(p.title || '(untitled)')}
             </div>
-            ${p.is_published
-              ? '<span class="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded shrink-0">Live</span>'
-              : '<span class="text-[10px] font-bold uppercase text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded shrink-0">Draft</span>'}
+            <div class="text-[11px] text-slate-500 font-mono truncate">${escapeHtml(p.slug || '—')}</div>
           </div>
           <div class="text-[10px] text-slate-400 mt-1">
             #${p.sort_order ?? '?'} · ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
           </div>
         </button>
+        <span class="row-status ${p.is_published ? 'live' : 'draft'}">${p.is_published ? 'Live' : 'Draft'}</span>
         <button class="row-action" data-duplicate="${p.id}" title="Duplicate this program as a new draft">Duplicate</button>
       </div>`).join('');
 
@@ -243,6 +249,68 @@
         e.stopPropagation();
         duplicatePost(btn.dataset.duplicate);
       });
+    });
+  }
+
+  /* ----- Custom confirmation modal -----
+   * Replaces native confirm() so destructive/important actions use a
+   * styled modal instead of the browser dialog.
+   *
+   *   const ok = await adminConfirm({
+   *     title:   'Delete this program?',
+   *     body:    'This cannot be undone.',
+   *     okLabel: 'Delete',
+   *     tone:    'danger', // 'danger' | 'primary'
+   *   });
+   *   if (ok) { ... }
+   */
+  const CONFIRM_ICONS = {
+    danger:  '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z"/>',
+    primary: '<path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>',
+    warn:    '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z"/>',
+  };
+  function adminConfirm({ title, body, okLabel = 'Confirm', cancelLabel = 'Cancel', tone = 'primary' } = {}) {
+    return new Promise(resolve => {
+      const overlay  = $('#confirm-modal');
+      const iconWrap = $('#confirm-icon');
+      const iconSvg  = $('#confirm-icon-svg');
+      const titleEl  = $('#confirm-title');
+      const bodyEl   = $('#confirm-body');
+      const okBtn    = $('#confirm-ok');
+      const cancel   = $('#confirm-cancel');
+
+      iconWrap.className = 'confirm-icon ' + (tone === 'danger' ? 'danger' : tone === 'warn' ? 'warn' : 'info');
+      iconSvg.innerHTML  = CONFIRM_ICONS[tone] || CONFIRM_ICONS.primary;
+      titleEl.textContent = title || 'Are you sure?';
+      bodyEl.innerHTML    = body  || '';
+      okBtn.textContent   = okLabel;
+      cancel.textContent  = cancelLabel;
+      okBtn.className = 'confirm-btn go ' + (tone === 'danger' ? 'danger' : 'primary');
+
+      overlay.classList.add('visible');
+      overlay.setAttribute('aria-hidden', 'false');
+
+      const close = (result) => {
+        overlay.classList.remove('visible');
+        overlay.setAttribute('aria-hidden', 'true');
+        okBtn.removeEventListener('click', onOk);
+        cancel.removeEventListener('click', onCancel);
+        overlay.removeEventListener('click', onBgClick);
+        document.removeEventListener('keydown', onKey);
+        resolve(result);
+      };
+      const onOk     = () => close(true);
+      const onCancel = () => close(false);
+      const onBgClick = (e) => { if (e.target === overlay) close(false); };
+      const onKey = (e) => {
+        if (e.key === 'Escape') close(false);
+        else if (e.key === 'Enter') close(true);
+      };
+      okBtn.addEventListener('click', onOk);
+      cancel.addEventListener('click', onCancel);
+      overlay.addEventListener('click', onBgClick);
+      document.addEventListener('keydown', onKey);
+      setTimeout(() => okBtn.focus(), 50);
     });
   }
 
@@ -258,29 +326,61 @@
     });
   }
 
-  /* ----- Duplicate a program as a new unsaved draft ----- */
+  /* ----- Duplicate a program as a new draft -----
+   * Confirms with a modal first, then immediately saves a copy to the
+   * database (so the duplicate exists as a real Draft row in the
+   * sidebar) and loads it into the editor for further editing. */
   async function duplicatePost(id) {
-    if (isDirty && !confirm('You have unsaved changes. Discard them and start a duplicate?')) return;
     const all = await window.ProgramsDB.listAll();
     const original = all.find(p => p.id === id);
     if (!original) return;
-    currentPost = {
-      ...blankPost(),
+
+    const ok = await adminConfirm({
+      title: 'Duplicate this program as a new draft?',
+      body:  `A new draft titled <strong>"Copy of ${escapeHtml(original.title || 'Untitled')}"</strong> will be created. The original program isn't touched. The duplicate will be saved as a draft (not published) so you can edit it before going live.`,
+      okLabel: 'Yes, duplicate',
+      tone: 'primary',
+    });
+    if (!ok) return;
+
+    if (isDirty) {
+      const drop = await adminConfirm({
+        title:  'You have unsaved changes',
+        body:   'Switching to the new duplicate will discard your current unsaved edits. Continue?',
+        okLabel: 'Discard and continue',
+        tone:   'warn',
+      });
+      if (!drop) return;
+    }
+
+    setStatus('Duplicating…', '#64748b');
+    const draft = {
       ...original,
       id: null,
-      slug: (original.slug || '') + '-copy',
-      title: (original.title || 'Untitled') + ' (copy)',
+      slug: 'copy-of-' + (original.slug || 'untitled') + '-' + Date.now().toString(36),
+      title: 'Copy of ' + (original.title || 'Untitled'),
       is_published: false,
       sort_order: (original.sort_order || 100) + 1,
     };
-    delete currentPost.created_at;
-    delete currentPost.updated_at;
-    paintFromState();
-    isDirty = true;
-    setStatus('Duplicated — review and Save to keep', '#1e3a5f');
-    loadPostList();
-    $('#post-title').focus();
-    $('#post-title').select();
+    delete draft.created_at;
+    delete draft.updated_at;
+
+    try {
+      const saved = await window.ProgramsDB.save(draft);
+      currentPost = { ...blankPost(), ...saved };
+      isDirty = false;
+      paintFromState();
+      renderPreview();
+      loadPostList();
+      setStatus('Duplicated ✓', '#059669');
+      setTimeout(() => setStatus(''), 2000);
+      $('#post-title').focus();
+      $('#post-title').select();
+    } catch (err) {
+      console.error(err);
+      setStatus('Duplicate failed', '#dc2626');
+      alert('Could not duplicate: ' + (err.message || err));
+    }
   }
 
   /* ----- Summary length counter (Google snippets ~155 chars) ----- */
@@ -317,7 +417,15 @@
 
   /* ========================== 6. EDITOR — load / new / paint ============== */
   async function loadPost(id) {
-    if (isDirty && !confirm('You have unsaved changes. Discard them and load another post?')) return;
+    if (isDirty) {
+      const ok = await adminConfirm({
+        title: 'Discard unsaved changes?',
+        body:  'You have unsaved edits in the current program. Loading another one will discard them.',
+        okLabel: 'Discard and switch',
+        tone:    'warn',
+      });
+      if (!ok) return;
+    }
     const all = await window.ProgramsDB.listAll();
     const p = all.find(x => x.id === id);
     if (!p) return;
@@ -328,8 +436,16 @@
     loadPostList();
   }
 
-  function newPost() {
-    if (isDirty && !confirm('You have unsaved changes. Start a new draft anyway?')) return;
+  async function newPost() {
+    if (isDirty) {
+      const ok = await adminConfirm({
+        title: 'Discard unsaved changes?',
+        body:  'You have unsaved edits. Starting a new draft will discard them.',
+        okLabel: 'Discard and continue',
+        tone:    'warn',
+      });
+      if (!ok) return;
+    }
     currentPost = blankPost();
     paintFromState();
     isDirty = false;
@@ -696,7 +812,13 @@
   async function deletePost() {
     if (!currentPost.id) return;
     const title = currentPost.title || '(untitled)';
-    if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return;
+    const ok = await adminConfirm({
+      title: 'Delete this program?',
+      body:  `<strong>"${escapeHtml(title)}"</strong> will be permanently removed. Visitors will see a "not found" page if they had the URL bookmarked. This cannot be undone.`,
+      okLabel: 'Delete program',
+      tone:    'danger',
+    });
+    if (!ok) return;
     try {
       await window.ProgramsDB.remove(currentPost.id);
       newPost();
@@ -982,7 +1104,13 @@
       renderFaqList();
       return;
     }
-    if (!confirm(`Delete this FAQ?\n\n"${orig.question || '(no question yet)'}"\n\nThis cannot be undone.`)) return;
+    const ok = await adminConfirm({
+      title:   'Delete this FAQ?',
+      body:    `<strong>"${escapeHtml(orig.question || '(no question yet)')}"</strong> will be permanently removed. This cannot be undone.`,
+      okLabel: 'Delete FAQ',
+      tone:    'danger',
+    });
+    if (!ok) return;
     try {
       await window.ProgramsDB.removeFaq(id);
       faqs = faqs.filter(f => f.id !== id);

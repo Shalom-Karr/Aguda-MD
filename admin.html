@@ -519,6 +519,25 @@
     ✕ Exit fullscreen
   </button>
 
+  <!-- ============================== CONFIRM MODAL =========================
+       Single shared modal used by every confirm() replacement (delete a
+       program, delete an FAQ, duplicate a program, switch tabs with
+       unsaved changes, etc.). adminConfirm() in admin.js opens it and
+       returns a Promise<boolean>. -->
+  <div id="confirm-modal" class="confirm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="confirm-card">
+      <div id="confirm-icon" class="confirm-icon info">
+        <svg id="confirm-icon-svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"></svg>
+      </div>
+      <h2 id="confirm-title" class="confirm-title"></h2>
+      <p   id="confirm-body"  class="confirm-body"></p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel" class="confirm-btn cancel">Cancel</button>
+        <button id="confirm-ok"     class="confirm-btn go primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/config.js"></script>
   <script src="assets/supabase-client.js"></script>
   <script src="assets/admin.js"></script>
