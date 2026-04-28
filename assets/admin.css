@@ -51,6 +51,40 @@ body { font-family: 'Inter', sans-serif; }
 .preview-pane strong { font-weight: 700; }
 .preview-pane img { max-width: 100%; border-radius: .5rem; margin: .85rem 0; }
 
+/* ---------- Status filter pills (programs sidebar) ---------- */
+.filter-pill {
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: background-color .15s, color .15s, border-color .15s;
+  cursor: pointer;
+}
+.filter-pill:hover { background: #f1f5f9; color: #334155; }
+.filter-pill.active {
+  background: #eff3f8;
+  color: #1e3a5f;
+  border-color: #c7d6e7;
+}
+
+/* ---------- Per-row Duplicate action (programs sidebar) ---------- */
+.post-row { position: relative; }
+.post-row .row-action {
+  position: absolute;
+  right: 6px; top: 6px;
+  opacity: 0;
+  font-size: 11px; font-weight: 700;
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: opacity .15s, background-color .15s, color .15s;
+  z-index: 2;
+}
+.post-row:hover .row-action { opacity: 1; }
+.post-row .row-action:hover { background: #1e3a5f; color: white; border-color: #1e3a5f; }
+
 /* ---------- Toolbar buttons ---------- */
 .tb-btn {
   display: inline-flex;

@@ -73,6 +73,7 @@
       <span id="save-status" class="text-xs text-slate-400 min-w-[110px] text-right"></span>
       <button onclick="showHelp()" title="Formatting help" class="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center font-bold">?</button>
       <button id="signout-btn" onclick="signOut()" class="hidden text-sm font-semibold text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Sign out</button>
+      <button id="preview-draft-btn" onclick="previewDraft()" class="hidden text-sm font-semibold text-slate-700 border border-slate-300 hover:border-brand-700 hover:text-brand-700 px-3 py-1.5 rounded-lg">Preview</button>
       <button id="save-program-btn" onclick="savePost()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save</button>
       <button id="save-settings-btn" onclick="saveSettings()" class="hidden bg-brand-700 hover:bg-brand-800 text-white font-bold px-4 py-1.5 rounded-lg text-sm">Save settings</button>
     </div>
@@ -99,6 +100,12 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Create New Draft
           </button>
+        </div>
+        <!-- Status filter pills -->
+        <div class="px-3 pt-3 flex gap-1.5" id="status-filter">
+          <button data-filter="all"   class="filter-pill active flex-1 py-1.5 text-xs font-bold rounded-md">All</button>
+          <button data-filter="live"  class="filter-pill flex-1 py-1.5 text-xs font-bold rounded-md">Live</button>
+          <button data-filter="draft" class="filter-pill flex-1 py-1.5 text-xs font-bold rounded-md">Drafts</button>
         </div>
         <div class="p-3 border-b border-slate-200">
           <input id="list-search" type="text" placeholder="Filter programs..." class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
@@ -151,7 +158,10 @@
             <input id="post-sort-order" type="number" placeholder="10" class="settings-input text-sm">
           </div>
           <div class="md:col-span-1">
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Short summary</label>
+            <label class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              <span>Short summary</span>
+              <span id="summary-counter" class="font-mono normal-case text-slate-400">0 / 155</span>
+            </label>
             <input id="post-summary" type="text" placeholder="One-line description for the homepage card" class="settings-input text-sm">
           </div>
         </div>
@@ -233,8 +243,11 @@
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
           Delete this guide
         </button>
-        <span class="text-[11px] text-slate-400 ml-auto">
-          <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘S</kbd> to save
+        <span class="text-[11px] text-slate-400 ml-auto flex items-center gap-3 flex-wrap justify-end">
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘B</kbd> bold</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘I</kbd> italic</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘K</kbd> link</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">⌘S</kbd> save</span>
         </span>
       </div>
     </main>

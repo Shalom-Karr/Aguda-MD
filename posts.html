@@ -338,12 +338,31 @@
 
     async function loadPost() {
       const params = new URLSearchParams(window.location.search);
-      const slug = params.get('title');
-      if (!slug) return showNotFound();
 
-      try { currentPost = await window.ProgramsDB.getBySlug(slug); }
-      catch (e) { console.error(e); return showNotFound(); }
-      if (!currentPost) return showNotFound();
+      // Admin preview mode: ?preview=<localStorage-key> — used by the
+      // "Preview" button in the admin to view an unsaved draft as if
+      // it were live, without writing to the DB. The key is consumed
+      // (deleted) after read so the preview can't be re-opened from the
+      // history.
+      const previewKey = params.get('preview');
+      if (previewKey) {
+        try {
+          const raw = localStorage.getItem(previewKey);
+          if (!raw) return showNotFound();
+          currentPost = JSON.parse(raw);
+          localStorage.removeItem(previewKey);
+        } catch (e) {
+          console.error(e);
+          return showNotFound();
+        }
+        if (!currentPost) return showNotFound();
+      } else {
+        const slug = params.get('title');
+        if (!slug) return showNotFound();
+        try { currentPost = await window.ProgramsDB.getBySlug(slug); }
+        catch (e) { console.error(e); return showNotFound(); }
+        if (!currentPost) return showNotFound();
+      }
 
       const C = window.SITE_CONFIG;
       document.getElementById('loading').classList.add('hidden');

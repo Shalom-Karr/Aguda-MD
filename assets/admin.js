@@ -45,6 +45,7 @@
   let settingsCache = {};
   let settingsDirty = false;
   let faqDirtyIds   = new Set();
+  let postFilter    = 'all';                     // 'all' | 'live' | 'draft'
 
   function blankPost() {
     return {
@@ -182,7 +183,7 @@
   /* =================================== 5. SIDEBAR ========================= */
   async function loadPostList() {
     const listEl = $('#post-list');
-    const filter = $('#list-search').value.toLowerCase().trim();
+    const search = $('#list-search').value.toLowerCase().trim();
 
     let posts;
     try { posts = await window.ProgramsDB.listAll(); }
@@ -191,22 +192,30 @@
       return;
     }
 
-    const filtered = filter
-      ? posts.filter(p => (p.title || '').toLowerCase().includes(filter) || (p.slug || '').includes(filter))
-      : posts;
+    const filtered = posts
+      .filter(p => {
+        if (postFilter === 'live')  return p.is_published;
+        if (postFilter === 'draft') return !p.is_published;
+        return true;
+      })
+      .filter(p => !search ||
+        (p.title || '').toLowerCase().includes(search) ||
+        (p.slug || '').includes(search)
+      );
 
     if (!filtered.length) {
       listEl.innerHTML = `
         <div class="p-6 text-sm text-slate-400 text-center">
-          No programs yet.<br>
-          <span class="text-xs">Click "Create New Draft" to start.</span>
+          ${postFilter === 'all' && !search
+            ? 'No programs yet.<br><span class="text-xs">Click "Create New Draft" to start.</span>'
+            : 'No matching programs.'}
         </div>`;
       return;
     }
 
     listEl.innerHTML = filtered.map(p => `
-      <div class="border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50 border-l-4 border-l-brand-600' : ''}">
-        <button data-load-post="${p.id}" class="w-full text-left px-3 py-2.5">
+      <div class="post-row border-b border-slate-100 hover:bg-slate-50 ${currentPost.id === p.id ? 'bg-brand-50 border-l-4 border-l-brand-600' : ''}">
+        <button data-load-post="${p.id}" class="w-full text-left px-3 py-2.5 pr-20">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
               <div class="font-semibold text-sm text-slate-900 truncate">
@@ -222,11 +231,87 @@
             #${p.sort_order ?? '?'} · ${escapeHtml(p.category || '')} · ${new Date(p.updated_at || p.created_at).toLocaleDateString()}
           </div>
         </button>
+        <button class="row-action" data-duplicate="${p.id}" title="Duplicate this program as a new draft">Duplicate</button>
       </div>`).join('');
 
     listEl.querySelectorAll('[data-load-post]').forEach(btn => {
       btn.addEventListener('click', () => loadPost(btn.dataset.loadPost));
     });
+    listEl.querySelectorAll('[data-duplicate]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        duplicatePost(btn.dataset.duplicate);
+      });
+    });
+  }
+
+  /* ----- Status filter pills (sidebar) ----- */
+  function wireStatusFilter() {
+    $$('#status-filter .filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postFilter = btn.dataset.filter;
+        $$('#status-filter .filter-pill').forEach(b =>
+          b.classList.toggle('active', b.dataset.filter === postFilter));
+        loadPostList();
+      });
+    });
+  }
+
+  /* ----- Duplicate a program as a new unsaved draft ----- */
+  async function duplicatePost(id) {
+    if (isDirty && !confirm('You have unsaved changes. Discard them and start a duplicate?')) return;
+    const all = await window.ProgramsDB.listAll();
+    const original = all.find(p => p.id === id);
+    if (!original) return;
+    currentPost = {
+      ...blankPost(),
+      ...original,
+      id: null,
+      slug: (original.slug || '') + '-copy',
+      title: (original.title || 'Untitled') + ' (copy)',
+      is_published: false,
+      sort_order: (original.sort_order || 100) + 1,
+    };
+    delete currentPost.created_at;
+    delete currentPost.updated_at;
+    paintFromState();
+    isDirty = true;
+    setStatus('Duplicated — review and Save to keep', '#1e3a5f');
+    loadPostList();
+    $('#post-title').focus();
+    $('#post-title').select();
+  }
+
+  /* ----- Summary length counter (Google snippets ~155 chars) ----- */
+  function updateSummaryCounter() {
+    const len = ($('#post-summary').value || '').length;
+    const el  = $('#summary-counter');
+    if (!el) return;
+    el.textContent = `${len} / 155`;
+    el.style.color = len > 160 ? '#dc2626'
+                   : len > 130 ? '#d97706'
+                   : '#94a3b8';
+  }
+
+  /* ----- Preview the unsaved draft as a visitor would see it ----- */
+  function previewDraft() {
+    if (!currentPost.title.trim()) {
+      alert('Add a title before previewing.');
+      return;
+    }
+    syncActiveContentMd();
+    // localStorage (not sessionStorage) so the new tab can read it
+    const key = 'bcrn_preview_' + Date.now();
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        ...currentPost,
+        slug: currentPost.slug || 'preview',
+      }));
+    } catch (e) {
+      alert('Could not stash preview data: ' + (e.message || e));
+      return;
+    }
+    window.open('posts.html?preview=' + encodeURIComponent(key), '_blank');
   }
 
   /* ========================== 6. EDITOR — load / new / paint ============== */
@@ -258,6 +343,8 @@
     $('#post-category').value   = currentPost.category || (C.categories || ['General'])[0];
     $('#post-summary').value    = currentPost.summary  || '';
     $('#post-sort-order').value = (currentPost.sort_order ?? 100);
+    updateSummaryCounter();
+    $('#preview-draft-btn').classList.toggle('hidden', !currentPost.title);
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
     $('#delete-btn').classList.toggle('hidden', !currentPost.id);
     paintIconPicker();
@@ -374,6 +461,7 @@
     });
     $('#post-summary').addEventListener('input', (e) => {
       currentPost.summary = e.target.value;
+      updateSummaryCounter();
       markDirty();
     });
     $('#post-sort-order').addEventListener('input', (e) => {
@@ -912,7 +1000,7 @@
 
   function exposeGlobals() {
     Object.assign(window, {
-      newPost, savePost, deletePost,
+      newPost, savePost, deletePost, duplicatePost, previewDraft,
       saveSettings, setView, setEditorView,
       addFaq,
       showHelp, closeHelp, signOut,
@@ -956,6 +1044,7 @@
     wireDragDrop();
     wireSyncScroll();
     wireSettingsInputs();
+    wireStatusFilter();
 
     window.addEventListener('beforeunload', (e) => {
       if (isDirty || settingsDirty) { e.preventDefault(); e.returnValue = ''; }
