@@ -180,6 +180,12 @@
             <span class="flex-1 truncate">Hero (Homepage)</span>
             <svg width="14" height="14" class="text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </button>
+          <button type="button" data-target="settings-programs-section"
+                  class="settings-nav-link flex items-center gap-2.5 w-full px-3 py-2.5 text-sm font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 hover:border-brand-500 rounded-lg text-left transition-colors">
+            <span class="dot w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0"></span>
+            <span class="flex-1 truncate">Programs Section</span>
+            <svg width="14" height="14" class="text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
           <button type="button" data-target="settings-book"
                   class="settings-nav-link flex items-center gap-2.5 w-full px-3 py-2.5 text-sm font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 hover:border-brand-500 rounded-lg text-left transition-colors">
             <span class="dot w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0"></span>
@@ -443,6 +449,19 @@
           </div>
         </section>
 
+        <section id="settings-programs-section" class="settings-section bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Programs Section (Homepage)</h2>
+          <p class="text-xs text-slate-400 -mt-2">Heading and subtext that sit above the program grid on the homepage.</p>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Heading</label>
+            <input data-setting="programsSection.heading" type="text" class="settings-input">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Subhead</label>
+            <input data-setting="programsSection.subhead" type="text" class="settings-input">
+          </div>
+        </section>
+
         <section id="settings-book" class="settings-section bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Book-a-Call Section</h2>
           <div>
@@ -586,8 +605,8 @@
     </div>
   </div>
 
-  <script src="assets/config.js?v=14"></script>
-  <script src="assets/supabase-client.js?v=14"></script>
-  <script src="assets/admin.js?v=14"></script>
+  <script src="assets/config.js?v=15"></script>
+  <script src="assets/supabase-client.js?v=15"></script>
+  <script src="assets/admin.js?v=15"></script>
 </body>
 </html>

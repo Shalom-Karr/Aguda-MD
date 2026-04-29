@@ -50,6 +50,12 @@ window.SITE_CONFIG = {
     ctaSecondary: { label: 'Book a free call', href: '#book' },
   },
 
+  /* Programs grid section heading and subhead */
+  programsSection: {
+    heading: 'Support starts here',
+    subhead: 'Helping you navigate the programs you are eligible for',
+  },
+
   /* Book-a-call section copy (shown after the programs grid) */
   book: {
     heading: 'Not sure where to start?',

@@ -300,7 +300,8 @@
   <main id="programs" class="max-w-6xl mx-auto px-6 py-16">
     <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
       <div>
-        <h2 class="text-3xl font-extrabold text-slate-900">Programs we help with</h2>
+        <h2 id="programs-heading" class="text-3xl font-extrabold text-slate-900"></h2>
+        <p id="programs-subhead" class="text-slate-600 mt-2"></p>
       </div>
       <input id="search" type="text" placeholder="Search programs..."
              class="w-full md:w-72 border border-slate-300 rounded-xl px-4 py-2.5 bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none text-sm">
@@ -406,6 +407,12 @@
       document.getElementById('hero-eyebrow').textContent = C.hero.eyebrow;
       document.getElementById('hero-heading').textContent = C.hero.heading;
       document.getElementById('hero-subhead').textContent = C.hero.subhead;
+      const ps = C.programsSection || {};
+      document.getElementById('programs-heading').textContent = ps.heading || 'Programs we help with';
+      document.getElementById('programs-subhead').textContent = ps.subhead || '';
+      // Hide the subhead paragraph entirely if it's empty so we don't
+      // leave an awkward gap below the heading.
+      document.getElementById('programs-subhead').classList.toggle('hidden', !ps.subhead);
       document.getElementById('book-heading').textContent = C.book.heading;
       document.getElementById('book-subhead').textContent = C.book.subhead;
       document.getElementById('book-cta').textContent     = C.book.buttonLabel;
