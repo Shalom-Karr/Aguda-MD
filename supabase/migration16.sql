@@ -1,6 +1,9 @@
 -- Add tab column (guide / faq) to page_views for per-tab tracking
 ALTER TABLE agudah_md_ga_page_views ADD COLUMN IF NOT EXISTS tab text;
 
+-- Drop old function so return type can change (tab column added)
+DROP FUNCTION IF EXISTS agudah_md_ga_view_counts();
+
 -- Rebuild view_counts to include tab breakdown
 CREATE OR REPLACE FUNCTION agudah_md_ga_view_counts()
 RETURNS TABLE(page text, page_type text, tab text, view_count bigint)
