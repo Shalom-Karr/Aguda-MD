@@ -1012,6 +1012,11 @@
 
   function switchAnalyticsTab() { /* no-op: tables are now always visible */ }
 
+  function toggleGeoRow(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
+  }
+
   async function loadAnalytics() {
     const progEl = $('#analytics-programs');
     if (!progEl) return;
@@ -1088,17 +1093,26 @@
         <th class="pb-2 pr-3 w-16">Tab</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
         <th class="pb-2 pr-3 w-12">State</th>
+        <th class="pb-2 w-16"></th>
       </tr></thead>
-      <tbody>${rows.map(r => {
+      <tbody>${rows.map((r, i) => {
         const displayUrl = r.url ? 'https://baltcrn.org' + r.url : `https://baltcrn.org/posts?title=${r.page}`;
-        const tab = r.tab === 'faq' ? 'FAQ' : r.tab === 'guide' ? 'Guide' : '—';
-        return `<tr class="border-b border-slate-50 last:border-0">
+        const tab    = r.tab === 'faq' ? 'FAQ' : r.tab === 'guide' ? 'Guide' : '—';
+        const geoId  = `pgeo-${i}`;
+        const hasGeo = r.geo && typeof r.geo === 'object';
+        return `<tr class="border-b border-slate-50">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
           <td class="py-2 pr-3 font-medium text-slate-700">${escapeHtml(r.page)}</td>
-          <td class="py-2 pr-3 font-mono text-xs text-slate-500">${escapeHtml(displayUrl)}</td>
+          <td class="py-2 pr-3 font-mono text-xs text-slate-500 break-all">${escapeHtml(displayUrl)}</td>
           <td class="py-2 pr-3 text-xs text-slate-600">${tab}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
           <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
+          <td class="py-2">${hasGeo ? `<button onclick="toggleGeoRow('${geoId}')" class="text-xs text-brand-700 hover:text-brand-900 font-semibold">Details</button>` : ''}</td>
+        </tr>
+        <tr id="${geoId}" class="hidden">
+          <td colspan="7" class="pb-3 pt-0 px-4">
+            <pre class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto text-slate-600 leading-relaxed">${escapeHtml(JSON.stringify(r.geo, null, 2))}</pre>
+          </td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }
@@ -1123,14 +1137,23 @@
         <th class="pb-2 pr-3">URL</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
         <th class="pb-2 pr-3 w-12">State</th>
+        <th class="pb-2 w-16"></th>
       </tr></thead>
-      <tbody>${rows.map(r => {
+      <tbody>${rows.map((r, i) => {
         const displayUrl = r.url ? 'https://baltcrn.org' + r.url : 'https://baltcrn.org/' + (r.page === 'home' ? '' : r.page);
-        return `<tr class="border-b border-slate-50 last:border-0">
+        const geoId  = `sgeo-${i}`;
+        const hasGeo = r.geo && typeof r.geo === 'object';
+        return `<tr class="border-b border-slate-50">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
-          <td class="py-2 pr-3 font-mono text-xs text-slate-700">${escapeHtml(displayUrl)}</td>
+          <td class="py-2 pr-3 font-mono text-xs text-slate-700 break-all">${escapeHtml(displayUrl)}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
           <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
+          <td class="py-2">${hasGeo ? `<button onclick="toggleGeoRow('${geoId}')" class="text-xs text-brand-700 hover:text-brand-900 font-semibold">Details</button>` : ''}</td>
+        </tr>
+        <tr id="${geoId}" class="hidden">
+          <td colspan="5" class="pb-3 pt-0 px-4">
+            <pre class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto text-slate-600 leading-relaxed">${escapeHtml(JSON.stringify(r.geo, null, 2))}</pre>
+          </td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }
@@ -1478,6 +1501,7 @@
       mdFont,
       switchAnalyticsTab,
       loadAnalytics,
+      toggleGeoRow,
     });
     // Toolbar onclick handlers reference these:
     window.md = md;

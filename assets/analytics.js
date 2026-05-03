@@ -31,10 +31,11 @@
   }
 
   let _state = null;
+  let _geo   = null;
 
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state, _geo).catch(function () {});
     }
   }
 
@@ -43,12 +44,15 @@
     ? (params.get('view') === 'faq' ? 'faq' : 'guide')
     : null;
 
-  // Look up state by IP, then fire the initial track (3-second timeout)
+  // Fetch full geo JSON, then fire the initial track (3-second timeout)
   Promise.race([
     fetch('https://get.geojs.io/v1/ip/geo.json').then(function (r) { return r.json(); }),
     new Promise(function (_, reject) { setTimeout(function () { reject('timeout'); }, 3000); }),
   ])
-    .then(function (d) { _state = d.region || null; })
+    .then(function (d) {
+      _state = d.region || null;
+      _geo   = d || null;
+    })
     .catch(function () {})
     .finally(function () { track(initialTab); });
 
