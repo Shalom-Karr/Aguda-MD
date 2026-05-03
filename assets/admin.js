@@ -1007,10 +1007,24 @@
 
   /* ============================ 14. SETTINGS ============================== */
   /* =========================== ANALYTICS ================================== */
+  let _chartTrend    = null;
+  let _chartPrograms = null;
+
+  function switchAnalyticsTab(tab) {
+    const isPrograms = tab === 'programs';
+    $('#atab-programs').className = isPrograms
+      ? 'text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white'
+      : 'text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100';
+    $('#atab-pages').className = !isPrograms
+      ? 'text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white'
+      : 'text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100';
+    $('#analytics-programs').classList.toggle('hidden', !isPrograms);
+    $('#analytics-pages').classList.toggle('hidden',     isPrograms);
+  }
+
   async function loadAnalytics() {
-    const articleEl = $('#analytics-articles');
-    const siteEl    = $('#analytics-site');
-    if (!articleEl) return;
+    const progEl = $('#analytics-programs');
+    if (!progEl) return;
 
     try {
       const d = await window.ProgramsDB.getAnalytics();
@@ -1019,33 +1033,134 @@
       $('#stat-article-total').textContent = d.articleTotal.toLocaleString();
       $('#stat-today').textContent         = d.today.toLocaleString();
 
-      const maxCount = d.pages.length ? d.pages[0].view_count : 1;
-
-      function renderTable(rows, emptyMsg) {
-        if (!rows.length) return `<p class="text-slate-400 text-sm">${emptyMsg}</p>`;
-        return `<table class="w-full text-sm">
-          <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-            <th class="pb-2">Page</th><th class="pb-2 text-right w-20">Views</th><th class="pb-2 pl-3 w-40">Bar</th>
-          </tr></thead>
-          <tbody>${rows.map(r => `
-            <tr class="border-b border-slate-50 last:border-0">
-              <td class="py-2 font-medium text-slate-700">${escapeHtml(r.page)}</td>
-              <td class="py-2 text-right font-bold text-brand-700">${Number(r.view_count).toLocaleString()}</td>
-              <td class="py-2 pl-3">
-                <div class="h-2 rounded-full bg-brand-100 overflow-hidden">
-                  <div class="h-full rounded-full bg-brand-600" style="width:${Math.round(r.view_count / maxCount * 100)}%"></div>
-                </div>
-              </td>
-            </tr>`).join('')}
-          </tbody></table>`;
-      }
-
-      articleEl.innerHTML = renderTable(d.pages.filter(p => p.page_type === 'article'), 'No article views yet.');
-      siteEl.innerHTML    = renderTable(d.pages.filter(p => p.page_type === 'site'),    'No site page views yet.');
+      renderTrendChart(d.byDay);
+      renderProgramTable(d.pages);
+      renderPageTable(d.pages);
+      renderTopProgramsChart(d.pages);
     } catch (e) {
-      articleEl.innerHTML = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
-      if (siteEl) siteEl.innerHTML = '';
+      progEl.innerHTML = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
     }
+  }
+
+  function renderTrendChart(byDay) {
+    const days = [], siteMap = {}, articleMap = {};
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      days.push(key);
+      siteMap[key] = 0; articleMap[key] = 0;
+    }
+    (byDay || []).forEach(r => {
+      const key = String(r.day).slice(0, 10);
+      if (key in siteMap) {
+        if (r.page_type === 'site') siteMap[key]    += Number(r.view_count);
+        else                        articleMap[key] += Number(r.view_count);
+      }
+    });
+    const labels      = days.map(d => { const [,m,dd] = d.split('-'); return `${+m}/${+dd}`; });
+    const ctx = document.getElementById('chart-trend');
+    if (!ctx) return;
+    if (_chartTrend) _chartTrend.destroy();
+    _chartTrend = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Site pages', data: days.map(d => siteMap[d]),    borderColor: '#1e3a5f', backgroundColor: 'rgba(30,58,95,.08)',  tension: 0.35, fill: true, pointRadius: 2 },
+          { label: 'Articles',   data: days.map(d => articleMap[d]), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.08)', tension: 0.35, fill: true, pointRadius: 2 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }, x: { ticks: { font: { size: 10 }, maxTicksLimit: 15 } } },
+      },
+    });
+  }
+
+  function renderProgramTable(pages) {
+    const el = $('#analytics-programs');
+    const articles = (pages || []).filter(p => p.page_type === 'article');
+    if (!articles.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No article views yet.</p>'; return; }
+
+    const bySlug = {};
+    articles.forEach(r => {
+      if (!bySlug[r.page]) bySlug[r.page] = { page: r.page, guide: 0, faq: 0, other: 0 };
+      const n = Number(r.view_count);
+      if (r.tab === 'guide')    bySlug[r.page].guide += n;
+      else if (r.tab === 'faq') bySlug[r.page].faq   += n;
+      else                      bySlug[r.page].other  += n;
+    });
+    const rows = Object.values(bySlug).sort((a, b) => (b.guide+b.faq+b.other) - (a.guide+a.faq+a.other));
+    const maxT = rows[0] ? rows[0].guide + rows[0].faq + rows[0].other : 1;
+
+    el.innerHTML = `<table class="w-full text-sm">
+      <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+        <th class="pb-2 pr-3">Program</th>
+        <th class="pb-2 text-right pr-3">Guide</th>
+        <th class="pb-2 text-right pr-3">FAQ</th>
+        <th class="pb-2 text-right pr-3">Total</th>
+        <th class="pb-2 w-28">Bar</th>
+      </tr></thead>
+      <tbody>${rows.map(r => {
+        const total = r.guide + r.faq + r.other;
+        const pct   = Math.round(total / maxT * 100);
+        return `<tr class="border-b border-slate-50 last:border-0">
+          <td class="py-2 pr-3 font-medium text-slate-700">${escapeHtml(r.page)}</td>
+          <td class="py-2 pr-3 text-right text-slate-600">${r.guide.toLocaleString()}</td>
+          <td class="py-2 pr-3 text-right text-slate-600">${r.faq.toLocaleString()}</td>
+          <td class="py-2 pr-3 text-right font-bold text-brand-700">${total.toLocaleString()}</td>
+          <td class="py-2"><div class="h-2 rounded-full bg-brand-100 overflow-hidden"><div class="h-full rounded-full bg-brand-600" style="width:${pct}%"></div></div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  }
+
+  function renderPageTable(pages) {
+    const el = $('#analytics-pages');
+    const site = (pages || []).filter(p => p.page_type === 'site')
+      .sort((a, b) => Number(b.view_count) - Number(a.view_count));
+    if (!site.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No site page views yet.</p>'; return; }
+    const maxC = Number(site[0].view_count) || 1;
+
+    el.innerHTML = `<table class="w-full text-sm">
+      <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+        <th class="pb-2 pr-3">Page</th>
+        <th class="pb-2 text-right pr-3 w-20">Views</th>
+        <th class="pb-2 w-28">Bar</th>
+      </tr></thead>
+      <tbody>${site.map(r => {
+        const n   = Number(r.view_count);
+        const pct = Math.round(n / maxC * 100);
+        return `<tr class="border-b border-slate-50 last:border-0">
+          <td class="py-2 pr-3 font-medium text-slate-700 capitalize">${escapeHtml(r.page)}</td>
+          <td class="py-2 pr-3 text-right font-bold text-brand-700">${n.toLocaleString()}</td>
+          <td class="py-2"><div class="h-2 rounded-full bg-brand-100 overflow-hidden"><div class="h-full rounded-full bg-brand-600" style="width:${pct}%"></div></div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  }
+
+  function renderTopProgramsChart(pages) {
+    const bySlug = {};
+    (pages || []).filter(p => p.page_type === 'article').forEach(r => {
+      bySlug[r.page] = (bySlug[r.page] || 0) + Number(r.view_count);
+    });
+    const sorted  = Object.entries(bySlug).sort((a, b) => b[1] - a[1]).slice(0, 7);
+    const ctx = document.getElementById('chart-programs');
+    if (!ctx) return;
+    if (_chartPrograms) _chartPrograms.destroy();
+    _chartPrograms = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels:   sorted.map(([k]) => k),
+        datasets: [{ label: 'Total views', data: sorted.map(([,v]) => v), backgroundColor: '#1e3a5f', borderRadius: 5 }],
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }, y: { ticks: { font: { size: 11 } } } },
+      },
+    });
   }
 
   async function loadSettings() {
@@ -1365,6 +1480,8 @@
       showHelp, closeHelp, signOut,
       mdLink, toggleFullscreen,
       handleImageFileInput,
+      mdFont,
+      switchAnalyticsTab,
     });
     // Toolbar onclick handlers reference these:
     window.md = md;

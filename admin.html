@@ -596,11 +596,11 @@
     </main>
 
     <!-- ========================= ANALYTICS MAIN ========================= -->
-    <main id="analytics-main" class="hidden flex-1 overflow-y-auto bg-stone-50 p-6">
-      <h1 class="text-lg font-extrabold text-slate-800 mb-5">Analytics</h1>
+    <main id="analytics-main" class="hidden flex-1 overflow-y-auto bg-stone-50 p-6 space-y-5">
+      <h1 class="text-lg font-extrabold text-slate-800">Analytics</h1>
 
       <!-- Stat cards -->
-      <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="grid grid-cols-3 gap-4">
         <div class="bg-white border border-slate-200 rounded-xl p-4">
           <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Site views</p>
           <p id="stat-site-total" class="text-3xl font-extrabold text-brand-700">—</p>
@@ -618,20 +618,28 @@
         </div>
       </div>
 
-      <!-- Article breakdown -->
-      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden mb-4">
-        <div class="px-4 py-3 border-b border-slate-200">
-          <p class="text-sm font-bold text-slate-700">Articles by views</p>
-        </div>
-        <div id="analytics-articles" class="p-4 text-sm text-slate-400">Loading…</div>
+      <!-- 30-day trend line chart -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <p class="text-sm font-bold text-slate-700 mb-4">30-day trend</p>
+        <div style="height:200px"><canvas id="chart-trend"></canvas></div>
       </div>
 
-      <!-- Site pages breakdown -->
+      <!-- Two-tab table switcher -->
       <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-200">
-          <p class="text-sm font-bold text-slate-700">Site pages by views</p>
+        <div class="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
+          <button id="atab-programs" onclick="switchAnalyticsTab('programs')"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white">Program views</button>
+          <button id="atab-pages" onclick="switchAnalyticsTab('pages')"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100">Page views</button>
         </div>
-        <div id="analytics-site" class="p-4 text-sm text-slate-400">Loading…</div>
+        <div id="analytics-programs" class="p-4 text-sm text-slate-400">Loading…</div>
+        <div id="analytics-pages"    class="p-4 text-sm text-slate-400 hidden"></div>
+      </div>
+
+      <!-- Top programs bar chart -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <p class="text-sm font-bold text-slate-700 mb-4">Top programs</p>
+        <div style="height:240px"><canvas id="chart-programs"></canvas></div>
       </div>
     </main>
   </div>
@@ -685,6 +693,7 @@
 
   <script src="assets/config.js?v=15"></script>
   <script src="assets/supabase-client.js?v=15"></script>
-  <script src="assets/admin.js?v=15"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="assets/admin.js?v=16"></script>
 </body>
 </html>

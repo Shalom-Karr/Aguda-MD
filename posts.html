@@ -310,6 +310,7 @@
 
     function setView(view) {
       currentView = view;
+      if (view === 'faq' && window.trackTabView) window.trackTabView('faq');
       document.querySelectorAll('#view-toggle button').forEach(b => {
         b.classList.toggle('active', b.dataset.view === view);
       });

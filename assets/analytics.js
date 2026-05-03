@@ -1,6 +1,7 @@
 /* ============================================================================
  * ANALYTICS TRACKER
- * Fires one page-view record per page load. Silent no-op in demo mode.
+ * Fires one page-view record per page load (and one per tab switch on
+ * article pages). Silent no-op in demo mode.
  * Must be loaded after config.js and supabase-client.js.
  * ========================================================================== */
 (function () {
@@ -27,7 +28,17 @@
     return; // admin or unknown — skip
   }
 
-  if (window.ProgramsDB && window.ProgramsDB.trackView) {
-    window.ProgramsDB.trackView(page, pageType).catch(function () {});
+  function track(tab) {
+    if (window.ProgramsDB && window.ProgramsDB.trackView) {
+      window.ProgramsDB.trackView(page, pageType, tab || null).catch(function () {});
+    }
+  }
+
+  // Track the initial page load (guide tab for articles)
+  track(pageType === 'article' ? 'guide' : null);
+
+  // Expose hook so posts.html can fire a separate event when the FAQ tab opens
+  if (pageType === 'article') {
+    window.trackTabView = function (tab) { track(tab); };
   }
 })();

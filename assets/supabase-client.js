@@ -589,23 +589,26 @@ So you usually don't need to apply separately for those.`,
 
       /* -------- Image upload --------------------------------------------- */
       /* -------- Analytics --------------------------------------------------- */
-      async trackView(page, pageType) {
-        await client.from('agudah_md_ga_page_views')
-          .insert({ page, page_type: pageType });
+      async trackView(page, pageType, tab) {
+        const payload = { page, page_type: pageType };
+        if (tab) payload.tab = tab;
+        await client.from('agudah_md_ga_page_views').insert(payload);
       },
       async getAnalytics() {
         const todayUTC = new Date().toISOString().slice(0, 10);
-        const [siteRes, articleRes, todayRes, pagesRes] = await Promise.all([
+        const [siteRes, articleRes, todayRes, pagesRes, byDayRes] = await Promise.all([
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'site'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'article'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).gte('viewed_at', todayUTC),
           client.rpc('agudah_md_ga_view_counts'),
+          client.rpc('agudah_md_ga_views_by_day', { days_back: 30 }),
         ]);
         return {
           siteTotal:    siteRes.count    || 0,
           articleTotal: articleRes.count || 0,
           today:        todayRes.count   || 0,
           pages:        pagesRes.data    || [],
+          byDay:        byDayRes.data    || [],
         };
       },
 
