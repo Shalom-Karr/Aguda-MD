@@ -30,9 +30,11 @@
     return; // admin or unknown — skip
   }
 
+  let _state = null;
+
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state).catch(function () {});
     }
   }
 
@@ -41,9 +43,16 @@
     ? (params.get('view') === 'faq' ? 'faq' : 'guide')
     : null;
 
-  track(initialTab);
+  // Look up state by IP, then fire the initial track (3-second timeout)
+  Promise.race([
+    fetch('https://ipapi.co/json/').then(function (r) { return r.json(); }),
+    new Promise(function (_, reject) { setTimeout(function () { reject('timeout'); }, 3000); }),
+  ])
+    .then(function (d) { _state = d.region_code || null; })
+    .catch(function () {})
+    .finally(function () { track(initialTab); });
 
-  // Expose hook so posts.html can fire a separate event when the FAQ tab opens
+  // Expose hook so posts.html can fire a separate event when tabs switch
   if (pageType === 'article') {
     window.trackTabView = function (tab) { track(tab); };
   }

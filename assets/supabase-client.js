@@ -592,11 +592,12 @@ So you usually don't need to apply separately for those.`,
 
       /* -------- Image upload --------------------------------------------- */
       /* -------- Analytics --------------------------------------------------- */
-      async trackView(page, pageType, tab, url, screenSize) {
+      async trackView(page, pageType, tab, url, screenSize, state) {
         const payload = { page, page_type: pageType };
         if (tab)        payload.tab         = tab;
         if (url)        payload.url         = url;
         if (screenSize) payload.screen_size = screenSize;
+        if (state)      payload.state       = state;
         await client.from('agudah_md_ga_page_views').insert(payload);
       },
       async getAnalytics() {
@@ -608,12 +609,12 @@ So you usually don't need to apply separately for those.`,
           client.rpc('agudah_md_ga_view_counts'),
           client.rpc('agudah_md_ga_views_by_day', { days_back: 30 }),
           client.from('agudah_md_ga_page_views')
-            .select('page, page_type, tab, url, screen_size, viewed_at')
+            .select('page, page_type, tab, url, screen_size, state, viewed_at')
             .eq('page_type', 'site')
             .order('viewed_at', { ascending: false })
             .limit(100),
           client.from('agudah_md_ga_page_views')
-            .select('page, page_type, tab, url, screen_size, viewed_at')
+            .select('page, page_type, tab, url, screen_size, state, viewed_at')
             .eq('page_type', 'article')
             .order('viewed_at', { ascending: false })
             .limit(100),

@@ -1087,9 +1087,10 @@
         <th class="pb-2 pr-3">URL</th>
         <th class="pb-2 pr-3 w-16">Tab</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
+        <th class="pb-2 pr-3 w-12">State</th>
       </tr></thead>
       <tbody>${rows.map(r => {
-        const displayUrl = r.url || `/posts?title=${r.page}`;
+        const displayUrl = r.url ? 'https://baltcrn.org' + r.url : `https://baltcrn.org/posts?title=${r.page}`;
         const tab = r.tab === 'faq' ? 'FAQ' : r.tab === 'guide' ? 'Guide' : '—';
         return `<tr class="border-b border-slate-50 last:border-0">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
@@ -1097,6 +1098,7 @@
           <td class="py-2 pr-3 font-mono text-xs text-slate-500">${escapeHtml(displayUrl)}</td>
           <td class="py-2 pr-3 text-xs text-slate-600">${tab}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
+          <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }
@@ -1120,13 +1122,15 @@
         <th class="pb-2 pr-3 w-32">Time</th>
         <th class="pb-2 pr-3">URL</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
+        <th class="pb-2 pr-3 w-12">State</th>
       </tr></thead>
       <tbody>${rows.map(r => {
-        const displayUrl = r.url || (r.page === 'home' ? '/' : `/${r.page}`);
+        const displayUrl = r.url ? 'https://baltcrn.org' + r.url : 'https://baltcrn.org/' + (r.page === 'home' ? '' : r.page);
         return `<tr class="border-b border-slate-50 last:border-0">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
           <td class="py-2 pr-3 font-mono text-xs text-slate-700">${escapeHtml(displayUrl)}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
+          <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }
