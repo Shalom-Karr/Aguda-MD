@@ -26,17 +26,25 @@
   const C = window.SITE_CONFIG;
 
   // Default category emojis (mirrors index.html / posts.html)
-  const CATEGORY_DEFAULT_ICON = {
-    Food: '🍎', Health: '🏥', Housing: '🏠',
-    Energy: '⚡', Family: '👶', Income: '💵',
+  // Lucide SVG path data — mirrors the icons used on the frontend program cards.
+  const ICON_SVGS = {
+    Food:           '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+    Health:         '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
+    Family:         '<circle cx="9" cy="12" r=".5" fill="currentColor"/><circle cx="15" cy="12" r=".5" fill="currentColor"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
+    Energy:         '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+    Income:         '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    Housing:        '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+    Utilities:      '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+    Transportation: '<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>',
+    Education:      '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+    General:        '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/>',
   };
-
-  // Icon options for the picker. First entry is "default (use category)".
-  const ICON_OPTIONS = [
-    '🍎','🏥','🏠','⚡','👶','💵','📋','📚','💼','🎓',
-    '⚖️','🛡️','🏛️','📞','✉️','💊','🍼','♿','🩺','🔑',
-    '🚌','🍞','💧','🏥','🧑‍⚕️','📝','🎒','👨‍👩‍👧','💳','🆘'
-  ];
+  const ICON_OPTIONS = Object.keys(ICON_SVGS);
+  const CATEGORY_DEFAULT_ICON = {
+    Food: 'Food', Health: 'Health', Housing: 'Housing',
+    Energy: 'Energy', Family: 'Family', Income: 'Income',
+    Utilities: 'Utilities', Transportation: 'Transportation',
+  };
 
   let currentPost   = blankPost();
   let isDirty       = false;
@@ -532,19 +540,24 @@
   }
 
   /* ============================ 6b. EDITOR — icon picker ================== */
+  function adminSvgWrap(inner) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">${inner}</svg>`;
+  }
+
   function paintIconPicker() {
     const picker = $('#icon-picker');
     if (!picker) return;
     const selected = currentPost.icon || '';
-    const fallback = CATEGORY_DEFAULT_ICON[currentPost.category] || '📋';
+    const fallbackKey = CATEGORY_DEFAULT_ICON[currentPost.category] || 'General';
     const buttons = [
       `<button type="button" data-icon="" class="${selected === '' ? 'selected' : ''}" title="Use the default icon for the selected category">
-         <span class="icon-emoji">${fallback}</span>
+         ${adminSvgWrap(ICON_SVGS[fallbackKey] || ICON_SVGS.General)}
          <span class="icon-default">Default</span>
        </button>`,
-      ...ICON_OPTIONS.map(emoji => `
-        <button type="button" data-icon="${escapeHtml(emoji)}" class="${selected === emoji ? 'selected' : ''}" title="Use ${escapeHtml(emoji)}">
-          <span class="icon-emoji">${escapeHtml(emoji)}</span>
+      ...ICON_OPTIONS.map(key => `
+        <button type="button" data-icon="${key}" class="${selected === key ? 'selected' : ''}" title="${key}">
+          ${adminSvgWrap(ICON_SVGS[key])}
+          <span class="icon-default">${key}</span>
         </button>`)
     ];
     picker.innerHTML = buttons.join('');

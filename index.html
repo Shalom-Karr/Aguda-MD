@@ -391,11 +391,12 @@
       // keeps the homepage grid visually consistent (clean line-art
       // instead of tinted-emoji silhouettes).
       if (ICON_SVG_BY_SLUG[p.slug]) return svgWrap(ICON_SVG_BY_SLUG[p.slug]);
-      // For any other (future) program, an admin-picked emoji is honoured.
       if (p.icon && p.icon.trim()) {
+        // Icon key set via admin picker (e.g. "Food", "Health") → use matching SVG.
+        if (ICON_SVG_BY_CATEGORY[p.icon]) return svgWrap(ICON_SVG_BY_CATEGORY[p.icon]);
+        // Legacy emoji value — still honoured.
         return `<span class="program-icon-emoji">${p.icon}</span>`;
       }
-      // Otherwise fall back to a category-mapped SVG, then a generic shape.
       return svgWrap(ICON_SVG_BY_CATEGORY[p.category] || ICON_SVG_GENERIC);
     }
     let allPrograms = [];

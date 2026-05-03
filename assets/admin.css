@@ -268,53 +268,42 @@ body { font-family: 'Inter', sans-serif; }
 /* ---------- Icon picker ---------- */
 .icon-picker {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
   gap: 8px;
 }
 .icon-picker button {
-  height: 54px;
+  height: 64px;
+  color: #1e3a5f;
   border: 2px solid transparent;
   border-radius: 12px;
   background: #dbeafe;
   cursor: pointer;
-  transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
+  transition: background-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
-.icon-picker button .icon-emoji {
-  font-size: 22px;
-  line-height: 1;
-  filter: brightness(0) saturate(100%) invert(19%) sepia(40%) saturate(1200%) hue-rotate(186deg) brightness(95%) contrast(95%);
-  transition: filter .2s ease;
-}
+.icon-picker button svg { flex-shrink: 0; }
 .icon-picker button:hover {
   background: #1e3a5f;
+  color: #dbeafe;
   transform: scale(1.05);
-}
-.icon-picker button:hover .icon-emoji {
-  filter: brightness(0) saturate(100%) invert(94%) sepia(8%) saturate(489%) hue-rotate(184deg) brightness(98%) contrast(95%);
 }
 .icon-picker button.selected {
   background: #1e3a5f;
+  color: #dbeafe;
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1e3a5f;
-}
-.icon-picker button.selected .icon-emoji {
-  filter: brightness(0) saturate(100%) invert(94%) sepia(8%) saturate(489%) hue-rotate(184deg) brightness(98%) contrast(95%);
 }
 .icon-picker .icon-default {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
-  color: #1e3a5f;
   text-align: center;
   line-height: 1;
 }
-.icon-picker button:hover .icon-default,
-.icon-picker button.selected .icon-default { color: #dbeafe; }
 
 /* ---------- Other ---------- */
 .scroll-pane { overflow-y: auto; }
