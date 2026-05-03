@@ -624,16 +624,22 @@
         <div style="height:200px"><canvas id="chart-trend"></canvas></div>
       </div>
 
-      <!-- Two-tab table switcher -->
+      <!-- Program views table -->
       <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-          <button id="atab-programs" onclick="switchAnalyticsTab('programs')"
-            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white">Program views</button>
-          <button id="atab-pages" onclick="switchAnalyticsTab('pages')"
-            class="text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100">Page views</button>
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-bold text-slate-700">Program views</p>
+          <p class="text-xs text-slate-400 mt-0.5">Most recent 100 article opens</p>
         </div>
-        <div id="analytics-programs" class="p-4 text-sm text-slate-400">Loading…</div>
-        <div id="analytics-pages"    class="p-4 text-sm text-slate-400 hidden"></div>
+        <div id="analytics-programs" class="p-4 overflow-x-auto text-sm text-slate-400">Loading…</div>
+      </div>
+
+      <!-- Page views table -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-bold text-slate-700">Page views</p>
+          <p class="text-xs text-slate-400 mt-0.5">Most recent 100 site page visits</p>
+        </div>
+        <div id="analytics-pages" class="p-4 overflow-x-auto text-sm text-slate-400">Loading…</div>
       </div>
 
       <!-- Top programs bar chart -->
@@ -694,6 +700,6 @@
   <script src="assets/config.js?v=15"></script>
   <script src="assets/supabase-client.js?v=20"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script src="assets/admin.js?v=20"></script>
+  <script src="assets/admin.js?v=21"></script>
 </body>
 </html>

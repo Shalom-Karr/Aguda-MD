@@ -1010,21 +1010,15 @@
   let _chartTrend    = null;
   let _chartPrograms = null;
 
-  function switchAnalyticsTab(tab) {
-    const isPrograms = tab === 'programs';
-    $('#atab-programs').className = isPrograms
-      ? 'text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white'
-      : 'text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100';
-    $('#atab-pages').className = !isPrograms
-      ? 'text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-700 text-white'
-      : 'text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100';
-    $('#analytics-programs').classList.toggle('hidden', !isPrograms);
-    $('#analytics-pages').classList.toggle('hidden',     isPrograms);
-  }
+  function switchAnalyticsTab() { /* no-op: tables are now always visible */ }
 
   async function loadAnalytics() {
     const progEl = $('#analytics-programs');
     if (!progEl) return;
+
+    const pageEl = $('#analytics-pages');
+    progEl.innerHTML = '<p class="text-slate-400 text-sm py-2">Loading…</p>';
+    if (pageEl) pageEl.innerHTML = '<p class="text-slate-400 text-sm py-2">Loading…</p>';
 
     try {
       const d = await window.ProgramsDB.getAnalytics();
@@ -1038,7 +1032,9 @@
       renderPageTable(d.raw);
       renderTopProgramsChart(d.pages);
     } catch (e) {
-      progEl.innerHTML = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
+      const msg = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
+      progEl.innerHTML = msg;
+      if (pageEl) pageEl.innerHTML = msg;
     }
   }
 
