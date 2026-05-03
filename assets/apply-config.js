@@ -34,6 +34,19 @@
     } catch (e) {
       console.warn('[apply-config] failed to load DB settings:', e);
     }
+    // Apply global font override
+    const font = window.SITE_CONFIG.font;
+    if (font && font !== 'Inter') {
+      const serif = ['Merriweather', 'Lora'].includes(font);
+      let el = document.getElementById('site-font-override');
+      if (!el) {
+        el = document.createElement('style');
+        el.id = 'site-font-override';
+        document.head.appendChild(el);
+      }
+      el.textContent = `body,h1,h2,h3,h4,h5,h6{font-family:'${font}',${serif?'serif':'sans-serif'}!important}`;
+    }
+
     return window.SITE_CONFIG;
   };
 })();

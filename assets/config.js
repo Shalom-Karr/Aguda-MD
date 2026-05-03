@@ -12,6 +12,8 @@
 
 window.SITE_CONFIG = {
   /* Public-facing name and tagline */
+  font: 'Inter',
+
   name:      'Baltimore Community Resource Network',
   shortName: 'BCRN',
   tagline:   'Connecting You to Resources That Matter.',

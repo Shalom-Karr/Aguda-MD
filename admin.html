@@ -176,6 +176,12 @@
             <span class="flex-1 truncate">Identity</span>
             <svg width="14" height="14" class="text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </button>
+          <button type="button" data-target="settings-typography"
+                  class="settings-nav-link flex items-center gap-2.5 w-full px-3 py-2.5 text-sm font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 hover:border-brand-500 rounded-lg text-left transition-colors">
+            <span class="dot w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0"></span>
+            <span class="flex-1 truncate">Typography</span>
+            <svg width="14" height="14" class="text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
           <button type="button" data-target="settings-contact"
                   class="settings-nav-link flex items-center gap-2.5 w-full px-3 py-2.5 text-sm font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 hover:border-brand-500 rounded-lg text-left transition-colors">
             <span class="dot w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0"></span>
@@ -399,6 +405,21 @@
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Tagline</label>
             <input data-setting="tagline" type="text" class="settings-input">
+          </div>
+        </section>
+
+        <section id="settings-typography" class="settings-section bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">Typography</h2>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Global font</label>
+            <select data-setting="font" class="settings-input">
+              <option value="Inter"        style="font-family:'Inter',sans-serif">Inter (default)</option>
+              <option value="Merriweather" style="font-family:'Merriweather',serif">Merriweather — classic serif</option>
+              <option value="Lora"         style="font-family:'Lora',serif">Lora — elegant serif</option>
+              <option value="Montserrat"   style="font-family:'Montserrat',sans-serif">Montserrat — geometric sans</option>
+              <option value="Open Sans"    style="font-family:'Open Sans',sans-serif">Open Sans — neutral sans</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-1">Applies to all headings and body text across the entire site, including the hero.</p>
           </div>
         </section>
 
