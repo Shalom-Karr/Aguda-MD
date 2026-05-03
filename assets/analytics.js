@@ -44,12 +44,11 @@
     : null;
 
   // Look up state by IP, then fire the initial track (3-second timeout)
-  // ipwho.is is free, CORS-enabled, no key required
   Promise.race([
-    fetch('https://ipwho.is/').then(function (r) { return r.json(); }),
+    fetch('https://get.geojs.io/v1/ip/geo.json').then(function (r) { return r.json(); }),
     new Promise(function (_, reject) { setTimeout(function () { reject('timeout'); }, 3000); }),
   ])
-    .then(function (d) { _state = (d.success && d.region_code) ? d.region_code : null; })
+    .then(function (d) { _state = d.region || null; })
     .catch(function () {})
     .finally(function () { track(initialTab); });
 
