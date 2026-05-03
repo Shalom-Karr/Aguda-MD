@@ -121,9 +121,10 @@
            Flex (not grid) so the FAQs tab can be hidden cleanly when the
            general FAQ section is disabled, without leaving an empty cell. -->
       <div class="flex border-b border-slate-200 text-xs font-bold">
-        <button id="tab-programs" onclick="setView('editor')"   class="flex-1 py-3 text-brand-700 border-b-2 border-brand-700 bg-brand-50/50">Programs</button>
-        <button id="tab-faqs"     onclick="setView('faqs')"     class="flex-1 py-3 text-slate-500 hover:text-slate-800">FAQs</button>
-        <button id="tab-settings" onclick="setView('settings')" class="flex-1 py-3 text-slate-500 hover:text-slate-800">Settings</button>
+        <button id="tab-programs"  onclick="setView('editor')"    class="flex-1 py-3 text-brand-700 border-b-2 border-brand-700 bg-brand-50/50">Programs</button>
+        <button id="tab-faqs"      onclick="setView('faqs')"      class="flex-1 py-3 text-slate-500 hover:text-slate-800">FAQs</button>
+        <button id="tab-settings"  onclick="setView('settings')"  class="flex-1 py-3 text-slate-500 hover:text-slate-800">Settings</button>
+        <button id="tab-analytics" onclick="setView('analytics')" class="flex-1 py-3 text-slate-500 hover:text-slate-800">Analytics</button>
       </div>
 
       <!-- Programs sidebar -->
@@ -153,6 +154,13 @@
         <p class="text-xs text-slate-400 leading-relaxed pt-2 border-t border-slate-200">
           Tip: each FAQ has a <strong>sort order</strong> number. Lower numbers appear first. To reorder, change the numbers.
         </p>
+      </div>
+
+      <!-- Analytics sidebar -->
+      <div id="sidebar-analytics" class="hidden flex-1 overflow-y-auto p-4 space-y-3">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Analytics</p>
+        <p class="text-xs text-slate-500 leading-relaxed">Views are tracked each time a visitor loads a page. Data starts accumulating after the migration is run.</p>
+        <button onclick="loadAnalytics()" class="w-full text-xs font-bold text-brand-700 hover:text-brand-900 py-2 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors">↻ Refresh</button>
       </div>
 
       <!-- Settings sidebar — section nav -->
@@ -563,6 +571,46 @@
         <p class="text-xs text-slate-400 pb-8">
           Click <strong>Save settings</strong> in the top bar to apply changes site-wide.
         </p>
+      </div>
+    </main>
+
+    <!-- ========================= ANALYTICS MAIN ========================= -->
+    <main id="analytics-main" class="hidden flex-1 overflow-y-auto bg-stone-50 p-6">
+      <h1 class="text-lg font-extrabold text-slate-800 mb-5">Analytics</h1>
+
+      <!-- Stat cards -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Site views</p>
+          <p id="stat-site-total" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">all time</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Article views</p>
+          <p id="stat-article-total" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">all time</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Views today</p>
+          <p id="stat-today" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">UTC day</p>
+        </div>
+      </div>
+
+      <!-- Article breakdown -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden mb-4">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-bold text-slate-700">Articles by views</p>
+        </div>
+        <div id="analytics-articles" class="p-4 text-sm text-slate-400">Loading…</div>
+      </div>
+
+      <!-- Site pages breakdown -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-bold text-slate-700">Site pages by views</p>
+        </div>
+        <div id="analytics-site" class="p-4 text-sm text-slate-400">Loading…</div>
       </div>
     </main>
   </div>

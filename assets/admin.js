@@ -179,27 +179,31 @@
       el.classList.toggle('bg-brand-50/50',   active);
       el.classList.toggle('text-slate-500',   !active);
     };
-    setTab('#tab-programs', view === 'editor');
-    setTab('#tab-faqs',     view === 'faqs');
-    setTab('#tab-settings', view === 'settings');
+    setTab('#tab-programs',  view === 'editor');
+    setTab('#tab-faqs',      view === 'faqs');
+    setTab('#tab-settings',  view === 'settings');
+    setTab('#tab-analytics', view === 'analytics');
 
     // Sidebar contents
-    $('#sidebar-programs').classList.toggle('hidden', view !== 'editor');
-    $('#sidebar-faqs').classList.toggle('hidden',     view !== 'faqs');
-    $('#sidebar-settings').classList.toggle('hidden', view !== 'settings');
+    $('#sidebar-programs').classList.toggle('hidden',  view !== 'editor');
+    $('#sidebar-faqs').classList.toggle('hidden',      view !== 'faqs');
+    $('#sidebar-settings').classList.toggle('hidden',  view !== 'settings');
+    $('#sidebar-analytics').classList.toggle('hidden', view !== 'analytics');
 
     // Main content
-    $('#editor-main').classList.toggle('hidden',   view !== 'editor');
-    $('#faqs-main').classList.toggle('hidden',     view !== 'faqs');
-    $('#settings-main').classList.toggle('hidden', view !== 'settings');
+    $('#editor-main').classList.toggle('hidden',    view !== 'editor');
+    $('#faqs-main').classList.toggle('hidden',      view !== 'faqs');
+    $('#settings-main').classList.toggle('hidden',  view !== 'settings');
+    $('#analytics-main').classList.toggle('hidden', view !== 'analytics');
 
     // Save buttons (FAQs save inline, no top-bar button)
     $('#save-program-btn').classList.toggle('hidden',  view !== 'editor');
     $('#save-settings-btn').classList.toggle('hidden', view !== 'settings');
 
     // Lazy-load tab data
-    if (view === 'settings' && !settingsCache.__loaded) loadSettings();
-    if (view === 'faqs')                                loadFaqList();
+    if (view === 'settings'  && !settingsCache.__loaded) loadSettings();
+    if (view === 'faqs')                                 loadFaqList();
+    if (view === 'analytics')                            loadAnalytics();
   }
 
   /* =================================== 5. SIDEBAR ========================= */
@@ -1002,6 +1006,48 @@
   }
 
   /* ============================ 14. SETTINGS ============================== */
+  /* =========================== ANALYTICS ================================== */
+  async function loadAnalytics() {
+    const articleEl = $('#analytics-articles');
+    const siteEl    = $('#analytics-site');
+    if (!articleEl) return;
+
+    try {
+      const d = await window.ProgramsDB.getAnalytics();
+
+      $('#stat-site-total').textContent    = d.siteTotal.toLocaleString();
+      $('#stat-article-total').textContent = d.articleTotal.toLocaleString();
+      $('#stat-today').textContent         = d.today.toLocaleString();
+
+      const maxCount = d.pages.length ? d.pages[0].view_count : 1;
+
+      function renderTable(rows, emptyMsg) {
+        if (!rows.length) return `<p class="text-slate-400 text-sm">${emptyMsg}</p>`;
+        return `<table class="w-full text-sm">
+          <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+            <th class="pb-2">Page</th><th class="pb-2 text-right w-20">Views</th><th class="pb-2 pl-3 w-40">Bar</th>
+          </tr></thead>
+          <tbody>${rows.map(r => `
+            <tr class="border-b border-slate-50 last:border-0">
+              <td class="py-2 font-medium text-slate-700">${escapeHtml(r.page)}</td>
+              <td class="py-2 text-right font-bold text-brand-700">${Number(r.view_count).toLocaleString()}</td>
+              <td class="py-2 pl-3">
+                <div class="h-2 rounded-full bg-brand-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-brand-600" style="width:${Math.round(r.view_count / maxCount * 100)}%"></div>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody></table>`;
+      }
+
+      articleEl.innerHTML = renderTable(d.pages.filter(p => p.page_type === 'article'), 'No article views yet.');
+      siteEl.innerHTML    = renderTable(d.pages.filter(p => p.page_type === 'site'),    'No site page views yet.');
+    } catch (e) {
+      articleEl.innerHTML = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
+      if (siteEl) siteEl.innerHTML = '';
+    }
+  }
+
   async function loadSettings() {
     try {
       const data = await window.ProgramsDB.getSettings();

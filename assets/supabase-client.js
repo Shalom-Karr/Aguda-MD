@@ -588,6 +588,27 @@ So you usually don't need to apply separately for those.`,
       },
 
       /* -------- Image upload --------------------------------------------- */
+      /* -------- Analytics --------------------------------------------------- */
+      async trackView(page, pageType) {
+        await client.from('agudah_md_ga_page_views')
+          .insert({ page, page_type: pageType });
+      },
+      async getAnalytics() {
+        const todayUTC = new Date().toISOString().slice(0, 10);
+        const [siteRes, articleRes, todayRes, pagesRes] = await Promise.all([
+          client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'site'),
+          client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'article'),
+          client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).gte('viewed_at', todayUTC),
+          client.rpc('agudah_md_ga_view_counts'),
+        ]);
+        return {
+          siteTotal:    siteRes.count    || 0,
+          articleTotal: articleRes.count || 0,
+          today:        todayRes.count   || 0,
+          pages:        pagesRes.data    || [],
+        };
+      },
+
       async uploadImage(file) {
         const ext  = (file.name.split('.').pop() || 'png').toLowerCase();
         const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
@@ -632,6 +653,8 @@ So you usually don't need to apply separately for those.`,
       saveFaq:        lazy('saveFaq'),
       removeFaq:      lazy('removeFaq'),
       uploadImage:    lazy('uploadImage'),
+      trackView:      lazy('trackView'),
+      getAnalytics:   lazy('getAnalytics'),
     };
   } else {
     // Demo mode — auth is a no-op (admin page is open in demo)
@@ -704,6 +727,8 @@ So you usually don't need to apply separately for those.`,
     demoDB.removeFaq = async (id) => {
       saveFaqs(loadFaqs().filter(f => f.id !== id));
     };
+    demoDB.trackView   = async () => {};
+    demoDB.getAnalytics = async () => ({ siteTotal: 0, articleTotal: 0, today: 0, pages: [] });
 
     window.ProgramsDB = demoDB;
   }
