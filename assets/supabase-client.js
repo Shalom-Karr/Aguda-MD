@@ -436,8 +436,11 @@ So you usually don't need to apply separately for those.`,
         document.head.appendChild(s);
       });
     }
+    // Persist session only on admin page — public pages don't need auth storage
+    // and Edge/Safari tracking prevention blocks localStorage on third-party origins.
+    const isAdmin = window.location.pathname.includes('admin');
     const client = window.supabase.createClient(cfg.url, cfg.anonKey, {
-      auth: { persistSession: true, autoRefreshToken: true, storageKey: 'agudah-md-ga-auth' }
+      auth: { persistSession: isAdmin, autoRefreshToken: isAdmin, storageKey: 'agudah-md-ga-auth' }
     });
     window.__supabaseClient = client;  // expose for admin auth flow
 
