@@ -1035,7 +1035,7 @@
 
       renderTrendChart(d.byDay);
       renderProgramTable(d.pages);
-      renderPageTable(d.pages);
+      renderPageTable(d.raw);
       renderTopProgramsChart(d.pages);
     } catch (e) {
       progEl.innerHTML = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
@@ -1122,32 +1122,32 @@
       }).join('')}</tbody></table>`;
   }
 
-  function renderPageTable(pages) {
-    const el = $('#analytics-pages');
-    const site = (pages || []).filter(p => p.page_type === 'site');
-    if (!site.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No site page views yet.</p>'; return; }
+  function fmtTime(iso) {
+    const d   = new Date(iso);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (sameDay) return 'Today ' + time;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + time;
+  }
 
-    // Group by URL (fall back to /<page> for old rows without url)
-    const byUrl = {};
-    site.forEach(r => {
-      const key = r.url || (r.page === 'home' ? '/' : `/${r.page}`);
-      byUrl[key] = (byUrl[key] || 0) + Number(r.view_count);
-    });
-    const rows = Object.entries(byUrl).sort((a, b) => b[1] - a[1]);
-    const maxC = rows[0] ? rows[0][1] : 1;
+  function renderPageTable(raw) {
+    const el = $('#analytics-pages');
+    const rows = (raw || []);
+    if (!rows.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No site page views yet.</p>'; return; }
 
     el.innerHTML = `<table class="w-full text-sm">
       <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+        <th class="pb-2 pr-3 w-32">Time</th>
         <th class="pb-2 pr-3">URL</th>
-        <th class="pb-2 text-right pr-3 w-20">Views</th>
-        <th class="pb-2 w-28">Bar</th>
+        <th class="pb-2 pr-3 w-24">Screen</th>
       </tr></thead>
-      <tbody>${rows.map(([url, n]) => {
-        const pct = Math.round(n / maxC * 100);
+      <tbody>${rows.map(r => {
+        const displayUrl = r.url || (r.page === 'home' ? '/' : `/${r.page}`);
         return `<tr class="border-b border-slate-50 last:border-0">
-          <td class="py-2 pr-3 font-mono text-xs text-slate-700">${escapeHtml(url)}</td>
-          <td class="py-2 pr-3 text-right font-bold text-brand-700">${n.toLocaleString()}</td>
-          <td class="py-2"><div class="h-2 rounded-full bg-brand-100 overflow-hidden"><div class="h-full rounded-full bg-brand-600" style="width:${pct}%"></div></div></td>
+          <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
+          <td class="py-2 pr-3 font-mono text-xs text-slate-700">${escapeHtml(displayUrl)}</td>
+          <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }

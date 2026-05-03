@@ -5,9 +5,10 @@
  * Must be loaded after config.js and supabase-client.js.
  * ========================================================================== */
 (function () {
-  const path   = window.location.pathname;
-  const params = new URLSearchParams(window.location.search);
-  const url    = path + (window.location.search || '');
+  const path       = window.location.pathname;
+  const params     = new URLSearchParams(window.location.search);
+  const url        = path + (window.location.search || '');
+  const screenSize = window.screen.width + 'x' + window.screen.height;
   let page, pageType;
 
   if (params.get('title')) {
@@ -31,7 +32,7 @@
 
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null, url).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize).catch(function () {});
     }
   }
 
