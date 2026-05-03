@@ -601,7 +601,7 @@ So you usually don't need to apply separately for those.`,
       },
       async getAnalytics() {
         const todayUTC = new Date().toISOString().slice(0, 10);
-        const [siteRes, articleRes, todayRes, pagesRes, byDayRes, rawRes] = await Promise.all([
+        const [siteRes, articleRes, todayRes, pagesRes, byDayRes, rawSiteRes, rawArticleRes] = await Promise.all([
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'site'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'article'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).gte('viewed_at', todayUTC),
@@ -612,14 +612,20 @@ So you usually don't need to apply separately for those.`,
             .eq('page_type', 'site')
             .order('viewed_at', { ascending: false })
             .limit(100),
+          client.from('agudah_md_ga_page_views')
+            .select('page, page_type, tab, url, screen_size, viewed_at')
+            .eq('page_type', 'article')
+            .order('viewed_at', { ascending: false })
+            .limit(100),
         ]);
         return {
-          siteTotal:    siteRes.count    || 0,
-          articleTotal: articleRes.count || 0,
-          today:        todayRes.count   || 0,
-          pages:        pagesRes.data    || [],
-          byDay:        byDayRes.data    || [],
-          raw:          rawRes.data      || [],
+          siteTotal:    siteRes.count        || 0,
+          articleTotal: articleRes.count     || 0,
+          today:        todayRes.count       || 0,
+          pages:        pagesRes.data        || [],
+          byDay:        byDayRes.data        || [],
+          raw:          rawSiteRes.data      || [],
+          rawArticles:  rawArticleRes.data   || [],
         };
       },
 

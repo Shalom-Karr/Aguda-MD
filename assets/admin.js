@@ -1034,7 +1034,7 @@
       $('#stat-today').textContent         = d.today.toLocaleString();
 
       renderTrendChart(d.byDay);
-      renderProgramTable(d.pages);
+      renderProgramTable(d.rawArticles);
       renderPageTable(d.raw);
       renderTopProgramsChart(d.pages);
     } catch (e) {
@@ -1079,45 +1079,28 @@
     });
   }
 
-  function renderProgramTable(pages) {
+  function renderProgramTable(raw) {
     const el = $('#analytics-programs');
-    const articles = (pages || []).filter(p => p.page_type === 'article');
-    if (!articles.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No article views yet.</p>'; return; }
-
-    const bySlug = {};
-    articles.forEach(r => {
-      if (!bySlug[r.page]) bySlug[r.page] = {
-        page: r.page,
-        url: r.url || `/posts?title=${r.page}`,
-        guide: 0, faq: 0, other: 0,
-      };
-      const n = Number(r.view_count);
-      if (r.tab === 'guide')    bySlug[r.page].guide += n;
-      else if (r.tab === 'faq') bySlug[r.page].faq   += n;
-      else                      bySlug[r.page].other  += n;
-    });
-    const rows = Object.values(bySlug).sort((a, b) => (b.guide+b.faq+b.other) - (a.guide+a.faq+a.other));
-    const maxT = rows[0] ? rows[0].guide + rows[0].faq + rows[0].other : 1;
+    const rows = (raw || []);
+    if (!rows.length) { el.innerHTML = '<p class="text-slate-400 text-sm py-2">No article views yet.</p>'; return; }
 
     el.innerHTML = `<table class="w-full text-sm">
       <thead><tr class="text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+        <th class="pb-2 pr-3 w-32">Time</th>
         <th class="pb-2 pr-3">Program</th>
-        <th class="pb-2 pr-3 text-slate-400">URL</th>
-        <th class="pb-2 text-right pr-3">Guide</th>
-        <th class="pb-2 text-right pr-3">FAQ</th>
-        <th class="pb-2 text-right pr-3">Total</th>
-        <th class="pb-2 w-28">Bar</th>
+        <th class="pb-2 pr-3">URL</th>
+        <th class="pb-2 pr-3 w-16">Tab</th>
+        <th class="pb-2 pr-3 w-24">Screen</th>
       </tr></thead>
       <tbody>${rows.map(r => {
-        const total = r.guide + r.faq + r.other;
-        const pct   = Math.round(total / maxT * 100);
+        const displayUrl = r.url || `/posts?title=${r.page}`;
+        const tab = r.tab === 'faq' ? 'FAQ' : r.tab === 'guide' ? 'Guide' : '—';
         return `<tr class="border-b border-slate-50 last:border-0">
+          <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
           <td class="py-2 pr-3 font-medium text-slate-700">${escapeHtml(r.page)}</td>
-          <td class="py-2 pr-3 text-slate-400 text-xs font-mono">${escapeHtml(r.url)}</td>
-          <td class="py-2 pr-3 text-right text-slate-600">${r.guide.toLocaleString()}</td>
-          <td class="py-2 pr-3 text-right text-slate-600">${r.faq.toLocaleString()}</td>
-          <td class="py-2 pr-3 text-right font-bold text-brand-700">${total.toLocaleString()}</td>
-          <td class="py-2"><div class="h-2 rounded-full bg-brand-100 overflow-hidden"><div class="h-full rounded-full bg-brand-600" style="width:${pct}%"></div></div></td>
+          <td class="py-2 pr-3 font-mono text-xs text-slate-500">${escapeHtml(displayUrl)}</td>
+          <td class="py-2 pr-3 text-xs text-slate-600">${tab}</td>
+          <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
         </tr>`;
       }).join('')}</tbody></table>`;
   }
