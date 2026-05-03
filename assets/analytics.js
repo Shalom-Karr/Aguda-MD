@@ -7,6 +7,7 @@
 (function () {
   const path   = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  const url    = path + (window.location.search || '');
   let page, pageType;
 
   if (params.get('title')) {
@@ -30,12 +31,16 @@
 
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url).catch(function () {});
     }
   }
 
-  // Track the initial page load (guide tab for articles)
-  track(pageType === 'article' ? 'guide' : null);
+  // Determine initial tab: articles default to guide unless ?view=faq in URL
+  const initialTab = pageType === 'article'
+    ? (params.get('view') === 'faq' ? 'faq' : 'guide')
+    : null;
+
+  track(initialTab);
 
   // Expose hook so posts.html can fire a separate event when the FAQ tab opens
   if (pageType === 'article') {

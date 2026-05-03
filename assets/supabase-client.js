@@ -589,9 +589,10 @@ So you usually don't need to apply separately for those.`,
 
       /* -------- Image upload --------------------------------------------- */
       /* -------- Analytics --------------------------------------------------- */
-      async trackView(page, pageType, tab) {
+      async trackView(page, pageType, tab, url) {
         const payload = { page, page_type: pageType };
         if (tab) payload.tab = tab;
+        if (url) payload.url = url;
         await client.from('agudah_md_ga_page_views').insert(payload);
       },
       async getAnalytics() {
