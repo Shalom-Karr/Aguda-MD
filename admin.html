@@ -11,7 +11,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script>
@@ -294,6 +294,15 @@
         <input id="image-upload" type="file" accept="image/*" class="hidden">
         <span class="w-px h-6 bg-slate-300 mx-1"></span>
         <button class="tb-btn" onclick="toggleFullscreen()" title="Distraction-free fullscreen mode (Esc to exit)">⛶ Fullscreen</button>
+        <span class="w-px h-6 bg-slate-300 mx-1"></span>
+        <select id="font-picker" onchange="mdFont(this.value)" title="Change font of selected text" class="tb-btn text-xs px-2 cursor-pointer" style="font-size:11px">
+          <option value="">Aa Font…</option>
+          <option value="Inter"        style="font-family:'Inter',sans-serif">Inter</option>
+          <option value="Merriweather" style="font-family:'Merriweather',serif">Merriweather</option>
+          <option value="Lora"         style="font-family:'Lora',serif">Lora</option>
+          <option value="Montserrat"   style="font-family:'Montserrat',sans-serif">Montserrat</option>
+          <option value="Open Sans"    style="font-family:'Open Sans',sans-serif">Open Sans</option>
+        </select>
 
         <div class="ml-auto flex items-center gap-3 pr-1">
           <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">

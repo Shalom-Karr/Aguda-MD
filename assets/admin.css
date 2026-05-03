@@ -271,8 +271,9 @@ body { font-family: 'Inter', sans-serif; }
   grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
   gap: 8px;
 }
-.icon-picker button {
+.icon-tile {
   height: 64px;
+  width: 100%;
   color: #1e3a5f;
   border: 2px solid transparent;
   border-radius: 12px;
@@ -285,25 +286,40 @@ body { font-family: 'Inter', sans-serif; }
   flex-direction: column;
   gap: 4px;
 }
-.icon-picker button svg { flex-shrink: 0; }
-.icon-picker button:hover {
-  background: #1e3a5f;
-  color: #dbeafe;
-  transform: scale(1.05);
+.icon-tile svg { flex-shrink: 0; }
+.icon-tile:hover  { background: #1e3a5f; color: #dbeafe; transform: scale(1.05); }
+.icon-tile.selected { background: #1e3a5f; color: #dbeafe; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1e3a5f; }
+.icon-default {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; text-align: center; line-height: 1;
 }
-.icon-picker button.selected {
-  background: #1e3a5f;
-  color: #dbeafe;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1e3a5f;
+/* Custom emoji wrapper — holds tile + remove badge */
+.icon-custom-wrap { position: relative; }
+.icon-remove {
+  position: absolute; top: -5px; right: -5px;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: #ef4444; color: #fff; border: 2px solid #fff;
+  font-size: 11px; line-height: 1; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center; z-index: 2;
 }
-.icon-picker .icon-default {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  text-align: center;
-  line-height: 1;
+.icon-remove:hover { background: #dc2626; }
+/* Other input + Add row — span full grid width */
+.icon-other-row, .icon-add-row {
+  grid-column: 1 / -1;
+  display: flex; gap: 8px; align-items: center;
 }
+.icon-add-row { border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 2px; }
+.icon-other-row input, .icon-add-row input {
+  flex: 1; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  padding: 7px 10px; font-size: 16px; outline: none; background: #fff;
+}
+.icon-other-row input:focus, .icon-add-row input:focus { border-color: #1e3a5f; }
+.icon-add-row > button {
+  padding: 7px 14px; background: #1e3a5f; color: #fff;
+  border: none; border-radius: 8px; font-size: 12px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+}
+.icon-add-row > button:hover { background: #162d4a; }
 
 /* ---------- Other ---------- */
 .scroll-pane { overflow-y: auto; }

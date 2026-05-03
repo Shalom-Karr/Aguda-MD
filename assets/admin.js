@@ -54,7 +54,9 @@
   let settingsDirty = false;
   let faqDirtyIds   = new Set();
   let postFilter    = 'all';                     // 'all' | 'live' | 'draft'
-  let cmView        = null;                      // CodeMirror 6 EditorView (set up in initCmEditor)
+  let cmView         = null;                      // CodeMirror 6 EditorView (set up in initCmEditor)
+  let customEmojis   = JSON.parse(localStorage.getItem('bcrn_custom_emojis') || '[]');
+  let iconPickerMode = 'default';                // 'default' | 'other'
 
   function blankPost() {
     return {
@@ -514,6 +516,7 @@
     $('#preview-draft-btn').classList.toggle('hidden', !currentPost.title);
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
     $('#delete-btn').classList.toggle('hidden', !currentPost.id);
+    iconPickerMode = (currentPost.icon && !ICON_SVGS[currentPost.icon] && !customEmojis.includes(currentPost.icon)) ? 'other' : 'default';
     paintIconPicker();
     updateBreadcrumb();
     updatePublishUI();
@@ -547,27 +550,101 @@
   function paintIconPicker() {
     const picker = $('#icon-picker');
     if (!picker) return;
-    const selected = currentPost.icon || '';
+    const selected    = currentPost.icon || '';
     const fallbackKey = CATEGORY_DEFAULT_ICON[currentPost.category] || 'General';
-    const buttons = [
-      `<button type="button" data-icon="" class="${selected === '' ? 'selected' : ''}" title="Use the default icon for the selected category">
+    const showOther   = iconPickerMode === 'other';
+
+    const tiles = [
+      // Default
+      `<button type="button" data-action="pick" data-icon="" class="icon-tile${!showOther && selected === '' ? ' selected' : ''}" title="Category default">
          ${adminSvgWrap(ICON_SVGS[fallbackKey] || ICON_SVGS.General)}
          <span class="icon-default">Default</span>
        </button>`,
-      ...ICON_OPTIONS.map(key => `
-        <button type="button" data-icon="${key}" class="${selected === key ? 'selected' : ''}" title="${key}">
-          ${adminSvgWrap(ICON_SVGS[key])}
-          <span class="icon-default">${key}</span>
-        </button>`)
+      // SVG category tiles
+      ...ICON_OPTIONS.map(key =>
+        `<button type="button" data-action="pick" data-icon="${key}" class="icon-tile${!showOther && selected === key ? ' selected' : ''}" title="${key}">
+           ${adminSvgWrap(ICON_SVGS[key])}
+           <span class="icon-default">${key}</span>
+         </button>`),
+      // Custom emoji tiles (localStorage-persisted)
+      ...customEmojis.map(emoji =>
+        `<div class="icon-custom-wrap">
+           <button type="button" data-action="pick" data-icon="${escapeHtml(emoji)}" class="icon-tile${!showOther && selected === emoji ? ' selected' : ''}" title="${escapeHtml(emoji)}">
+             <span style="font-size:22px;line-height:1">${escapeHtml(emoji)}</span>
+           </button>
+           <button type="button" class="icon-remove" data-action="remove" data-emoji="${escapeHtml(emoji)}" title="Remove from list">×</button>
+         </div>`),
+      // Other tile
+      `<button type="button" data-action="other" class="icon-tile${showOther ? ' selected' : ''}" title="Custom / other">
+         ${adminSvgWrap('<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>')}
+         <span class="icon-default">Other</span>
+       </button>`,
+      // Other input row — only when Other is active
+      showOther
+        ? `<div class="icon-other-row">
+             <input type="text" id="icon-other-val" placeholder="Paste an emoji…" value="${escapeHtml(selected)}" maxlength="10" autocomplete="off">
+           </div>`
+        : '',
+      // Add-to-list row — always visible
+      `<div class="icon-add-row">
+         <input type="text" id="icon-add-input" placeholder="Paste emoji to add to picker…" maxlength="10" autocomplete="off">
+         <button type="button" id="icon-add-btn">+ Add</button>
+       </div>`,
     ];
-    picker.innerHTML = buttons.join('');
-    picker.querySelectorAll('button').forEach(btn => {
+
+    picker.innerHTML = tiles.join('');
+
+    picker.querySelectorAll('[data-action="pick"]').forEach(btn => {
       btn.addEventListener('click', () => {
+        iconPickerMode   = 'default';
         currentPost.icon = btn.dataset.icon;
         paintIconPicker();
         markDirty();
       });
     });
+
+    const otherBtn = picker.querySelector('[data-action="other"]');
+    if (otherBtn) {
+      otherBtn.addEventListener('click', () => {
+        iconPickerMode = 'other';
+        paintIconPicker();
+        const inp = $('#icon-other-val');
+        if (inp) { inp.focus(); inp.select(); }
+      });
+    }
+
+    const otherInp = $('#icon-other-val');
+    if (otherInp) {
+      otherInp.addEventListener('input', e => {
+        currentPost.icon = e.target.value.trim();
+        markDirty();
+      });
+    }
+
+    picker.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emoji = btn.dataset.emoji;
+        customEmojis = customEmojis.filter(e => e !== emoji);
+        localStorage.setItem('bcrn_custom_emojis', JSON.stringify(customEmojis));
+        if (currentPost.icon === emoji) { currentPost.icon = ''; iconPickerMode = 'default'; }
+        paintIconPicker();
+      });
+    });
+
+    const addInp = $('#icon-add-input');
+    const addBtn = $('#icon-add-btn');
+    if (addBtn && addInp) {
+      const doAdd = () => {
+        const val = addInp.value.trim();
+        if (!val || customEmojis.includes(val)) { addInp.value = ''; return; }
+        customEmojis.push(val);
+        localStorage.setItem('bcrn_custom_emojis', JSON.stringify(customEmojis));
+        addInp.value = '';
+        paintIconPicker();
+      };
+      addBtn.addEventListener('click', doAdd);
+      addInp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+    }
   }
 
   /* ============================== 7. EDITOR — publish toggle ============== */
@@ -772,6 +849,20 @@
       changes: { from: sel.from, to: sel.to, insert },
       selection: { anchor: sel.from + 1, head: sel.from + 1 + text.length },
     });
+    cmView.focus();
+  }
+
+  function mdFont(font) {
+    if (!cmView || !font) return;
+    const sel  = cmView.state.selection.main;
+    const text = cmView.state.doc.sliceString(sel.from, sel.to);
+    if (!text) { cmView.focus(); return; }
+    const insert = `<span style="font-family:'${font}',sans-serif">${text}</span>`;
+    cmView.dispatch({
+      changes:   { from: sel.from, to: sel.to, insert },
+      selection: { anchor: sel.from + insert.length },
+    });
+    document.getElementById('font-picker').value = '';
     cmView.focus();
   }
 
