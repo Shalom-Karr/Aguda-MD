@@ -539,11 +539,12 @@
     const fallback = CATEGORY_DEFAULT_ICON[currentPost.category] || '📋';
     const buttons = [
       `<button type="button" data-icon="" class="${selected === '' ? 'selected' : ''}" title="Use the default icon for the selected category">
-         <span class="icon-default">Default<br>${fallback}</span>
+         <span class="icon-emoji">${fallback}</span>
+         <span class="icon-default">Default</span>
        </button>`,
       ...ICON_OPTIONS.map(emoji => `
         <button type="button" data-icon="${escapeHtml(emoji)}" class="${selected === emoji ? 'selected' : ''}" title="Use ${escapeHtml(emoji)}">
-          ${escapeHtml(emoji)}
+          <span class="icon-emoji">${escapeHtml(emoji)}</span>
         </button>`)
     ];
     picker.innerHTML = buttons.join('');
