@@ -33,9 +33,29 @@
   let _state = null;
   let _geo   = null;
 
+  // Session ID: one UUID per browser session (links all views in one visit)
+  let _sessionId = sessionStorage.getItem('bcrn_sid');
+  if (!_sessionId) {
+    _sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    sessionStorage.setItem('bcrn_sid', _sessionId);
+  }
+
+  // New vs returning: localStorage flag persists across sessions
+  const isNew = !localStorage.getItem('bcrn_v');
+  if (isNew) localStorage.setItem('bcrn_v', '1');
+
+  // Referral source
+  const referrer = document.referrer || null;
+
+  // Device type from screen width
+  const device = window.screen.width < 768 ? 'mobile' : 'desktop';
+
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state, _geo).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state, _geo, _sessionId, referrer, device, isNew).catch(function () {});
     }
   }
 

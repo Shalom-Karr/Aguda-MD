@@ -1099,6 +1099,9 @@
         <th class="pb-2 pr-3 w-16">Tab</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
         <th class="pb-2 pr-3 w-12">State</th>
+        <th class="pb-2 pr-3 w-14">Device</th>
+        <th class="pb-2 pr-3 w-14">New</th>
+        <th class="pb-2 pr-3">Referrer</th>
         <th class="pb-2 pr-3 w-16">Org</th>
         <th class="pb-2 w-16"></th>
       </tr></thead>
@@ -1108,6 +1111,15 @@
         const geoId    = `pgeo-${i}`;
         const hasGeo   = r.geo && typeof r.geo === 'object';
         const techloq  = isTechloq(r.geo);
+        const newCell  = r.is_new === true ? '<span class="text-xs font-semibold text-emerald-700">New</span>' : r.is_new === false ? 'Return' : '—';
+        let refCell = '—';
+        if (r.referrer) {
+          try {
+            if (r.referrer.includes('google')) refCell = 'Google';
+            else if (r.referrer.includes('facebook')) refCell = 'Facebook';
+            else refCell = new URL(r.referrer).hostname;
+          } catch (e) { refCell = r.referrer; }
+        }
         return `<tr class="border-b border-slate-50">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
           <td class="py-2 pr-3 font-medium text-slate-700">${escapeHtml(r.page)}</td>
@@ -1115,11 +1127,14 @@
           <td class="py-2 pr-3 text-xs text-slate-600">${tab}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
           <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
+          <td class="py-2 pr-3 text-slate-600 text-xs">${escapeHtml(r.device || '—')}</td>
+          <td class="py-2 pr-3 text-xs">${newCell}</td>
+          <td class="py-2 pr-3 text-xs text-slate-500 break-all">${escapeHtml(refCell)}</td>
           <td class="py-2 pr-3">${techloq ? '<span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">Techloq</span>' : ''}</td>
           <td class="py-2">${hasGeo ? `<button onclick="toggleGeoRow('${geoId}')" class="text-xs text-brand-700 hover:text-brand-900 font-semibold">Details</button>` : ''}</td>
         </tr>
         <tr id="${geoId}" class="hidden">
-          <td colspan="8" class="pb-3 pt-0 px-4">
+          <td colspan="11" class="pb-3 pt-0 px-4">
             <pre class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto text-slate-600 leading-relaxed">${escapeHtml(JSON.stringify(r.geo, null, 2))}</pre>
           </td>
         </tr>`;
@@ -1146,6 +1161,9 @@
         <th class="pb-2 pr-3">URL</th>
         <th class="pb-2 pr-3 w-24">Screen</th>
         <th class="pb-2 pr-3 w-12">State</th>
+        <th class="pb-2 pr-3 w-14">Device</th>
+        <th class="pb-2 pr-3 w-14">New</th>
+        <th class="pb-2 pr-3">Referrer</th>
         <th class="pb-2 pr-3 w-16">Org</th>
         <th class="pb-2 w-16"></th>
       </tr></thead>
@@ -1154,16 +1172,28 @@
         const geoId   = `sgeo-${i}`;
         const hasGeo  = r.geo && typeof r.geo === 'object';
         const techloq = isTechloq(r.geo);
+        const newCell = r.is_new === true ? '<span class="text-xs font-semibold text-emerald-700">New</span>' : r.is_new === false ? 'Return' : '—';
+        let refCell = '—';
+        if (r.referrer) {
+          try {
+            if (r.referrer.includes('google')) refCell = 'Google';
+            else if (r.referrer.includes('facebook')) refCell = 'Facebook';
+            else refCell = new URL(r.referrer).hostname;
+          } catch (e) { refCell = r.referrer; }
+        }
         return `<tr class="border-b border-slate-50">
           <td class="py-2 pr-3 text-slate-500 text-xs whitespace-nowrap">${escapeHtml(fmtTime(r.viewed_at))}</td>
           <td class="py-2 pr-3 font-mono text-xs text-slate-700 break-all">${escapeHtml(displayUrl)}</td>
           <td class="py-2 pr-3 text-slate-500 text-xs">${escapeHtml(r.screen_size || '—')}</td>
           <td class="py-2 pr-3 text-slate-600 text-xs font-mono">${escapeHtml(r.state || '—')}</td>
+          <td class="py-2 pr-3 text-slate-600 text-xs">${escapeHtml(r.device || '—')}</td>
+          <td class="py-2 pr-3 text-xs">${newCell}</td>
+          <td class="py-2 pr-3 text-xs text-slate-500 break-all">${escapeHtml(refCell)}</td>
           <td class="py-2 pr-3">${techloq ? '<span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">Techloq</span>' : ''}</td>
           <td class="py-2">${hasGeo ? `<button onclick="toggleGeoRow('${geoId}')" class="text-xs text-brand-700 hover:text-brand-900 font-semibold">Details</button>` : ''}</td>
         </tr>
         <tr id="${geoId}" class="hidden">
-          <td colspan="6" class="pb-3 pt-0 px-4">
+          <td colspan="9" class="pb-3 pt-0 px-4">
             <pre class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 overflow-x-auto text-slate-600 leading-relaxed">${escapeHtml(JSON.stringify(r.geo, null, 2))}</pre>
           </td>
         </tr>`;
