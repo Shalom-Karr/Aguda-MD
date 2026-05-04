@@ -618,6 +618,41 @@
         </div>
       </div>
 
+      <!-- This-month stat cards -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Visitors this month</p>
+          <p id="stat-month-sessions" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">unique sessions</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">New visitors</p>
+          <p id="stat-month-new" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">% of month sessions</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Help requests</p>
+          <p id="stat-help-total" class="text-3xl font-extrabold text-brand-700">—</p>
+          <p class="text-xs text-slate-400 mt-1">all time</p>
+        </div>
+      </div>
+
+      <!-- At-a-glance: top programs + referrers + recent clicks -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <p class="text-sm font-bold text-slate-700 mb-3">Top programs (recent 100)</p>
+          <div id="dash-top-programs" class="text-sm text-slate-400">—</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <p class="text-sm font-bold text-slate-700 mb-3">Top referrers (recent 100)</p>
+          <div id="dash-top-referrers" class="text-sm text-slate-400">—</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <p class="text-sm font-bold text-slate-700 mb-3">Recent button clicks</p>
+          <div id="dash-recent-clicks" class="text-sm text-slate-400">—</div>
+        </div>
+      </div>
+
       <!-- 30-day trend line chart -->
       <div class="bg-white border border-slate-200 rounded-xl p-5">
         <p class="text-sm font-bold text-slate-700 mb-4">30-day trend</p>
@@ -698,8 +733,8 @@
   </div>
 
   <script src="assets/config.js?v=15"></script>
-  <script src="assets/supabase-client.js?v=25"></script>
+  <script src="assets/supabase-client.js?v=26"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script src="assets/admin.js?v=25"></script>
+  <script src="assets/admin.js?v=26"></script>
 </body>
 </html>

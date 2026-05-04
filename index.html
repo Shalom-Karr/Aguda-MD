@@ -335,10 +335,10 @@
     <div class="max-w-4xl mx-auto px-6 py-16 text-center">
       <h2 id="book-heading" class="text-3xl font-extrabold text-slate-900 mb-3"></h2>
       <p id="book-subhead" class="text-slate-600 mb-7 text-lg"></p>
-      <a id="book-cta" href="#" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
+      <a id="book-cta" href="#" onclick="if(window.trackBcrnClick)trackBcrnClick('book_call',this.href)" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors"></a>
       <p class="mt-5 text-sm text-slate-500">
         Prefer email?
-        <a href="contact.html" class="font-semibold text-brand-700 hover:text-brand-900 ml-1">
+        <a href="contact.html" onclick="if(window.trackBcrnClick)trackBcrnClick('message_us','contact.html')" class="font-semibold text-brand-700 hover:text-brand-900 ml-1">
           Send us a message <span aria-hidden="true">→</span>
         </a>
       </p>
@@ -348,9 +348,9 @@
   <footer id="site-footer"></footer>
 
   <script src="assets/config.js"></script>
-  <script src="assets/supabase-client.js?v=25"></script>
+  <script src="assets/supabase-client.js?v=26"></script>
   <script src="assets/apply-config.js"></script>
-  <script src="assets/analytics.js?v=25"></script>
+  <script src="assets/analytics.js?v=26"></script>
   <script src="assets/footer.js"></script>
   <script>
     /* ----- Card styling -----

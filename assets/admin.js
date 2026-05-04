@@ -1038,6 +1038,7 @@
       $('#stat-article-total').textContent = d.articleTotal.toLocaleString();
       $('#stat-today').textContent         = d.today.toLocaleString();
 
+      renderDashboard(d);
       renderTrendChart(d.byDay);
       renderProgramTable(d.rawArticles);
       renderPageTable(d.raw);
@@ -1046,6 +1047,85 @@
       const msg = `<p class="text-red-500 text-sm">Failed to load analytics: ${escapeHtml(String(e.message || e))}</p>`;
       progEl.innerHTML = msg;
       if (pageEl) pageEl.innerHTML = msg;
+    }
+  }
+
+  function renderDashboard(d) {
+    const mEl = $('#stat-month-sessions');
+    const nEl = $('#stat-month-new');
+    const hEl = $('#stat-help-total');
+    if (mEl) mEl.textContent = (d.monthSessions || 0).toLocaleString();
+    if (nEl) nEl.textContent = (d.monthNewPct  || 0) + '%';
+    if (hEl) hEl.textContent = (d.helpRequests || []).length.toLocaleString();
+
+    // Top programs by appearance in recent 100 article views
+    const progCounts = {};
+    (d.rawArticles || []).forEach(r => {
+      const key = r.page || '?';
+      progCounts[key] = (progCounts[key] || 0) + 1;
+    });
+    const topProgs = Object.entries(progCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const progEl = $('#dash-top-programs');
+    if (progEl) {
+      if (!topProgs.length) {
+        progEl.textContent = 'No data yet.';
+      } else {
+        progEl.innerHTML = `<ol class="space-y-1.5">${topProgs.map(([name, count], i) =>
+          `<li class="flex items-center justify-between gap-2">
+            <span class="text-slate-700 truncate">${i + 1}. ${escapeHtml(name)}</span>
+            <span class="text-xs font-bold text-brand-700 flex-shrink-0">${count}</span>
+          </li>`
+        ).join('')}</ol>`;
+      }
+    }
+
+    // Top referrers from all raw rows combined
+    const allRaw = [...(d.raw || []), ...(d.rawArticles || [])];
+    const refCounts = {};
+    allRaw.forEach(r => {
+      if (!r.referrer) return;
+      let label = r.referrer;
+      try {
+        if (r.referrer.includes('google')) label = 'google.com';
+        else if (r.referrer.includes('facebook')) label = 'facebook.com';
+        else label = new URL(r.referrer).hostname;
+      } catch (e) { /* leave as-is */ }
+      refCounts[label] = (refCounts[label] || 0) + 1;
+    });
+    const topRefs = Object.entries(refCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const refEl = $('#dash-top-referrers');
+    if (refEl) {
+      if (!topRefs.length) {
+        refEl.textContent = 'No referrer data yet.';
+      } else {
+        refEl.innerHTML = `<ol class="space-y-1.5">${topRefs.map(([name, count], i) =>
+          `<li class="flex items-center justify-between gap-2">
+            <span class="text-slate-700 truncate">${i + 1}. ${escapeHtml(name)}</span>
+            <span class="text-xs font-bold text-brand-700 flex-shrink-0">${count}</span>
+          </li>`
+        ).join('')}</ol>`;
+      }
+    }
+
+    // Recent button clicks — group by button label
+    const clicks = d.clicks || [];
+    const clickEl = $('#dash-recent-clicks');
+    if (clickEl) {
+      if (!clicks.length) {
+        clickEl.textContent = 'No click events yet.';
+      } else {
+        const clickCounts = {};
+        clicks.forEach(c => { clickCounts[c.button] = (clickCounts[c.button] || 0) + 1; });
+        const topClicks = Object.entries(clickCounts).sort((a, b) => b[1] - a[1]);
+        const LABELS = { book_call: 'Book a Call', message_us: 'Message Us', apply_now: 'Apply Now', learn_more: 'Learn More' };
+        clickEl.innerHTML = `<ol class="space-y-1.5">${topClicks.map(([btn, count], i) =>
+          `<li class="flex items-center justify-between gap-2">
+            <span class="text-slate-700 truncate">${i + 1}. ${escapeHtml(LABELS[btn] || btn)}</span>
+            <span class="text-xs font-bold text-brand-700 flex-shrink-0">${count}</span>
+          </li>`
+        ).join('')}</ol>
+        <p class="text-[11px] text-slate-400 mt-3">Last ${clicks.length} events shown</p>`;
+      }
     }
   }
 

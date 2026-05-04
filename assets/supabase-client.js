@@ -603,35 +603,73 @@ So you usually don't need to apply separately for those.`,
         if (referrer)  payload.referrer   = referrer;
         if (device)    payload.device     = device;
         if (isNew !== undefined && isNew !== null) payload.is_new = isNew;
-        await client.from('agudah_md_ga_page_views').insert(payload);
+        const { data } = await client.from('agudah_md_ga_page_views').insert(payload).select('id').single();
+        return data ? data.id : null;
+      },
+      async updatePageExit(id, timeOnPage, scrollDepth) {
+        if (!id) return;
+        await client.from('agudah_md_ga_page_views').update({ time_on_page: timeOnPage, scroll_depth: scrollDepth }).eq('id', id);
+      },
+      async trackClick(sessionId, page, button, targetUrl) {
+        const payload = { page, button };
+        if (sessionId) payload.session_id = sessionId;
+        if (targetUrl) payload.target_url  = targetUrl;
+        await client.from('agudah_md_ga_click_events').insert(payload);
+      },
+      async logHelpRequest(name, email, subject) {
+        const payload = {};
+        if (name)    payload.name    = name;
+        if (email)   payload.email   = email;
+        if (subject) payload.subject = subject;
+        await client.from('agudah_md_ga_help_requests').insert(payload);
       },
       async getAnalytics() {
-        const todayUTC = new Date().toISOString().slice(0, 10);
-        const [siteRes, articleRes, todayRes, pagesRes, byDayRes, rawSiteRes, rawArticleRes] = await Promise.all([
+        const now      = new Date();
+        const monthUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+        const todayUTC = now.toISOString().slice(0, 10);
+        const [siteRes, articleRes, todayRes, monthRes, pagesRes, byDayRes,
+               rawSiteRes, rawArticleRes, clickRes, helpRes] = await Promise.all([
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'site'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).eq('page_type', 'article'),
           client.from('agudah_md_ga_page_views').select('*', { count: 'exact', head: true }).gte('viewed_at', todayUTC),
+          client.from('agudah_md_ga_page_views').select('session_id, is_new').gte('viewed_at', monthUTC),
           client.rpc('agudah_md_ga_view_counts'),
           client.rpc('agudah_md_ga_views_by_day', { days_back: 30 }),
           client.from('agudah_md_ga_page_views')
-            .select('page, page_type, tab, url, screen_size, state, geo, session_id, referrer, device, is_new, viewed_at')
+            .select('page, page_type, tab, url, screen_size, state, geo, session_id, referrer, device, is_new, time_on_page, scroll_depth, viewed_at')
             .eq('page_type', 'site')
             .order('viewed_at', { ascending: false })
             .limit(100),
           client.from('agudah_md_ga_page_views')
-            .select('page, page_type, tab, url, screen_size, state, geo, session_id, referrer, device, is_new, viewed_at')
+            .select('page, page_type, tab, url, screen_size, state, geo, session_id, referrer, device, is_new, time_on_page, scroll_depth, viewed_at')
             .eq('page_type', 'article')
             .order('viewed_at', { ascending: false })
             .limit(100),
+          client.from('agudah_md_ga_click_events')
+            .select('button, page, clicked_at')
+            .order('clicked_at', { ascending: false })
+            .limit(200),
+          client.from('agudah_md_ga_help_requests')
+            .select('name, subject, submitted_at')
+            .order('submitted_at', { ascending: false })
+            .limit(100),
         ]);
+        // Unique sessions this month
+        const monthRows      = monthRes.data || [];
+        const uniqueSessions = new Set(monthRows.map(r => r.session_id).filter(Boolean)).size;
+        const newSessions    = monthRows.filter(r => r.is_new).length;
         return {
-          siteTotal:    siteRes.count        || 0,
-          articleTotal: articleRes.count     || 0,
-          today:        todayRes.count       || 0,
-          pages:        pagesRes.data        || [],
-          byDay:        byDayRes.data        || [],
-          raw:          rawSiteRes.data      || [],
-          rawArticles:  rawArticleRes.data   || [],
+          siteTotal:      siteRes.count    || 0,
+          articleTotal:   articleRes.count || 0,
+          today:          todayRes.count   || 0,
+          monthSessions:  uniqueSessions,
+          monthNewPct:    uniqueSessions ? Math.round(newSessions / uniqueSessions * 100) : 0,
+          pages:          pagesRes.data    || [],
+          byDay:          byDayRes.data    || [],
+          raw:            rawSiteRes.data  || [],
+          rawArticles:    rawArticleRes.data || [],
+          clicks:         clickRes.data    || [],
+          helpRequests:   helpRes.data     || [],
         };
       },
 
@@ -679,8 +717,11 @@ So you usually don't need to apply separately for those.`,
       saveFaq:        lazy('saveFaq'),
       removeFaq:      lazy('removeFaq'),
       uploadImage:    lazy('uploadImage'),
-      trackView:      lazy('trackView'),
-      getAnalytics:   lazy('getAnalytics'),
+      trackView:        lazy('trackView'),
+      updatePageExit:   lazy('updatePageExit'),
+      trackClick:       lazy('trackClick'),
+      logHelpRequest:   lazy('logHelpRequest'),
+      getAnalytics:     lazy('getAnalytics'),
     };
   } else {
     // Demo mode — auth is a no-op (admin page is open in demo)
@@ -753,8 +794,14 @@ So you usually don't need to apply separately for those.`,
     demoDB.removeFaq = async (id) => {
       saveFaqs(loadFaqs().filter(f => f.id !== id));
     };
-    demoDB.trackView   = async () => {};
-    demoDB.getAnalytics = async () => ({ siteTotal: 0, articleTotal: 0, today: 0, pages: [] });
+    demoDB.trackView      = async () => null;
+    demoDB.updatePageExit = async () => {};
+    demoDB.trackClick     = async () => {};
+    demoDB.logHelpRequest = async () => {};
+    demoDB.getAnalytics   = async () => ({
+      siteTotal: 0, articleTotal: 0, today: 0, monthSessions: 0, monthNewPct: 0,
+      pages: [], byDay: [], raw: [], rawArticles: [], clicks: [], helpRequests: [],
+    });
 
     window.ProgramsDB = demoDB;
   }

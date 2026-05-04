@@ -1,7 +1,6 @@
 /* ============================================================================
  * ANALYTICS TRACKER
- * Fires one page-view record per page load (and one per tab switch on
- * article pages). Silent no-op in demo mode.
+ * Tracks page views, time on page, scroll depth, and tab switches.
  * Must be loaded after config.js and supabase-client.js.
  * ========================================================================== */
 (function () {
@@ -47,15 +46,41 @@
   const isNew = !localStorage.getItem('bcrn_v');
   if (isNew) localStorage.setItem('bcrn_v', '1');
 
-  // Referral source
+  // Referral source and device
   const referrer = document.referrer || null;
+  const device   = window.screen.width < 768 ? 'mobile' : 'desktop';
 
-  // Device type from screen width
-  const device = window.screen.width < 768 ? 'mobile' : 'desktop';
+  // Time on page and scroll depth
+  const _startTime  = Date.now();
+  let   _rowId      = null;
+  let   _maxScroll  = 0;
+  let   _exitFired  = false;
+
+  window.addEventListener('scroll', function () {
+    const el     = document.documentElement;
+    const pct    = Math.round(el.scrollTop / (el.scrollHeight - el.clientHeight) * 100);
+    if (pct > _maxScroll) _maxScroll = Math.min(pct, 100);
+  }, { passive: true });
+
+  function fireExit() {
+    if (_exitFired || !_rowId) return;
+    _exitFired = true;
+    const seconds = Math.round((Date.now() - _startTime) / 1000);
+    if (window.ProgramsDB && window.ProgramsDB.updatePageExit) {
+      window.ProgramsDB.updatePageExit(_rowId, seconds, _maxScroll).catch(function () {});
+    }
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') fireExit();
+  });
+  window.addEventListener('pagehide', fireExit);
 
   function track(tab) {
     if (window.ProgramsDB && window.ProgramsDB.trackView) {
-      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state, _geo, _sessionId, referrer, device, isNew).catch(function () {});
+      window.ProgramsDB.trackView(page, pageType, tab || null, url, screenSize, _state, _geo, _sessionId, referrer, device, isNew)
+        .then(function (id) { _rowId = id; })
+        .catch(function () {});
     }
   }
 
@@ -80,4 +105,11 @@
   if (pageType === 'article') {
     window.trackTabView = function (tab) { track(tab); };
   }
+
+  // Expose click tracker for inline onclick handlers on key buttons
+  window.trackBcrnClick = function (button, targetUrl) {
+    if (window.ProgramsDB && window.ProgramsDB.trackClick) {
+      window.ProgramsDB.trackClick(_sessionId, page, button, targetUrl || null).catch(function () {});
+    }
+  };
 })();

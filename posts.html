@@ -104,8 +104,8 @@
           <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
         </a>
         <div class="flex items-center gap-2">
-          <a href="contact.html" class="text-xs font-bold bg-white border border-brand-700 text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">Message Us</a>
-          <a href="book.html" class="text-xs font-bold bg-brand-700 hover:bg-brand-800 text-white px-3 py-1.5 rounded-lg transition-colors">Book a Call</a>
+          <a href="contact.html" onclick="if(window.trackBcrnClick)trackBcrnClick('message_us','contact.html')" class="text-xs font-bold bg-white border border-brand-700 text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">Message Us</a>
+          <a href="book.html" onclick="if(window.trackBcrnClick)trackBcrnClick('book_call','book.html')" class="text-xs font-bold bg-brand-700 hover:bg-brand-800 text-white px-3 py-1.5 rounded-lg transition-colors">Book a Call</a>
         </div>
       </div>
       <!-- Desktop: single row -->
@@ -172,7 +172,7 @@
           <aside class="mt-16 p-8 bg-gradient-to-br from-brand-700 to-brand-800 text-white rounded-2xl">
             <h3 class="text-2xl font-bold mb-2">Need help with this application?</h3>
             <p class="text-blue-50/90 mb-5">Book a free 20-minute call and we'll walk through it together.</p>
-            <a id="cta-calendly" href="#" class="inline-block bg-white hover:bg-blue-50 text-brand-800 font-bold px-6 py-3 rounded-xl transition-colors">Book a free call</a>
+            <a id="cta-calendly" href="#" onclick="if(window.trackBcrnClick)trackBcrnClick('book_call',this.href)" class="inline-block bg-white hover:bg-blue-50 text-brand-800 font-bold px-6 py-3 rounded-xl transition-colors">Book a free call</a>
           </aside>
         </article>
 
@@ -188,9 +188,9 @@
   <footer id="site-footer"></footer>
 
   <script src="assets/config.js"></script>
-  <script src="assets/supabase-client.js?v=25"></script>
+  <script src="assets/supabase-client.js?v=26"></script>
   <script src="assets/apply-config.js"></script>
-  <script src="assets/analytics.js?v=25"></script>
+  <script src="assets/analytics.js?v=26"></script>
   <script src="assets/footer.js"></script>
   <script>
     const CATEGORY_BADGE = 'bg-slate-100 text-slate-700';
