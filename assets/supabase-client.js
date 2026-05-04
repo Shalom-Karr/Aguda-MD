@@ -593,18 +593,22 @@ So you usually don't need to apply separately for those.`,
       /* -------- Image upload --------------------------------------------- */
       /* -------- Analytics --------------------------------------------------- */
       async trackView(page, pageType, tab, url, screenSize, state, geo, sessionId, referrer, device, isNew) {
-        const payload = { page, page_type: pageType };
-        if (tab)        payload.tab         = tab;
-        if (url)        payload.url         = url;
-        if (screenSize) payload.screen_size = screenSize;
-        if (state)      payload.state       = state;
-        if (geo)        payload.geo         = geo;
-        if (sessionId) payload.session_id = sessionId;
-        if (referrer)  payload.referrer   = referrer;
-        if (device)    payload.device     = device;
-        if (isNew !== undefined && isNew !== null) payload.is_new = isNew;
-        const { data } = await client.from('agudah_md_ga_page_views').insert(payload).select('id').single();
-        return data ? data.id : null;
+        // Uses a SECURITY DEFINER RPC so anon can get back the row id without
+        // needing SELECT on the table (direct INSERT + RETURNING → 401).
+        const { data } = await client.rpc('agudah_md_ga_insert_page_view', {
+          p_page:        page,
+          p_page_type:   pageType,
+          p_tab:         tab        || null,
+          p_url:         url        || null,
+          p_screen_size: screenSize || null,
+          p_state:       state      || null,
+          p_geo:         geo        || null,
+          p_session_id:  sessionId  || null,
+          p_referrer:    referrer   || null,
+          p_device:      device     || null,
+          p_is_new:      (isNew !== undefined && isNew !== null) ? isNew : null,
+        });
+        return data || null;
       },
       async updatePageExit(id, timeOnPage, scrollDepth) {
         if (!id) return;
