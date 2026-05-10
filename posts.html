@@ -366,8 +366,10 @@
 
     function applySeo(post) {
       const C       = window.SITE_CONFIG;
-      const title   = `${post.title} · ${C.name}`;
-      const desc    = (post.summary || '').slice(0, 200);
+      // Admin-set overrides take precedence; otherwise fall back to the
+      // page title/summary so SEO metadata is always populated.
+      const title   = (post.seo_title       || `${post.title} · ${C.name}`);
+      const desc    = (post.seo_description || post.summary || '').slice(0, 200);
       const canon   = `https://baltcrn.org/posts/${encodeURIComponent(post.slug)}`;
       const set = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
       set('seo-description',    'content', desc);
@@ -428,7 +430,7 @@
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('article-layout').classList.remove('hidden');
       document.getElementById('article').classList.remove('hidden');
-      document.title = `${currentPost.title} · ${C.name}`;
+      document.title = currentPost.seo_title || `${currentPost.title} · ${C.name}`;
       document.getElementById('title').textContent   = currentPost.title;
       document.getElementById('summary').textContent = currentPost.summary || '';
 

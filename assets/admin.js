@@ -65,6 +65,7 @@
       icon: '', content_md: '', faq_md: '', is_published: false,
       is_listed: true,
       sort_order: 100,
+      seo_title: '', seo_description: '',
     };
   }
 
@@ -449,6 +450,21 @@
                    : '#94a3b8';
   }
 
+  function updateSeoCounters() {
+    const tLen = ($('#post-seo-title').value || '').length;
+    const dLen = ($('#post-seo-description').value || '').length;
+    const tEl  = $('#seo-title-counter');
+    const dEl  = $('#seo-description-counter');
+    if (tEl) {
+      tEl.textContent = `${tLen} / 60`;
+      tEl.style.color = tLen > 65 ? '#dc2626' : tLen > 55 ? '#d97706' : '#94a3b8';
+    }
+    if (dEl) {
+      dEl.textContent = `${dLen} / 160`;
+      dEl.style.color = dLen > 165 ? '#dc2626' : dLen > 140 ? '#d97706' : '#94a3b8';
+    }
+  }
+
   /* ----- Preview the unsaved draft as a visitor would see it ----- */
   function previewDraft() {
     if (!currentPost.title.trim()) {
@@ -516,7 +532,10 @@
     $('#post-summary').value    = currentPost.summary  || '';
     $('#post-sort-order').value = (currentPost.sort_order ?? 100);
     $('#post-is-listed').checked = currentPost.is_listed !== false;
+    $('#post-seo-title').value       = currentPost.seo_title       || '';
+    $('#post-seo-description').value = currentPost.seo_description || '';
     updateSummaryCounter();
+    updateSeoCounters();
     $('#preview-draft-btn').classList.toggle('hidden', !currentPost.title);
     $('#post-slug').dataset.manual = currentPost.id ? '1' : '';
     $('#delete-btn').classList.toggle('hidden', !currentPost.id);
@@ -722,6 +741,16 @@
     });
     $('#post-is-listed').addEventListener('change', (e) => {
       currentPost.is_listed = e.target.checked;
+      markDirty();
+    });
+    $('#post-seo-title').addEventListener('input', (e) => {
+      currentPost.seo_title = e.target.value;
+      updateSeoCounters();
+      markDirty();
+    });
+    $('#post-seo-description').addEventListener('input', (e) => {
+      currentPost.seo_description = e.target.value;
+      updateSeoCounters();
       markDirty();
     });
     // Note: the markdown editor's input listener lives inside CodeMirror
