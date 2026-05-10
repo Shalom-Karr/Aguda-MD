@@ -679,7 +679,7 @@
   function updatePreviewLink() {
     const link = $('#preview-link');
     if (currentPost.slug && currentPost.is_published) {
-      link.href = `posts.html?title=${encodeURIComponent(currentPost.slug)}`;
+      link.href = `/posts/${encodeURIComponent(currentPost.slug)}`;
       link.classList.remove('hidden');
     } else {
       link.classList.add('hidden');

@@ -22,8 +22,48 @@
   <meta name="twitter:image"       content="https://baltcrn.org/assets/logo.png">
   <script id="seo-jsonld" type="application/ld+json"></script>
 
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="apple-touch-icon" href="favicon.png">
+  <!-- Synchronous SEO bootstrap. Runs before any other script and before
+       the body parses, so crawlers (and Googlebot's renderer) see unique
+       per-program title / canonical / meta description immediately, even
+       before the DB-driven loadPost() completes. The async loadPost will
+       overwrite these later with richer DB content. -->
+  <script>
+  (function () {
+    // Slug can come from the path (/posts/snap, via _redirects rewrite) or
+    // the legacy query string (/posts.html?title=snap). Prefer the path.
+    var slug = null;
+    var pathMatch = location.pathname.match(/^\/posts\/([^/?#]+)/);
+    if (pathMatch) slug = decodeURIComponent(pathMatch[1]);
+    if (!slug) {
+      var p = new URLSearchParams(location.search);
+      if (p.get('title')) slug = p.get('title');
+    }
+    if (!slug) return;
+
+    var ACRONYMS = { snap:1, wic:1, tca:1, ebt:1, fafsa:1, mdh:1, dhs:1, ssi:1, ssdi:1, tanf:1, chip:1 };
+    var pretty = slug.split('-').map(function (w) {
+      return ACRONYMS[w.toLowerCase()] ? w.toUpperCase() : (w.charAt(0).toUpperCase() + w.slice(1));
+    }).join(' ');
+
+    var SITE  = 'Baltimore Community Resource Network';
+    var title = pretty + ' · ' + SITE;
+    var desc  = 'Step-by-step guide to applying for ' + pretty + ' in Maryland.';
+    var canon = 'https://baltcrn.org/posts/' + slug;
+
+    document.title = title;
+    var set = function (id, attr, val) { var el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+    set('seo-description',    'content', desc);
+    set('seo-canonical',      'href',    canon);
+    set('seo-og-title',       'content', title);
+    set('seo-og-description', 'content', desc);
+    set('seo-og-url',         'content', canon);
+    set('seo-tw-title',       'content', title);
+    set('seo-tw-description', 'content', desc);
+  })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,31 +140,31 @@
     <div class="max-w-5xl mx-auto px-6">
       <!-- Mobile: logo centered, two CTA buttons below -->
       <div class="md:hidden flex flex-col items-center py-3 gap-3">
-        <a href="index.html" class="flex items-center">
-          <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
+        <a href="/index.html" class="flex items-center">
+          <img src="/assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
         </a>
         <div class="flex items-center gap-2">
-          <a href="contact.html" onclick="if(window.trackBcrnClick)trackBcrnClick('message_us','contact.html')" class="text-xs font-bold bg-white border border-brand-700 text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">Message Us</a>
-          <a href="book.html" onclick="if(window.trackBcrnClick)trackBcrnClick('book_call','book.html')" class="text-xs font-bold bg-brand-700 hover:bg-brand-800 text-white px-3 py-1.5 rounded-lg transition-colors">Book a Call</a>
+          <a href="/contact.html" onclick="if(window.trackBcrnClick)trackBcrnClick('message_us','/contact.html')" class="text-xs font-bold bg-white border border-brand-700 text-brand-700 hover:bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">Message Us</a>
+          <a href="/book.html" onclick="if(window.trackBcrnClick)trackBcrnClick('book_call','/book.html')" class="text-xs font-bold bg-brand-700 hover:bg-brand-800 text-white px-3 py-1.5 rounded-lg transition-colors">Book a Call</a>
         </div>
       </div>
       <!-- Desktop: single row -->
       <div class="hidden md:flex h-16 items-center justify-between">
-        <a href="index.html" class="flex items-center gap-2">
-          <img src="assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
+        <a href="/index.html" class="flex items-center gap-2">
+          <img src="/assets/logo.png" alt="BCRN — Baltimore Community Resource Network" class="h-12 w-auto">
         </a>
         <nav class="flex items-center gap-7 text-sm font-semibold text-slate-600">
-          <a href="index.html#programs" class="hover:text-brand-700">Programs</a>
-          <a id="nav-faq" href="faq.html" class="hidden hover:text-brand-700">FAQ</a>
-          <a href="contact.html" class="hover:text-brand-700">Contact</a>
-          <a href="book.html" class="hover:text-brand-700">Book a Call</a>
+          <a href="/index.html#programs" class="hover:text-brand-700">Programs</a>
+          <a id="nav-faq" href="/faq.html" class="hidden hover:text-brand-700">FAQ</a>
+          <a href="/contact.html" class="hover:text-brand-700">Contact</a>
+          <a href="/book.html" class="hover:text-brand-700">Book a Call</a>
         </nav>
       </div>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-6 py-10 md:py-14">
-    <a href="index.html" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900 mb-8">
+    <a href="/index.html" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-900 mb-8">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       All programs
     </a>
@@ -179,7 +219,7 @@
         <div id="notfound" class="hidden py-16 text-center bg-white border-2 border-dashed border-slate-200 rounded-2xl">
           <p class="text-2xl font-bold text-slate-700 mb-2">Guide not found</p>
           <p class="text-slate-500 mb-6">The program you're looking for doesn't exist yet.</p>
-          <a href="index.html" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-5 py-2.5 rounded-xl">Browse all programs</a>
+          <a href="/index.html" class="inline-block bg-brand-700 hover:bg-brand-800 text-white font-bold px-5 py-2.5 rounded-xl">Browse all programs</a>
         </div>
       </div>
     </div>
@@ -187,11 +227,11 @@
 
   <footer id="site-footer"></footer>
 
-  <script src="assets/config.js"></script>
-  <script src="assets/supabase-client.js?v=27"></script>
-  <script src="assets/apply-config.js"></script>
-  <script src="assets/analytics.js?v=26"></script>
-  <script src="assets/footer.js"></script>
+  <script src="/assets/config.js"></script>
+  <script src="/assets/supabase-client.js?v=27"></script>
+  <script src="/assets/apply-config.js"></script>
+  <script src="/assets/analytics.js?v=26"></script>
+  <script src="/assets/footer.js"></script>
   <script>
     const CATEGORY_BADGE = 'bg-slate-100 text-slate-700';
 
@@ -328,7 +368,7 @@
       const C       = window.SITE_CONFIG;
       const title   = `${post.title} · ${C.name}`;
       const desc    = (post.summary || '').slice(0, 200);
-      const canon   = `https://baltcrn.org/posts.html?title=${encodeURIComponent(post.slug)}`;
+      const canon   = `https://baltcrn.org/posts/${encodeURIComponent(post.slug)}`;
       const set = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
       set('seo-description',    'content', desc);
       set('seo-canonical',      'href',    canon);
@@ -375,7 +415,9 @@
         }
         if (!currentPost) return showNotFound();
       } else {
-        const slug = params.get('title');
+        // Slug can come from /posts/:slug (clean URL) or ?title=:slug (legacy).
+        const pathMatch = window.location.pathname.match(/^\/posts\/([^/?#]+)/);
+        const slug = pathMatch ? decodeURIComponent(pathMatch[1]) : params.get('title');
         if (!slug) return showNotFound();
         try { currentPost = await window.ProgramsDB.getBySlug(slug); }
         catch (e) { console.error(e); return showNotFound(); }
