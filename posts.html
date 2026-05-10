@@ -21,6 +21,7 @@
   <meta name="twitter:description" id="seo-tw-description"  content="Step-by-step guide for applying to Maryland government assistance programs.">
   <meta name="twitter:image"       content="https://baltcrn.org/assets/logo.png">
   <script id="seo-jsonld" type="application/ld+json"></script>
+  <script id="seo-jsonld-faq" type="application/ld+json"></script>
 
   <!-- Synchronous SEO bootstrap. Runs before any other script and before
        the body parses, so crawlers (and Googlebot's renderer) see unique
@@ -394,6 +395,63 @@
       };
       const ld = document.getElementById('seo-jsonld');
       if (ld) ld.textContent = JSON.stringify(jsonld);
+
+      // JSON-LD FAQPage schema — built from the program's faq_md.
+      // Google can render FAQ rich results in search using this.
+      const faqItems = parseFaqMarkdown(post.faq_md);
+      const faqLd = document.getElementById('seo-jsonld-faq');
+      if (faqLd) {
+        if (faqItems.length) {
+          faqLd.textContent = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': faqItems.map(it => ({
+              '@type': 'Question',
+              'name': it.question,
+              'acceptedAnswer': { '@type': 'Answer', 'text': it.answer }
+            }))
+          });
+        } else {
+          faqLd.textContent = '';
+        }
+      }
+    }
+
+    /* Parse FAQ markdown into Q&A pairs.
+     *   Question = any line that begins with ##, ###, or **bold** at line start.
+     *   Answer   = everything until the next question (markdown stripped to plain text). */
+    function parseFaqMarkdown(md) {
+      if (!md || !md.trim()) return [];
+      const lines = md.split(/\r?\n/);
+      const items = [];
+      let current = null;
+      for (const line of lines) {
+        let q = null;
+        let m = line.match(/^#{2,4}\s+(.+?)\s*$/);
+        if (m) q = m[1];
+        else {
+          m = line.match(/^\*\*(.+?)\*\*\s*\??\s*$/);
+          if (m) q = m[1].replace(/\?$/, '') + '?';
+        }
+        if (q) {
+          if (current && current.answer.trim()) items.push(current);
+          current = { question: q.trim(), answer: '' };
+        } else if (current) {
+          current.answer += line + '\n';
+        }
+      }
+      if (current && current.answer.trim()) items.push(current);
+      return items.map(it => ({
+        question: it.question,
+        answer: it.answer.trim()
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')   // [text](url) -> text
+          .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')    // images
+          .replace(/[*_`]+/g, '')                     // markdown emphasis
+          .replace(/^>\s?/gm, '')                     // blockquotes
+          .replace(/\n{2,}/g, ' ')                    // collapse paragraphs
+          .replace(/\s+/g, ' ')                       // collapse whitespace
+          .trim()
+      })).filter(it => it.question && it.answer);
     }
 
     async function loadPost() {
