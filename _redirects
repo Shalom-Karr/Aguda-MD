@@ -1,6 +1,7 @@
 # Cloudflare Pages and Netlify automatically serve `/foo.html` at `/foo`.
 # No rewrite rules are needed for clean URLs to .html files.
-
-# Clean URLs for program guides: /posts/snap serves posts.html?title=snap
-# while keeping /posts/snap in the URL bar (200 = rewrite, not redirect).
-/posts/:slug   /posts.html?title=:slug   200
+#
+# Note: clean URLs for /posts/<slug> are handled by functions/posts/[slug].js
+# rather than a _redirects rewrite, because Cloudflare Pages' built-in
+# .html-stripping conflicts with rewrites whose source path overlaps an
+# existing .html file (here, /posts.html).
